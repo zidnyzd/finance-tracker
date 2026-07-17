@@ -1,0 +1,85 @@
+{{define "content"}}
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="fs-4 fw-semibold mb-1">Tambah Transaksi</h1>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden" style="max-width:500px">
+    <div class="card-body p-4">
+        <form method="POST" action="/transactions">
+            <input type="hidden" name="default_account" value="0">
+            <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+
+            <!-- Tipe: Toggle Buttons -->
+            <div class="mb-4">
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="type" id="type-expense" value="expense" checked>
+                    <label class="btn btn-outline-danger py-3 rounded-start" for="type-expense">
+                        <div class="d-flex flex-column align-items-center lh-sm">
+                            <span style="font-size:1.5rem">📉</span>
+                            <small class="fw-semibold mt-1">Pengeluaran</small>
+                        </div>
+                    </label>
+                    <input type="radio" class="btn-check" name="type" id="type-income" value="income">
+                    <label class="btn btn-outline-success py-3 rounded-end" for="type-income">
+                        <div class="d-flex flex-column align-items-center lh-sm">
+                            <span style="font-size:1.5rem">📈</span>
+                            <small class="fw-semibold mt-1">Pemasukan</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Jumlah -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Jumlah</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent fw-semibold border-end-0">Rp</span>
+                    <input type="text" inputmode="numeric" id="amount_display" class="form-control border-start-0 ps-0" placeholder="0" required oninput="formatCurrency(this)">
+                </div>
+                <input type="hidden" name="amount" id="amount_real">
+            </div>
+
+            <!-- Kategori -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Kategori</label>
+                <input type="text" name="category" placeholder="Contoh: Makanan, Transport, Gaji" class="form-control" required list="cat-list">
+                <datalist id="cat-list">{{range .Categories}}<option value="{{.}}">{{end}}</datalist>
+            </div>
+
+            <!-- Akun -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Dompet / Akun</label>
+                <select name="account" class="form-select" required>
+                    <option value="">Pilih akun</option>
+                    {{range .Accounts}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+                </select>
+            </div>
+
+            <!-- Tanggal -->
+            <div class="mb-4">
+                <label class="form-label small fw-medium text-muted">Tanggal & Waktu</label>
+                <input type="datetime-local" id="datetimepicker" name="date" class="form-control" required>
+            </div>
+
+            <!-- Keterangan (collapsible) -->
+            <div class="mb-4">
+                <details>
+                    <summary class="small text-muted" style="cursor:pointer"><i class="ti ti-plus me-1"></i>Tambah Keterangan</summary>
+                    <input type="text" name="description" placeholder="Catatan tambahan" class="form-control mt-2">
+                </details>
+            </div>
+
+            <!-- Tombol -->
+            <div class="d-flex gap-2">
+                <a href="/" class="btn btn-outline-secondary flex-fill py-2">Batal</a>
+                <button type="submit" class="btn btn-primary flex-fill py-2 fw-semibold"><i class="ti ti-plus me-1"></i> Tambah</button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}
+{{define "pagescripts"}}
+function formatCurrency(input){var v=input.value.replace(/\D/g,'');if(v===''){input.value='';document.getElementById('amount_real').value='';return}document.getElementById('amount_real').value=v;input.value=new Intl.NumberFormat('id-ID').format(v)}
+{{end}}

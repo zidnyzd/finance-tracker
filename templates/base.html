@@ -1,0 +1,277 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{if eq .Page "dashboard"}}ZiRa Finance{{else if eq .Page "history"}}Riwayat - ZiRa Finance{{else if eq .Page "accounts"}}Akun - ZiRa Finance{{else if eq .Page "edit"}}Edit - ZiRa Finance{{else if eq .Page "add"}}Tambah - ZiRa Finance{{end}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f5f6fa; }
+        .sidebar { width: 260px; min-height: 100vh; background: #fff; border-right: 1px solid #e8ecf1; position: fixed; top: 0; left: 0; z-index: 100; padding: 0; overflow-y: auto; transition: left .25s ease; }
+        .logo-area { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e8ecf1; }
+        .logo-text { font-size: 1.15rem; font-weight: 700; color: #2c7be5; letter-spacing: -.02em; }
+        .nav-text { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #b0b7c0; font-weight: 600; }
+        .sidebar .nav { padding: 0; }
+        .sidebar .nav-link { display: flex; align-items: center; gap: .75rem; padding: .55rem 1.5rem; color: #5e6870; font-size: .875rem; text-decoration: none; transition: all .15s; border-radius: 0; }
+        .sidebar .nav-link:hover { background: #f0f4f8; color: #2c7be5; }
+        .sidebar .nav-link.active { background: #eef4ff; color: #2c7be5; font-weight: 600; border-right: 3px solid #2c7be5; }
+        .sidebar .nav-link i { font-size: 1.1rem; width: 1.25rem; text-align: center; }
+        .main-wrap { margin-left: 260px; min-height: 100vh; }
+        .topbar { background: #fff; min-height: 56px; border-bottom: 1px solid #e8ecf1; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 99; }
+        .content { padding: 1.75rem; }
+        .icon-shape { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: .5rem; flex-shrink: 0; }
+        .sidebar-toggle { display: none; cursor: pointer; background: none; border: none; padding: .25rem; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #e8ecf1; display: inline-flex; align-items: center; justify-content: center; color: #5e6870; font-weight: 600; font-size: .85rem; }
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; }
+            .sidebar.show { left: 0; }
+            .main-wrap { margin-left: 0; }
+            .topbar { padding: 0 .75rem; }
+            .content { padding: .75rem .75rem 72px; }
+            .sidebar-toggle { display: inline-flex; }
+        }
+        [data-bs-theme="dark"] body { background: #16181b; }
+        [data-bs-theme="dark"] .sidebar { background: #1e2024; border-color: #2c3035; }
+        [data-bs-theme="dark"] .sidebar .nav-link { color: #abb2bf; }
+        [data-bs-theme="dark"] .sidebar .nav-link:hover { background: #2c3035; color: #6ea8fe; }
+        [data-bs-theme="dark"] .sidebar .nav-link.active { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
+        [data-bs-theme="dark"] .nav-text { color: #6c757d; }
+        [data-bs-theme="dark"] .logo-area { border-color: #2c3035; }
+        [data-bs-theme="dark"] .topbar { background: #1e2024; border-color: #2c3035; }
+        [data-bs-theme="dark"] .card { background: #1e2024; }
+        [data-bs-theme="dark"] .table { color: #cfd4da; --bs-table-color: #cfd4da; }
+        [data-bs-theme="dark"] .table-light { --bs-table-bg: #262a2e; --bs-table-color: #cfd4da; }
+        [data-bs-theme="dark"] .table-hover tbody tr:hover { --bs-table-hover-bg: #2c3035; }
+        .balance-hidden { color: transparent !important; background: currentColor; border-radius: 4px; user-select: none; position: relative; display: inline-block; min-width: 4rem; }
+        .balance-hidden::after { content: "Rp xxx"; position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: #8b95a5; font-weight: 400; font-size: 0.85em; white-space: nowrap; }
+        .balance-text { transition: color 0.25s ease, background 0.25s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08) !important; }
+        [data-bs-theme="dark"] .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.3) !important; }
+        /* Entrance animations */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .content .card { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .content .card:nth-child(1) { animation-delay: 0s; }
+        .content .card:nth-child(2) { animation-delay: 0.08s; }
+        .content .card:nth-child(3) { animation-delay: 0.16s; }
+        .content .card:nth-child(4) { animation-delay: 0.24s; }
+        .content .card:nth-child(5) { animation-delay: 0.32s; }
+        .content .btn-primary { animation: fadeUp 0.4s 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+        .icon-shape { animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+        .stat-cards-row .card { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .stat-cards-row .card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-cards-row .card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-cards-row .card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-cards-row .card:nth-child(4) { animation-delay: 0.2s; }
+        .sidebar, .topbar, .main-wrap { animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        @media (max-width: 768px) { .content .card:nth-child(n) { animation-delay: 0s; } }
+        @media (max-width: 768px) {
+            .mobile-tx-list .tx-item { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1rem; border-bottom: 1px solid #e8ecf1; }
+            .mobile-tx-list .tx-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; margin-right: .75rem; }
+            .mobile-tx-list .tx-icon.income { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+            .mobile-tx-list .tx-icon.expense { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+            .mobile-tx-list .tx-details { flex: 1; min-width: 0; }
+            .mobile-tx-list .tx-cat { font-weight: 600; font-size: .85rem; color: #1e293b; margin-bottom: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .mobile-tx-list .tx-meta { font-size: .75rem; color: #8695a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .mobile-tx-list .tx-amount-wrap { text-align: right; flex-shrink: 0; margin-left: .5rem; }
+            .mobile-tx-list .tx-amount { font-weight: 700; font-size: .9rem; margin-bottom: .15rem; }
+            .mobile-tx-list .tx-amount.income { color: #22c55e; }
+            .mobile-tx-list .tx-amount.expense { color: #ef4444; }
+            .mobile-tx-list .tx-delete { font-size: 1.1rem; color: #ef4444; padding: .25rem; }
+            [data-bs-theme="dark"] .mobile-tx-list .tx-item { border-color: #2c3035; }
+            [data-bs-theme="dark"] .mobile-tx-list .tx-cat { color: #f8f9fa; }
+        }
+        [data-bs-theme="dark"] .list-group-item { background: #1e2024; border-color: #2c3035; color: #cfd4da; }
+        [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select, [data-bs-theme="dark"] .input-group-text { background: #262a2e; border-color: #2c3035; color: #cfd4da; }
+        [data-bs-theme="dark"] .form-control:focus, [data-bs-theme="dark"] .form-select:focus { background: #2c3035; border-color: #6ea8fe; color: #f8f9fa; }
+        [data-bs-theme="dark"] .form-control:focus + .input-group-text, [data-bs-theme="dark"] .input-group-text:has(+ .form-control:focus) { border-color: #6ea8fe; }
+        [data-bs-theme="dark"] .form-label { color: #abb2bf; }
+        [data-bs-theme="dark"] .btn-light { background: #2c3035; border-color: #3a3f45; color: #cfd4da; }
+        [data-bs-theme="dark"] .btn-outline-secondary { color: #abb2bf; border-color: #3a3f45; }
+        [data-bs-theme="dark"] .text-muted { color: #8b95a5 !important; }
+        .acct-icon { font-size: 1.1rem; width: 1.25rem; display: inline-block; text-align: center; }
+        [data-bs-theme="dark"] .card-header { background: #1e2024; border-color: #2c3035; }
+        /* Mobile Bottom Nav */
+        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 56px; background: #fff; border-top: 1px solid #e8ecf1; z-index: 1000; justify-content: space-around; align-items: center; padding: 0; }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #959ca6; font-size: .65rem; padding: 6px 12px; border-radius: 8px; transition: all .15s; }
+        .bottom-nav-item i { font-size: 1.3rem; }
+        .bottom-nav-item.active { color: #2c7be5; }
+        .bottom-nav-item.add-btn { background: #2c7be5; color: #fff !important; width: 44px; height: 44px; border-radius: 50%; margin-top: -12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px rgba(44,123,229,.4); }
+        .bottom-nav-item.add-btn i { font-size: 1.5rem; color: #fff !important; }
+        [data-bs-theme="dark"] .bottom-nav { background: #1e2024; border-color: #2c3035; }
+        [data-bs-theme="dark"] .bottom-nav-item { color: #6c757d; }
+        [data-bs-theme="dark"] .bottom-nav-item.active { color: #6ea8fe; }
+        [data-bs-theme="dark"] #confirm-modal .card { background: #1e2024; color: #cfd4da; }
+        @media (min-width: 769px) { .bottom-nav { display: none !important; } }
+        /* Mobile summary cards fix */
+        @media (max-width: 768px) { .row.g-2.mb-3 > div .fw-semibold { font-size: .85rem; } }
+    </style>
+</head>
+<body>
+    <div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="logo-area"><span class="logo-text">ZiRa Finance</span></div>
+        <ul class="nav flex-column">
+            <li class="px-4 py-2"><small class="nav-text">Menu</small></li>
+            <li><a href="/" class="nav-link {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a></li>
+            <li><a href="/add" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Tambah</span></a></li>
+            <li><a href="/history" class="nav-link {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a></li>
+            <li><a href="/report" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a></li>
+            <li><a href="/accounts" class="nav-link {{if eq .Page "accounts"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-wallet"></i><span>Akun</span></a></li>
+            <li class="px-4 pt-4 pb-2"><small class="nav-text">Lainnya</small></li>
+            <li><a href="/profile" class="nav-link {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a></li>
+        </ul>
+        <div style="padding:0 1.5rem;font-size:.85rem">
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Saldo</span><strong><span class="balance-text">{{.BalanceStr}}</span></strong></div>
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Pemasukan</span><strong class="text-success"><span class="balance-text">{{.TotalIncomeStr}}</span></strong></div>
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Pengeluaran</span><strong class="text-danger"><span class="balance-text">{{.TotalExpenseStr}}</span></strong></div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-wrap">
+        <!-- TOPBAR -->
+        <nav class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="ti ti-menu-2" style="font-size:1.3rem;color:#5e6870"></i></button>
+                <span class="fw-bold d-sm-none" style="color:#2c7be5">ZiRa</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span style="font-size:.85rem;color:#5e6870" class="d-none d-sm-inline">{{.DisplayName}}</span>
+                <button onclick="toggleTheme()" class="btn btn-light btn-icon btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px;border:1px solid #e8ecf1;padding:0">🌓</button>
+                <div class="dropdown">
+                    <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar">{{slice .DisplayName 0 1}}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end p-0" style="min-width:200px">
+                        <div class="d-flex gap-3 align-items-center px-3 py-3 border-bottom">
+                            <span class="avatar" style="width:42px;height:42px;font-size:1rem">{{slice .DisplayName 0 1}}</span>
+                            <div>
+                                <div class="fw-semibold small">{{.DisplayName}}</div>
+                                <div class="text-muted small">{{.DisplayName}}</div>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <a href="/logout" class="dropdown-item small py-2 rounded"><i class="ti ti-logout me-2"></i> Keluar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- CONTENT -->
+        <main class="content">
+            <div class="container-fluid">
+                {{template "content" .}}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        function togglePW(id,btn){var inp=document.getElementById(id);if(inp.type==='password'){inp.type='text';btn.innerHTML='<i class=\"ti ti-eye-off\"></i>';}else{inp.type='password';btn.innerHTML='<i class=\"ti ti-eye\"></i>';}}
+        function toggleSidebar(){
+            var s=document.getElementById('sidebar');
+            s.classList.toggle('show');
+            var o=document.getElementById('overlay');
+            o.style.display=o.style.display==='block'?'none':'block';
+            if(window.innerWidth <= 768) {
+                s.style.left = s.classList.contains('show') ? '0' : '-260px';
+            }
+        }
+        function closeSidebar(){
+            var s=document.getElementById('sidebar');
+            if(!s)return;
+            s.classList.remove('show');
+            if(window.innerWidth <= 768) s.style.left = '-260px';
+            var o=document.getElementById('overlay');
+            if(o)o.style.display='none';
+        }
+        function toggleTheme(){
+            var h=document.documentElement;
+            var t=h.getAttribute('data-bs-theme')==='dark'?'light':'dark';
+            h.setAttribute('data-bs-theme',t);
+            localStorage.setItem('bsTheme',t);
+        }
+        function formatCurrency(input) {
+            var value = input.value.replace(/\D/g, '');
+            if (value === '') { input.value = ''; document.getElementById('amount_real').value = ''; return; }
+            document.getElementById('amount_real').value = value;
+            input.value = new Intl.NumberFormat('id-ID').format(value);
+        }
+        function toggleBalance() {
+            var isHidden = localStorage.getItem('hideBalance') === 'true';
+            var newHidden = !isHidden;
+            localStorage.setItem('hideBalance', newHidden);
+            applyBalanceVisibility(newHidden);
+        }
+        function applyBalanceVisibility(isHidden) {
+            var els = document.querySelectorAll('.balance-text');
+            els.forEach(function(el){
+                if(isHidden){el.classList.add('balance-hidden');}
+                else{el.classList.remove('balance-hidden');}
+            });
+            var btn = document.getElementById('btnHideBalance');
+            if (btn) {
+                btn.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
+            }
+        }
+        // Custom confirm modal
+        function showConfirm(url, msg){
+            var m=document.getElementById('confirm-modal');if(!m)return;
+            m.querySelector('.confirm-msg').textContent=msg||'Hapus?';
+            m.style.display='flex';
+            m.querySelector('.confirm-yes').onclick=function(){m.style.display='none';location.href=url;};
+            m.querySelector('.confirm-no').onclick=function(){m.style.display='none';};
+        }
+        (function(){
+            var t=localStorage.getItem('bsTheme');if(t)document.documentElement.setAttribute('data-bs-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-bs-theme','dark');
+            var hide = localStorage.getItem('hideBalance') === 'true';
+            document.addEventListener("DOMContentLoaded", function() { applyBalanceVisibility(hide); });
+            var tzoffset=(new Date()).getTimezoneOffset()*60000;
+            var dt=document.getElementById('datetimepicker');
+            if(dt) dt.value=(new Date(Date.now()-tzoffset)).toISOString().slice(0,16);
+            // Force sidebar hidden on mobile (fix BFcache issue)
+            closeSidebar();
+            // Direct style fallback for mobile
+            if(window.innerWidth <= 768) {
+                var sb = document.getElementById('sidebar');
+                if(sb && !sb.classList.contains('show')) sb.style.left = '-260px';
+            }
+        })();
+        // Also close sidebar on page show (handles back/forward cache)
+        window.addEventListener('pageshow', function(){ closeSidebar(); });
+        // Page-specific scripts placeholder
+        {{template "pagescripts" .}}
+    </script>
+<!-- Confirm Modal -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target==this)this.style.display='none'">
+    <div class="card border-0 shadow-lg" style="max-width:320px;width:90%;border-radius:.75rem" onclick="event.stopPropagation()">
+        <div class="card-body text-center py-4 px-4">
+            <div style="font-size:2rem;margin-bottom:.5rem">🗑️</div>
+            <p class="confirm-msg fw-semibold mb-3">Hapus?</p>
+            <div class="d-flex gap-2">
+                <button class="confirm-no btn btn-outline-secondary flex-fill py-2">Batal</button>
+                <button class="confirm-yes btn btn-danger flex-fill py-2">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+{{template "bottomnav" .}}
+</html>
+{{end}}
+{{define "bottomnav"}}
+<!-- Mobile Bottom Nav -->
+<nav class="d-md-none bottom-nav">
+    <a href="/" class="bottom-nav-item {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a>
+    <a href="/report" class="bottom-nav-item {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a>
+    <a href="/add" class="bottom-nav-item add-btn" onclick="closeSidebar()"><i class="ti ti-plus"></i></a>
+    <a href="/history" class="bottom-nav-item {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a>
+    <a href="/profile" class="bottom-nav-item {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a>
+</nav>
+</html>{{end}}

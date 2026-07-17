@@ -1,0 +1,80 @@
+{{define "content"}}
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="fs-4 fw-semibold mb-1">Edit Transaksi</h1>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden" style="max-width:500px">
+    <div class="card-body p-4">
+        <form method="POST" action="/edit">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+
+            <!-- Tipe: Toggle Buttons -->
+            <div class="mb-4">
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="type" id="type-expense" value="expense" {{if eq .Type "expense"}}checked{{end}}>
+                    <label class="btn btn-outline-danger py-3 rounded-start" for="type-expense">
+                        <div class="d-flex flex-column align-items-center lh-sm">
+                            <span style="font-size:1.5rem">📉</span>
+                            <small class="fw-semibold mt-1">Pengeluaran</small>
+                        </div>
+                    </label>
+                    <input type="radio" class="btn-check" name="type" id="type-income" value="income" {{if eq .Type "income"}}checked{{end}}>
+                    <label class="btn btn-outline-success py-3 rounded-end" for="type-income">
+                        <div class="d-flex flex-column align-items-center lh-sm">
+                            <span style="font-size:1.5rem">📈</span>
+                            <small class="fw-semibold mt-1">Pemasukan</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Jumlah -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Jumlah</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent fw-semibold border-end-0">Rp</span>
+                    <input type="number" name="amount" class="form-control border-start-0 ps-0" value="{{.Amount}}" step="any" required>
+                </div>
+            </div>
+
+            <!-- Kategori -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Kategori</label>
+                <input type="text" name="category" class="form-control" value="{{.Category}}" required>
+            </div>
+
+            <!-- Akun -->
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Dompet / Akun</label>
+                <select name="account" class="form-select" required>
+                    {{range $.Accounts}}<option value="{{.ID}}" {{if eq $.AccountID .ID}}selected{{end}}>{{.Name}}</option>{{end}}
+                </select>
+            </div>
+
+            <!-- Tanggal -->
+            <div class="mb-4">
+                <label class="form-label small fw-medium text-muted">Tanggal & Waktu</label>
+                <input type="datetime-local" name="date" class="form-control" value="{{.Date}}" required>
+            </div>
+
+            <!-- Keterangan -->
+            <div class="mb-4">
+                <details>
+                    <summary class="small text-muted" style="cursor:pointer"><i class="ti ti-plus me-1"></i>Keterangan</summary>
+                    <input type="text" name="description" class="form-control mt-2" value="{{.Description}}" placeholder="Catatan tambahan">
+                </details>
+            </div>
+
+            <!-- Tombol -->
+            <div class="d-flex gap-2">
+                <a href="/" class="btn btn-outline-secondary flex-fill py-2">Batal</a>
+                <button type="submit" class="btn btn-primary flex-fill py-2 fw-semibold"><i class="ti ti-check me-1"></i> Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}
+{{define "pagescripts"}}{{end}}
