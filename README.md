@@ -153,9 +153,10 @@ GitHub Actions workflow (`.github/workflows/build-deploy.yml`):
 
 Requires GitHub Secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`
 
-## License
+## Hak Milik
 
-GNU Affero General Public License v3.0 (AGPL-3.0)  
-Built with Go by [ZidStore](https://zidstore.net).  
+**Proprietary — All Rights Reserved.**
 
-See [LICENSE](LICENSE) for full text.
+Aplikasi ini adalah hak milik eksklusif **ZidStore** dan dilindungi oleh hukum. Dilarang keras menyalin, mendistribusikan, memodifikasi, melakukan reverse engineering, atau menggunakan seluruh maupun sebagian kode, desain, logika bisnis, maupun aset dari aplikasi ini tanpa izin tertulis dari pemilik.
+
+Built with Go by [ZidStore](https://zidstore.net).
