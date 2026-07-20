@@ -1,0 +1,50 @@
+name: Deploy Finance Tracker
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop service before deploy
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            systemctl stop finance-tracker || true
+            for i in 1 2 3 4 5; do
+              if ! pgrep -x finance-app > /dev/null; then break; fi
+              sleep 1
+            done
+            pkill -x finance-app 2>/dev/null || true
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "finance-app,templates/"
+          target: "/root/finance-tracker"
+          strip_components: 0
+          rm: false
+          overwrite: true
+
+      - name: Restart Systemd Service
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            systemctl restart finance-tracker
