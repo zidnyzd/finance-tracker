@@ -25,7 +25,11 @@
         .sidebar .nav-link { display: flex; align-items: center; gap: .75rem; padding: .55rem 1.5rem; color: #5e6870; font-size: .875rem; text-decoration: none; transition: all .15s; border-radius: 0; }
         .sidebar .nav-link:hover { background: #f0f4f8; color: #2c7be5; }
         .sidebar .nav-link.active { background: #eef4ff; color: #2c7be5; font-weight: 600; border-right: 3px solid #2c7be5; }
+        .sidebar li.has-active > .nav-link { background: #eef4ff; color: #2c7be5; font-weight: 600; border-right: 3px solid #2c7be5; }
         .sidebar .nav-link i { font-size: 1.1rem; width: 1.25rem; text-align: center; }
+        .report-sub .nav-link { padding: .4rem 1.5rem .4rem 2.5rem !important; font-size: .8rem !important; border-right: 3px solid transparent; }
+        .report-sub .nav-link:hover { background: #f0f4f8; color: #2c7be5; }
+        .report-sub .nav-link.active { background: transparent !important; color: #2c7be5 !important; font-weight: 600 !important; border-right: 3px solid #2c7be5; }
         .main-wrap { margin-left: 260px; min-height: 100vh; }
         .topbar { background: #fff; min-height: 56px; border-bottom: 1px solid #e8ecf1; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 99; }
         .content { padding: 1.75rem; }
@@ -46,7 +50,11 @@
         [data-bs-theme="dark"] .sidebar .nav-link:hover { background: #2c3035; color: #6ea8fe; }
         .sidebar-footer { padding: 1rem 1.5rem; margin-top: .5rem; border-top: 1px solid #e8ecf1; }
         [data-bs-theme="dark"] .sidebar .nav-link.active { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
+        [data-bs-theme="dark"] .sidebar li.has-active > .nav-link { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
         [data-bs-theme="dark"] .sidebar-footer { border-color: #2c3035; }
+        [data-bs-theme="dark"] .nav-text { color: #6c757d; }
+        [data-bs-theme="dark"] .report-sub .nav-link:hover { background: #2c3035; color: #6ea8fe; }
+        [data-bs-theme="dark"] .report-sub .nav-link.active { color: #6ea8fe !important; border-color: #6ea8fe !important; }
         [data-bs-theme="dark"] .nav-text { color: #6c757d; }
         [data-bs-theme="dark"] .logo-area { border-color: #2c3035; }
         [data-bs-theme="dark"] .topbar { background: #1e2024; border-color: #2c3035; }
