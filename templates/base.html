@@ -229,6 +229,17 @@
             localStorage.setItem('hideBalance', newHidden);
             applyBalanceVisibility(newHidden);
         }
+        function toggleReportDropdown() {
+            var d = document.getElementById('report-dropdown');
+            var icon = document.querySelector('[onclick="toggleReportDropdown()"] .ti-chevron-down');
+            if (d.style.display === 'none' || d.style.display === '') {
+                d.style.display = 'block';
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            } else {
+                d.style.display = 'none';
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            }
+        }
         function applyBalanceVisibility(isHidden) {
             var els = document.querySelectorAll('.balance-text');
             els.forEach(function(el){
