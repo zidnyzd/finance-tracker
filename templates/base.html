@@ -25,11 +25,7 @@
         .sidebar .nav-link { display: flex; align-items: center; gap: .75rem; padding: .55rem 1.5rem; color: #5e6870; font-size: .875rem; text-decoration: none; transition: all .15s; border-radius: 0; }
         .sidebar .nav-link:hover { background: #f0f4f8; color: #2c7be5; }
         .sidebar .nav-link.active { background: #eef4ff; color: #2c7be5; font-weight: 600; border-right: 3px solid #2c7be5; }
-        .sidebar li.has-active > .nav-link { background: #eef4ff; color: #2c7be5; font-weight: 600; border-right: 3px solid #2c7be5; }
         .sidebar .nav-link i { font-size: 1.1rem; width: 1.25rem; text-align: center; }
-        .report-sub .nav-link { padding: .4rem 1.5rem .4rem 2.5rem !important; font-size: .8rem !important; border-right: 3px solid transparent; }
-        .report-sub .nav-link:hover { background: #f0f4f8; color: #2c7be5; }
-        .report-sub .nav-link.active { background: transparent !important; color: #2c7be5 !important; font-weight: 600 !important; border-right: 3px solid #2c7be5; }
         .main-wrap { margin-left: 260px; min-height: 100vh; }
         .topbar { background: #fff; min-height: 56px; border-bottom: 1px solid #e8ecf1; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; position: sticky; top: 0; z-index: 99; }
         .content { padding: 1.75rem; }
@@ -50,11 +46,8 @@
         [data-bs-theme="dark"] .sidebar .nav-link:hover { background: #2c3035; color: #6ea8fe; }
         .sidebar-footer { padding: 1rem 1.5rem; margin-top: .5rem; border-top: 1px solid #e8ecf1; }
         [data-bs-theme="dark"] .sidebar .nav-link.active { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
-        [data-bs-theme="dark"] .sidebar li.has-active > .nav-link { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
         [data-bs-theme="dark"] .sidebar-footer { border-color: #2c3035; }
         [data-bs-theme="dark"] .nav-text { color: #6c757d; }
-        [data-bs-theme="dark"] .report-sub .nav-link:hover { background: #2c3035; color: #6ea8fe; }
-        [data-bs-theme="dark"] .report-sub .nav-link.active { color: #6ea8fe !important; border-color: #6ea8fe !important; }
         [data-bs-theme="dark"] .nav-text { color: #6c757d; }
         [data-bs-theme="dark"] .logo-area { border-color: #2c3035; }
         [data-bs-theme="dark"] .topbar { background: #1e2024; border-color: #2c3035; }
@@ -122,12 +115,7 @@
             <li><a href="/" class="nav-link {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a></li>
             <li><a href="/add" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Tambah</span></a></li>
             <li><a href="/history" class="nav-link {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a></li>
-            <li class="{{if eq .Page "report"}}has-active{{end}}"><a href="#" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="toggleReportDropdown(event)"><i class="ti ti-chart-bar"></i><span>Laporan</span><i class="ti ti-chevron-down ms-auto" style="font-size:.75rem;transition:transform .2s"></i></a>
-                <div id="report-dropdown" class="report-sub" style="{{if eq .Page "report"}}display:block{{else}}display:none{{end}};padding:0 1.5rem .5rem">
-                    <a href="/report?view=monthly" class="nav-link small ps-4 {{if eq .View "monthly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-month" style="font-size:.85rem"></i><span>Bulanan</span></a>
-                    <a href="/report?view=weekly" class="nav-link small ps-4 {{if eq .View "weekly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-week" style="font-size:.85rem"></i><span>Mingguan</span></a>
-                </div>
-            </li>
+            <li><a href="/report" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a></li>
             <li><a href="/dompet" class="nav-link {{if eq .Page "accounts"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-wallet"></i><span>Dompet</span></a></li>
             <li class="px-4 pt-4 pb-2"><small class="nav-text">Lainnya</small></li>
             <li><a href="/profile" class="nav-link {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a></li>
@@ -219,18 +207,6 @@
             var newHidden = !isHidden;
             localStorage.setItem('hideBalance', newHidden);
             applyBalanceVisibility(newHidden);
-        }
-        function toggleReportDropdown(e) {
-            if (e) e.preventDefault();
-            var d = document.getElementById('report-dropdown');
-            var icon = document.querySelector('[onclick^="toggleReportDropdown"] .ti-chevron-down');
-            if (d.style.display === 'none' || d.style.display === '') {
-                d.style.display = 'block';
-                if (icon) icon.style.transform = 'rotate(180deg)';
-            } else {
-                d.style.display = 'none';
-                if (icon) icon.style.transform = 'rotate(0deg)';
-            }
         }
         function applyBalanceVisibility(isHidden) {
             var els = document.querySelectorAll('.balance-text');
