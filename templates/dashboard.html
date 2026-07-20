@@ -97,6 +97,7 @@
                 </div>
 {{end}}
 {{define "pagescripts"}}
+        try {
         var container = document.getElementById('chart-container');
         var textColor = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#cfd4da' : '#5e6870';
         if (container) {
@@ -106,7 +107,6 @@
             window.chartAcct=new ApexCharts(document.querySelector("#chart-donut-acct"),{series:acctBals,chart:{type:'donut',height:280,toolbar:{show:false},zoom:{enabled:false},background:'transparent',animations:{enabled:true,speed:700,animateGradually:{enabled:true,delay:100}}},labels:acctNames,colors:acctColors.length?acctColors:['#2c7be5','#22c55e','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#6366f1'],stroke:{show:true,colors:'transparent'},dataLabels:{enabled:false},legend:{position:'bottom',labels:{colors:textColor}},tooltip:{y:{formatter:v=>"Rp "+new Intl.NumberFormat('id-ID').format(v)}},theme:{mode:dmode}});window.chartAcct.render();
         }
         var origToggle=toggleTheme;toggleTheme=function(){origToggle();var m=document.documentElement.getAttribute('data-bs-theme'),tc=m==='dark'?'#cfd4da':'#5e6870';['chartLine','chartDonut','chartAcct'].forEach(function(n){if(window[n])window[n].updateOptions({theme:{mode:m},xaxis:{labels:{style:{colors:tc}}},legend:{labels:{colors:tc}}});});};
-        // Replay animation on page show (fix bfcache skip)
         window.addEventListener('pageshow', function(e){
             if(e.persisted){
                 ['chartLine','chartDonut','chartAcct'].forEach(function(n){
@@ -114,4 +114,5 @@
                 });
             }
         });
+        } catch(e) { console.warn('ApexCharts init error:', e); }
 {{end}}
