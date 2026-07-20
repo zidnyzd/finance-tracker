@@ -1,0 +1,23 @@
+{
+  "name": "ZiRa Finance",
+  "short_name": "ZiRa",
+  "description": "Pencatatan keuangan pribadi — sederhana & mobile-friendly",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#2c7be5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
