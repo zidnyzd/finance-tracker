@@ -1,0 +1,4 @@
+# Tell GitHub Linguist: HTML files are Go templates, not the primary language
+templates/*.html linguist-detectable=false
+static/*.js   linguist-detectable=false
+static/*.json linguist-detectable=false
