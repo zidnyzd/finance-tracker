@@ -12,100 +12,113 @@ Kelola pemasukan & pengeluaran dengan mudah langsung dari browser.
 
 - **Dashboard** — ringkasan saldo, pemasukan & pengeluaran, 3 chart interaktif
 - **Tambah Transaksi** — income/expense, autocomplete kategori, datetime picker
-- **Riwayat** — terpisah per bulan, paginasi, filter & edit/delete
-- **Laporan Bulanan** — pemasukan vs pengeluaran per kategori dengan progress bar
-- **Akun / Dompet** — BCA, GoPay, Cash, dll. Saldo otomatis terhitung
-- **Google OAuth** — login/daftar instan dengan akun Google
-- **Profil** — ubah nama tampilan, email, dan kata sandi
+- **Riwayat** — per-bulan, paginasi, edit/delete
+- **Laporan Bulanan** — pemasukan vs pengeluaran per kategori
+- **Akun / Dompet** — BCA, GoPay, Cash, saldo auto-hitung
+- **Google OAuth** — login/daftar dengan akun Google
+- **Profil** — ubah nama, email, & kata sandi
 - **Dark Mode** — toggle tema, tersimpan di localStorage
-- **Sembunyikan Saldo** — tombol mata untuk menyembunyikan nominal
-- **Bottom Nav Mobile** — navigasi cepat di ponsel
 - **Responsive** — desktop & mobile
 
 ---
 
-## Cara Deploy
+## Penjelasan Sistem
 
-Binary telah di-build. Cukup salin binary + template, lalu jalankan.
+### Arsitektur
 
-```bash
-# 1. Buat folder
-cd /root/finance-tracker
-
-# 2. Pastikan binary executable
-chmod +x finance-app
-
-# 3. Jalankan
-./finance-app
+```
+┌──────────────────┐      ┌──────────────────┐     ┌────────────┐
+│    Browser       │ ───▶ │  Go Web Server    │ ──▶ │  SQLite DB │
+│  (Bootstrap 5)   │ ◀─── │  (net/http + Go   │ ◀── │finance.db  │
+│  ApexCharts UI   │      │   html/template)  │     │ (WAL mode) │
+└──────────────────┘      └──────────────────┘     └────────────┘
 ```
 
-Server berjalan di `http://127.0.0.1:8081`
+### Alur Kerja
 
-### Systemd Service
+1. **Session & Auth**
+   - Login via username/password (bcrypt) atau Google OAuth 2.0
+   - Session token 16-byte random disimpan di HttpOnly + Secure cookie (7 hari)
+   - CSRF token per-session untuk proteksi mutasi data
+   - Rate limiter per-IP untuk login (5/menit) dan register (3/jam)
 
-```bash
-cat > /etc/systemd/system/finance-tracker.service << 'EOF'
-[Unit]
-Description=Finance Tracker Web App
-After=network.target
+2. **Dashboard**
+   - Saldo = total income − total expense
+   - 3 chart ApexCharts: income/expense 7 hari terakhir, top expense categories (donut), saldo per-akun
+   - 5 transaksi terbaru
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/root/finance-tracker
-ExecStart=/root/finance-tracker/finance-app
-Restart=always
-RestartSec=5
+3. **Transaksi**
+   - Tipe: income atau expense
+   - Input: amount, category (autocomplete dari riwayat), account (dompet), description, date
+   - Edit & delete dengan CSRF validation
+   - Pagination per-bulan, 20 transaksi per halaman
 
-[Install]
-WantedBy=multi-user.target
-EOF
+4. **Laporan Bulanan**
+   - Breakdown income dan expense per kategori
+   - Progress bar per kategori (persentase dari total expense)
 
-systemctl daemon-reload
-systemctl enable --now finance-tracker
-```
+5. **Akun Dompet**
+   - CRUD dompet (bank, ewallet, cash)
+   - Saldo otomatis dari transaksi terkait
+   - Brand colors otomatis untuk BCA, GoPay, Mandiri, Seabank, dll
+   - Chart distribusi saldo di dashboard
 
-### Cloudflare Tunnel
+### Keamanan
 
-```yaml
-ingress:
-  - hostname: finance.zira.web.id
-    service: http://127.0.0.1:8081
-  - service: http_status:404
-```
+| Lapisan | Detail |
+|---------|--------|
+| Password | bcrypt default cost |
+| Session | `crypto/rand` 16-byte, HttpOnly, Secure, SameSite=Lax, expiry 7 hari |
+| CSRF | Per-session random token, required on POST/PUT/DELETE |
+| SQL Injection | Parameterized queries semua endpoint |
+| XSS | Go `html/template` auto-escaping |
+| Security Headers | HSTS, CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy |
+| Rate Limit | In-memory sliding window per IP/User |
+| Input Validation | Username 3-20 char (alnum+underscore), password 6-72 char |
+| Audit Log | Login/register/oauth success & failure tercatat |
 
 ---
 
-## Environment Variables
+## API Endpoints
 
-| Variable | Required | Keterangan |
-|----------|----------|------------|
-| `GOOGLE_CLIENT_ID` | No | Google OAuth Client ID |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth Client Secret |
-| `ADMIN_USERNAME` | No | Bootstrap admin username |
-| `ADMIN_PASSWORD` | No | Bootstrap admin password |
-| `ADMIN_DISPLAY` | No | Bootstrap admin display name |
+| Route | Auth | Methods | Deskripsi |
+|-------|------|---------|-----------|
+| `/` | ✅ | GET | Dashboard |
+| `/login` | ❌ | GET/POST | Login form |
+| `/register` | ❌ | GET/POST | Registrasi |
+| `/logout` | ✅ | GET | Logout |
+| `/auth/google` | ❌ | GET | Redirect Google OAuth |
+| `/auth/google/callback` | ❌ | GET | Google OAuth callback |
+| `/add` | ✅ | GET | Form tambah transaksi |
+| `/transactions` | ✅ | POST | Simpan transaksi |
+| `/edit` | ✅ | GET/POST | Edit transaksi |
+| `/delete` | ✅ | GET | Hapus transaksi |
+| `/history` | ✅ | GET | Riwayat per-bulan |
+| `/report` | ✅ | GET | Laporan bulanan |
+| `/accounts` | ✅ | GET/POST | Kelola dompet |
+| `/rename-account` | ✅ | POST | Rename dompet |
+| `/profile` | ✅ | GET/POST | Edit profil |
 
 ---
 
 ## Stack
 
-- **Backend:** Go (net/http + html/template)
-- **Database:** SQLite 3 (+ WAL mode)
-- **Frontend:** Bootstrap 5.3, Tabler Icons, ApexCharts, Poppins
-- **Auth:** bcrypt + crypto/rand session cookies + Google OAuth 2.0
-- **Deploy:** Systemd + Cloudflare Tunnel
+| Layer | Teknologi |
+|-------|-----------|
+| Backend | Go (net/http + html/template) |
+| Database | SQLite 3 (WAL mode) |
+| Frontend | Bootstrap 5.3 + Tabler Icons + ApexCharts + Poppins |
+| Auth | bcrypt + crypto/rand session + Google OAuth 2.0 |
 
 ---
 
 ## Resource Usage
 
 | Metric | Value |
-|---|---|
+|--------|-------|
 | Memory | ~10 MB |
-| Binary size | ~17 MB |
+| Binary size | ~17 MB (static build, single binary) |
 | CPU | Near zero at idle |
-| Dependencies | single binary (CGO静态 build) |
 
 ---
 
