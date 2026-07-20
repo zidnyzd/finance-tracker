@@ -44,7 +44,9 @@
         [data-bs-theme="dark"] .sidebar { background: #1e2024; border-color: #2c3035; }
         [data-bs-theme="dark"] .sidebar .nav-link { color: #abb2bf; }
         [data-bs-theme="dark"] .sidebar .nav-link:hover { background: #2c3035; color: #6ea8fe; }
+        .sidebar-footer { padding: 1rem 1.5rem; margin-top: .5rem; border-top: 1px solid #e8ecf1; }
         [data-bs-theme="dark"] .sidebar .nav-link.active { background: #1a2d44; color: #6ea8fe; border-color: #6ea8fe; }
+        [data-bs-theme="dark"] .sidebar-footer { border-color: #2c3035; }
         [data-bs-theme="dark"] .nav-text { color: #6c757d; }
         [data-bs-theme="dark"] .logo-area { border-color: #2c3035; }
         [data-bs-theme="dark"] .topbar { background: #1e2024; border-color: #2c3035; }
@@ -139,7 +141,7 @@
             <div class="d-flex justify-content-between py-1"><span class="text-muted">Pemasukan</span><strong class="text-success"><span class="balance-text">{{.TotalIncomeStr}}</span></strong></div>
             <div class="d-flex justify-content-between py-1"><span class="text-muted">Pengeluaran</span><strong class="text-danger"><span class="balance-text">{{.TotalExpenseStr}}</span></strong></div>
         </div>
-        <div style="padding:1rem 1.5rem;margin-top:.5rem;border-top:1px solid #e8ecf1">
+        <div class="sidebar-footer">
             <small class="text-muted" style="font-size:.7rem">&copy; 2026 ZiRa Finance</small>
         </div>
     </aside>
