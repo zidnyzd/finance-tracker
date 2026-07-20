@@ -218,6 +218,23 @@
             if (btn) {
                 btn.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
             }
+            updateChartVisibility(isHidden);
+        }
+        function updateChartVisibility(hide) {
+            var fmt = hide ? function(){return '***'} : undefined;
+            if(window.chartLine) window.chartLine.updateOptions({
+                dataLabels: { enabled: !hide },
+                yaxis: { labels: { formatter: fmt } },
+                tooltip: { y: { formatter: fmt } }
+            });
+            if(window.chartDonut) window.chartDonut.updateOptions({
+                dataLabels: { enabled: !hide },
+                tooltip: { y: { formatter: fmt } }
+            });
+            if(window.chartAcct) window.chartAcct.updateOptions({
+                dataLabels: { enabled: !hide },
+                tooltip: { y: { formatter: fmt } }
+            });
         }
         // Custom confirm modal (POST + CSRF via hidden form)
         function showConfirm(id, msg){
