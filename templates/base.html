@@ -298,8 +298,8 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/static/sw.js');
 }
 </script>
-</body>
 {{template "bottomnav" .}}
+</body>
 </html>
 {{end}}
 {{define "bottomnav"}}
@@ -311,4 +311,4 @@ if ('serviceWorker' in navigator) {
     <a href="/history" class="bottom-nav-item {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a>
     <a href="/profile" class="bottom-nav-item {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a>
 </nav>
-</html>{{end}}
+{{end}}
