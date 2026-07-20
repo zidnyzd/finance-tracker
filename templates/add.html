@@ -48,13 +48,27 @@
                 <datalist id="cat-list">{{range .Categories}}<option value="{{.}}">{{end}}</datalist>
             </div>
 
-            <!-- Akun -->
+            <!-- Dompet -->
             <div class="mb-3">
                 <label class="form-label small fw-medium text-muted">Dompet / Akun</label>
-                <select name="account" class="form-select" required>
-                    <option value="">Pilih akun</option>
-                    {{range .Accounts}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
-                </select>
+                <div class="input-group">
+                    <select name="account" id="acct-select" class="form-select" required>
+                        <option value="">Pilih dompet</option>
+                        {{range .Accounts}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+                    </select>
+                    <button type="button" class="btn btn-outline-primary" onclick="showQuickAdd()" title="Dompet baru"><i class="ti ti-plus"></i></button>
+                </div>
+                <div id="quick-add" style="display:none;margin-top:.5rem;padding:.75rem;background:var(--bs-card-bg,#fff);border-radius:.5rem;border:1px solid #e8ecf1">
+                    <div class="d-flex gap-2">
+                        <input type="text" id="new-acct-name" class="form-control form-control-sm" placeholder="Nama dompet" autocomplete="off">
+                        <select id="new-acct-type" class="form-select form-select-sm" style="width:auto">
+                            <option value="bank">🏦 Bank</option>
+                            <option value="ewallet" selected>📱 E-Wallet</option>
+                            <option value="cash">💵 Tunai</option>
+                        </select>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="createQuickAccount()" style="white-space:nowrap">Tambah</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Tanggal -->
@@ -82,4 +96,6 @@
 {{end}}
 {{define "pagescripts"}}
 function formatCurrency(input){var v=input.value.replace(/\D/g,'');if(v===''){input.value='';document.getElementById('amount_real').value='';return}document.getElementById('amount_real').value=v;input.value=new Intl.NumberFormat('id-ID').format(v)}
+function showQuickAdd(){var d=document.getElementById('quick-add');if(d.style.display==='none'){d.style.display='block';document.getElementById('new-acct-name').focus()}else{d.style.display='none'}}
+function createQuickAccount(){var n=document.getElementById('new-acct-name').value.trim();if(!n)return;var t=document.getElementById('new-acct-type').value;var csrf=document.querySelector('input[name="_csrf"]').value;fetch('/dompet',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'name='+encodeURIComponent(n)+'&type='+encodeURIComponent(t)+'&_csrf='+encodeURIComponent(csrf)}).then(function(r){if(r.ok){var sel=document.getElementById('acct-select');var opt=document.createElement('option');opt.value='new';opt.textContent=n+' \u2713';sel.appendChild(opt);sel.value='new';document.getElementById('quick-add').style.display='none';document.getElementById('new-acct-name').value='';setTimeout(function(){location.reload()},300)}else{alert('Gagal menambah dompet')}}).catch(function(){alert('Gagal menambah dompet')})}
 {{end}}
