@@ -232,10 +232,13 @@
         function toggleReportDropdown(e) {
             if (e) e.preventDefault();
             var d = document.getElementById('report-dropdown');
+            var icon = document.querySelector('[onclick^="toggleReportDropdown"] .ti-chevron-down');
             if (d.style.display === 'none' || d.style.display === '') {
                 d.style.display = 'block';
+                if (icon) icon.style.transform = 'rotate(180deg)';
             } else {
                 d.style.display = 'none';
+                if (icon) icon.style.transform = 'rotate(0deg)';
             }
         }
         function applyBalanceVisibility(isHidden) {
