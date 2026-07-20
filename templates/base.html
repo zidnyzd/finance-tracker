@@ -131,7 +131,12 @@
             <li><a href="/" class="nav-link {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a></li>
             <li><a href="/add" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Tambah</span></a></li>
             <li><a href="/history" class="nav-link {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a></li>
-            <li><a href="/report" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a></li>
+            <li><a href="#" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="toggleReportDropdown()"><i class="ti ti-chart-bar"></i><span>Laporan</span><i class="ti ti-chevron-down ms-auto" style="font-size:.75rem"></i></a>
+                <div id="report-dropdown" style="display:none;padding:0 1.5rem .5rem">
+                    <a href="/report?view=monthly" class="nav-link small ps-4 {{if ne .View "weekly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-month" style="font-size:.85rem"></i><span>Bulanan</span></a>
+                    <a href="/report?view=weekly" class="nav-link small ps-4 {{if eq .View "weekly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-week" style="font-size:.85rem"></i><span>Mingguan</span></a>
+                </div>
+            </li>
             <li><a href="/dompet" class="nav-link {{if eq .Page "accounts"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-wallet"></i><span>Dompet</span></a></li>
             <li class="px-4 pt-4 pb-2"><small class="nav-text">Lainnya</small></li>
             <li><a href="/profile" class="nav-link {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a></li>

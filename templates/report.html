@@ -2,15 +2,8 @@
 <div class="row mb-3">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="fs-4 fw-semibold mb-1">Laporan</h1>
+            <h1 class="fs-4 fw-semibold mb-1">{{if eq .View "weekly"}}Laporan Mingguan{{else}}Laporan Bulanan{{end}}</h1>
             <p class="text-muted small mb-0">{{.MonthLabel}}</p>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-            {{if eq .View "weekly"}}
-            <a href="/report?view=monthly" class="btn btn-sm btn-outline-secondary">Bulanan</a>
-            {{else}}
-            <a href="/report?view=weekly" class="btn btn-sm btn-outline-primary">Mingguan</a>
-            {{end}}
         </div>
     </div>
 </div>
