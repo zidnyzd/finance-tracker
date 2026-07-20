@@ -67,7 +67,7 @@
                                         <td class="ps-3 text-nowrap">{{.Date}}</td><td class="text-nowrap"><small class="text-muted">{{.AccountName}}</small></td><td class="text-nowrap">{{.Category}}</td><td class="d-none d-md-table-cell text-nowrap"><small class="text-muted">{{.Description}}</small></td>
                                         <td class="text-center">{{if eq .Type "income"}}<span class="badge bg-success-subtle text-success">📈</span>{{else}}<span class="badge bg-danger-subtle text-danger">📉</span>{{end}}</td>
                                         <td class="text-end pe-3 fw-semibold text-nowrap"><span class="balance-text">{{.FormattedAmount}}</span></td>
-                                        <td class="text-center pe-3"><a href="/delete?id={{.ID}}" onclick="showConfirm(this.href);return false" class="text-danger text-decoration-none me-1">✕</a><a href="/edit?id={{.ID}}" class="text-muted text-decoration-none"><i class="ti ti-pencil"></i></a></td>
+                                        <td class="text-center pe-3"><a href="#" onclick="showConfirm('{{.ID}}');return false" class="text-danger text-decoration-none me-1">✕</a><a href="/edit?id={{.ID}}" class="text-muted text-decoration-none"><i class="ti ti-pencil"></i></a></td>
                                     </tr>
                                     {{else}}<tr><td colspan="7" class="text-center text-muted py-5">Belum ada catatan keuangan.</td></tr>{{end}}
                                 </tbody>
@@ -78,7 +78,7 @@
                             <div class="tx-item">
                                 <div class="tx-icon {{.Type}}"><i class="ti {{if eq .Type "income"}}ti-arrow-up-right{{else}}ti-arrow-down-left{{end}}"></i></div>
                                 <div class="tx-details"><div class="tx-cat">{{.Category}}</div><div class="tx-meta">{{.AccountName}} • {{.Date}}{{if .Description}} • {{.Description}}{{end}}</div></div>
-                                <div class="tx-amount-wrap"><div class="tx-amount {{.Type}}"><span class="balance-text">{{if eq .Type "income"}}+{{else}}-{{end}}{{.FormattedAmount}}</span></div><div class="d-flex gap-1 justify-content-end mt-1"><a href="/edit?id={{.ID}}" class="text-muted text-decoration-none"><i class="ti ti-pencil" style="font-size:.85rem"></i></a><a href="/delete?id={{.ID}}" onclick="showConfirm(this.href);return false" class="tx-delete text-decoration-none"><i class="ti ti-trash"></i></a></div></div>
+                                <div class="tx-amount-wrap"><div class="tx-amount {{.Type}}"><span class="balance-text">{{if eq .Type "income"}}+{{else}}-{{end}}{{.FormattedAmount}}</span></div><div class="d-flex gap-1 justify-content-end mt-1"><a href="/edit?id={{.ID}}" class="text-muted text-decoration-none"><i class="ti ti-pencil" style="font-size:.85rem"></i></a><a href="#" onclick="showConfirm('{{.ID}}');return false" class="tx-delete text-decoration-none"><i class="ti ti-trash"></i></a></div></div>
                             </div>
                             {{else}}<div class="text-center text-muted py-5 small">Belum ada catatan keuangan.</div>{{end}}
                         </div>

@@ -220,12 +220,16 @@
                 btn.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
             }
         }
-        // Custom confirm modal
-        function showConfirm(url, msg){
+        // Custom confirm modal (POST + CSRF via hidden form)
+        function showConfirm(id, msg){
             var m=document.getElementById('confirm-modal');if(!m)return;
             m.querySelector('.confirm-msg').textContent=msg||'Hapus?';
             m.style.display='flex';
-            m.querySelector('.confirm-yes').onclick=function(){m.style.display='none';location.href=url;};
+            m.querySelector('.confirm-yes').onclick=function(){
+                m.style.display='none';
+                document.getElementById('delete-id').value=id;
+                document.getElementById('delete-form').submit();
+            };
             m.querySelector('.confirm-no').onclick=function(){m.style.display='none';};
         }
         (function(){
@@ -248,6 +252,11 @@
         // Page-specific scripts placeholder
         {{template "pagescripts" .}}
     </script>
+<!-- Hidden delete form (POST + CSRF) -->
+<form id="delete-form" method="POST" action="/delete" style="display:none">
+    <input type="hidden" name="id" id="delete-id">
+    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+</form>
 <!-- Confirm Modal -->
 <div id="confirm-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target==this)this.style.display='none'">
     <div class="card border-0 shadow-lg" style="max-width:320px;width:90%;border-radius:.75rem" onclick="event.stopPropagation()">
