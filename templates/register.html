@@ -38,7 +38,7 @@
             <form method="POST" action="/register">
                 <div class="mb-3">
                     <label class="form-label small">Nama Pengguna</label>
-                    <input type="text" name="username" class="form-control" required placeholder="Contoh: johndoe">
+                    <input type="text" name="username" class="form-control" required placeholder="Contoh: johndoe" autocomplete="username">
                     <div class="text-muted mt-1" style="font-size:.65rem">🔑 Username untuk login, tidak bisa diubah</div>
                 </div>
                 <div class="mb-3">
@@ -53,14 +53,14 @@
                 <div class="mb-3">
                     <label class="form-label small">Kata Sandi</label>
                     <div class="input-group">
-                        <input type="password" name="password" id="reg-password" class="form-control" required placeholder="Min 6 karakter">
+                        <input type="password" name="password" id="reg-password" class="form-control" required placeholder="Min 6 karakter" autocomplete="new-password">
                         <button type="button" class="btn btn-outline-secondary" onclick="togglePW('reg-password',this)" tabindex="-1"><i class="ti ti-eye"></i></button>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small">Konfirmasi Sandi</label>
                     <div class="input-group">
-                        <input type="password" name="confirm" id="reg-confirm" class="form-control" required placeholder="Ketik ulang sandi">
+                        <input type="password" name="confirm" id="reg-confirm" class="form-control" required placeholder="Ketik ulang sandi" autocomplete="new-password">
                         <button type="button" class="btn btn-outline-secondary" onclick="togglePW('reg-confirm',this)" tabindex="-1"><i class="ti ti-eye"></i></button>
                     </div>
                 </div>

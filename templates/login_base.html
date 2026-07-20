@@ -37,12 +37,12 @@
             <form method="POST" action="/login">
                 <div class="mb-3">
                     <label class="form-label small fw-medium">Nama Pengguna</label>
-                    <input type="text" name="username" class="form-control" required>
+                    <input type="text" name="username" class="form-control" required autocomplete="username">
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-medium">Kata Sandi</label>
                     <div class="input-group">
-                        <input type="password" name="password" id="login-password" class="form-control" required>
+                        <input type="password" name="password" id="login-password" class="form-control" required autocomplete="current-password">
                         <button type="button" class="btn btn-outline-secondary" onclick="togglePW('login-password',this)" tabindex="-1"><i class="ti ti-eye"></i></button>
                     </div>
                 </div>
