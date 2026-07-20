@@ -131,9 +131,9 @@
             <li><a href="/" class="nav-link {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a></li>
             <li><a href="/add" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Tambah</span></a></li>
             <li><a href="/history" class="nav-link {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a></li>
-            <li><a href="#" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="toggleReportDropdown()"><i class="ti ti-chart-bar"></i><span>Laporan</span><i class="ti ti-chevron-down ms-auto" style="font-size:.75rem"></i></a>
-                <div id="report-dropdown" style="display:none;padding:0 1.5rem .5rem">
-                    <a href="/report?view=monthly" class="nav-link small ps-4 {{if ne .View "weekly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-month" style="font-size:.85rem"></i><span>Bulanan</span></a>
+            <li class="{{if eq .Page "report"}}has-active{{end}}"><a href="#" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="toggleReportDropdown(event)"><i class="ti ti-chart-bar"></i><span>Laporan</span><i class="ti ti-chevron-down ms-auto" style="font-size:.75rem;transition:transform .2s"></i></a>
+                <div id="report-dropdown" class="report-sub" style="{{if eq .Page "report"}}display:block{{else}}display:none{{end}};padding:0 1.5rem .5rem">
+                    <a href="/report?view=monthly" class="nav-link small ps-4 {{if eq .View "monthly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-month" style="font-size:.85rem"></i><span>Bulanan</span></a>
                     <a href="/report?view=weekly" class="nav-link small ps-4 {{if eq .View "weekly"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-calendar-week" style="font-size:.85rem"></i><span>Mingguan</span></a>
                 </div>
             </li>
@@ -229,15 +229,13 @@
             localStorage.setItem('hideBalance', newHidden);
             applyBalanceVisibility(newHidden);
         }
-        function toggleReportDropdown() {
+        function toggleReportDropdown(e) {
+            if (e) e.preventDefault();
             var d = document.getElementById('report-dropdown');
-            var icon = document.querySelector('[onclick="toggleReportDropdown()"] .ti-chevron-down');
             if (d.style.display === 'none' || d.style.display === '') {
                 d.style.display = 'block';
-                if (icon) icon.style.transform = 'rotate(180deg)';
             } else {
                 d.style.display = 'none';
-                if (icon) icon.style.transform = 'rotate(0deg)';
             }
         }
         function applyBalanceVisibility(isHidden) {
