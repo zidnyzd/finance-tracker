@@ -83,6 +83,43 @@
         .footer a { color: #5e6870; text-decoration: none; transition: .15s; }
         .footer a:hover { color: #2c7be5; }
         .footer .sep { color: #d0d5dd; }
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50%      { transform: translateY(-20px) rotate(3deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(44,123,229,.4); }
+            50%      { box-shadow: 0 0 0 15px rgba(44,123,229,0); }
+        }
+        .anim-hero-logo  { animation: fadeInUp .8s ease-out; }
+        .anim-hero-h1    { animation: fadeInUp .8s ease-out .2s both; }
+        .anim-hero-p     { animation: fadeInUp .8s ease-out .4s both; }
+        .anim-hero-btn   { animation: fadeInUp .8s ease-out .6s both; }
+        .anim-hero-extras{ animation: fadeIn .6s ease-out .8s both; }
+        .float-shape {
+            position: absolute; border-radius: 50%; opacity: .06; pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-shape:nth-child(1) { width: 300px; height: 300px; background: #2c7be5; top: 10%; left: 5%; animation-delay: 0s; }
+        .float-shape:nth-child(2) { width: 200px; height: 200px; background: #22c55e; top: 60%; right: 5%; animation-delay: -2s; }
+        .float-shape:nth-child(3) { width: 150px; height: 150px; background: #f59e0b; bottom: 20%; left: 15%; animation-delay: -4s; }
+        .float-shape:nth-child(4) { width: 250px; height: 250px; background: #8b5cf6; top: 30%; right: 20%; animation-delay: -1s; }
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity .6s ease-out, transform .6s ease-out;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .cta .btn-light { animation: pulse 2s infinite; }
+
         /* Dark mode */
         [data-bs-theme="dark"] body { background: #16181b; color: #cfd4da; }
         [data-bs-theme="dark"] .hero::before { background: radial-gradient(ellipse at 30% 50%, rgba(44,123,229,.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(34,197,94,.15) 0%, transparent 50%); }
@@ -99,20 +136,25 @@
 </head>
 <body>
     <div class="hero">
-        <div class="logo">ZiRa Finance</div>
-        <h1>Catat Uang <span>Jadi Gampang</span></h1>
-        <p>Pantau pemasukan & pengeluaran harian, dapatkan laporan bulanan, atur budget dari dompet virtual — semua gratis, tanpa iklan.</p>
-        <div class="d-flex gap-3 flex-wrap justify-content-center">
+        <div class="float-shape"></div>
+        <div class="float-shape"></div>
+        <div class="float-shape"></div>
+        <div class="float-shape"></div>
+
+        <div class="logo anim-hero-logo">ZiRa Finance</div>
+        <h1 class="anim-hero-h1">Catat Uang <span>Jadi Gampang</span></h1>
+        <p class="anim-hero-p">Pantau pemasukan & pengeluaran harian, dapatkan laporan bulanan, atur budget dari dompet virtual — semua gratis, tanpa iklan.</p>
+        <div class="d-flex gap-3 flex-wrap justify-content-center anim-hero-btn">
             <a href="https://finance.zira.web.id/login" class="btn btn-primary"><i class="ti ti-login me-1"></i> Mulai Sekarang</a>
             <a href="https://finance.zira.web.id/login" class="btn-outline"><i class="ti ti-brand-google me-1"></i> Masuk dengan Google</a>
         </div>
-        <p class="text-muted mt-3" style="font-size:.8rem">Belum punya akun? <a href="https://finance.zira.web.id/register" class="text-muted"><strong>Daftar di sini</strong></a></p>
+        <p class="text-muted mt-3 anim-hero-extras" style="font-size:.8rem">Belum punya akun? <a href="https://finance.zira.web.id/register" class="text-muted"><strong>Daftar di sini</strong></a></p>
         <div class="mt-4">
             <a href="#" onclick="toggleTheme();return false" class="text-muted small text-decoration-none"><i class="ti ti-moon"></i> Ganti Tema</a>
         </div>
     </div>
 
-    <section>
+    <section class="reveal">
         <h2>Kenapa ZiRa?</h2>
         <p class="subtitle">Semua fitur yang kamu butuhkan untuk mengatur keuangan pribadi, dikemas simpel dan mudah dipakai.</p>
         <div class="feature-grid">
@@ -149,7 +191,7 @@
         </div>
     </section>
 
-    <section>
+    <section class="reveal">
         <h2>Dari Awal Sampai Pantau</h2>
         <p class="subtitle">Hanya 3 langkah untuk mulai mencatat keuangan kamu.</p>
         <div class="steps">
@@ -171,7 +213,7 @@
         </div>
     </section>
 
-    <section>
+    <section class="reveal">
         <h2>Keamanan Data Kamu</h2>
         <p class="subtitle">Kami serius menjaga privasi dan keamanan data keuangan kamu.</p>
         <div class="stats" style="text-align:left; display:block;">
@@ -183,7 +225,7 @@
         </div>
     </section>
 
-    <section>
+    <section class="reveal">
         <h2>Pertanyaan Umum</h2>
         <p class="subtitle">Beberapa hal yang mungkin kamu tanyakan.</p>
         <div class="faq-item">
@@ -204,7 +246,7 @@
         </div>
     </section>
 
-    <section>
+    <section class="reveal">
         <div class="cta">
             <h2>Siap Catat Keuangan?</h2>
             <p>Mulai sekarang — gratis selamanya, tanpa iklan, tanpa batasan transaksi.</p>
@@ -212,7 +254,7 @@
         </div>
     </section>
 
-    <section>
+    <section class="reveal">
         <h2>Dukung Proyek Ini</h2>
         <p class="subtitle">ZiRa Finance 100% gratis. Bantu pengembangan dengan membeli produk digital di ZidStore.</p>
         <div style="text-align:center">
@@ -233,6 +275,18 @@
     <script>
         function toggleTheme(){var h=document.documentElement;var t=h.getAttribute('data-bs-theme')==='dark'?'light':'dark';h.setAttribute('data-bs-theme',t);localStorage.setItem('bsTheme',t);}
         (function(){var t=localStorage.getItem('bsTheme');if(t)document.documentElement.setAttribute('data-bs-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-bs-theme','dark');})();
+    </script>
+
+    <script>
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
     </script>
 </body>
 </html>
