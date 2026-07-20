@@ -2,14 +2,30 @@
 <div class="row mb-3">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="fs-4 fw-semibold mb-1">Laporan Bulanan</h1>
+            <h1 class="fs-4 fw-semibold mb-1">Laporan</h1>
             <p class="text-muted small mb-0">{{.MonthLabel}}</p>
         </div>
-        <div class="d-flex gap-1">
+        <div class="d-flex gap-2 align-items-center">
+            {{if eq .View "weekly"}}
+            <a href="/report?view=monthly" class="btn btn-sm btn-outline-secondary">Bulanan</a>
+            {{else}}
+            <a href="/report?view=weekly" class="btn btn-sm btn-outline-primary">Mingguan</a>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-center gap-1">
+        {{if eq .View "weekly"}}
+            <a href="{{.WeekPrev}}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px"><i class="ti ti-chevron-left"></i></a>
+            <span class="btn btn-sm text-muted" style="cursor:default;font-size:.8rem">{{.MonthLabel}}</span>
+            {{if .WeekNextDisabled}}<span class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center disabled" style="width:34px;height:34px;opacity:0.4"><i class="ti ti-chevron-right"></i></span>{{else}}<a href="{{.WeekNext}}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px"><i class="ti ti-chevron-right"></i></a>{{end}}
+        {{else}}
             <a href="/report?month={{.PrevMonth}}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px"><i class="ti ti-chevron-left"></i></a>
             <input type="month" class="form-control form-control-sm" style="width:auto;min-width:130px" value="{{.Month}}" onchange="window.location='/report?month='+this.value">
             {{if .NextDisabled}}<span class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center disabled" style="width:34px;height:34px;opacity:0.4"><i class="ti ti-chevron-right"></i></span>{{else}}<a href="/report?month={{.NextMonth}}" class="btn btn-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style="width:34px;height:34px"><i class="ti ti-chevron-right"></i></a>{{end}}
-        </div>
+        {{end}}
     </div>
 </div>
 
@@ -39,7 +55,7 @@
                 </div>
                 {{end}}
                 {{else}}
-                <p class="text-muted small text-center py-4">Belum ada pengeluaran bulan ini.</p>
+                <p class="text-muted small text-center py-4">Belum ada pengeluaran periode ini.</p>
                 {{end}}
             </div>
         </div>
@@ -58,7 +74,7 @@
                 </div>
                 {{end}}
                 {{else}}
-                <p class="text-muted small text-center py-4">Belum ada pemasukan bulan ini.</p>
+                <p class="text-muted small text-center py-4">Belum ada pemasukan periode ini.</p>
                 {{end}}
             </div>
         </div>
