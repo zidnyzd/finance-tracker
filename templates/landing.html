@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZiRa Finance — Catat Keuangan Pribadi Gratis</title>
-    <meta name="description" content="ZiRa Finance: aplikasi catat keuangan pribadi gratis. Pantau pemasukan & pengeluaran, lihat laporan bulanan, dark mode, dan mobile friendly.">
+    <title>ZiRa Finance — Catat Keuangan Pribadi, Gratis & Simpel</title>
+    <meta name="description" content="ZiRa Finance: aplikasi catat keuangan pribadi — pantau pemasukan & pengeluaran, laporan bulanan, multi dompet, dark mode, login Google. Gratis!">
     <meta name="keywords" content="aplikasi keuangan, catat pengeluaran, finance tracker, pengelolaan uang, laporan bulanan, gratis">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://zira.web.id/">
@@ -16,14 +16,14 @@
     <meta name="google-site-verification" content="1bfnqEHYprT3LgA-Gr3B_BWGEFD_-IbwsFU4rwgVsy8">
     <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/static/sw.js')}</script>
     <!-- Open Graph -->
-    <meta property="og:title" content="ZiRa Finance — Catat Keuangan Pribadi Gratis">
+    <meta property="og:title" content="ZiRa Finance — Catat Keuangan Pribadi, Gratis & Simpel">
     <meta property="og:description" content="Pantau pemasukan & pengeluaran, lihat laporan bulanan, tanpa ribet.">
     <meta property="og:url" content="https://zira.web.id/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ZiRa Finance">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ZiRa Finance — Catat Keuangan Pribadi Gratis">
+    <meta name="twitter:title" content="ZiRa Finance — Catat Keuangan Pribadi, Gratis & Simpel">
     <meta name="twitter:description" content="Pantau pemasukan & pengeluaran, lihat laporan bulanan, tanpa ribet.">
     <!-- Schema -->
     <script type="application/ld+json">
@@ -36,32 +36,61 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: #f5f6fa; color: #1a1a2e; }
         .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(44,123,229,.08) 0%, transparent 50%), radial-gradient(ellipse at 70% 50%, rgba(34,197,94,.08) 0%, transparent 50%); pointer-events: none; }
-        .logo { font-size: 2rem; font-weight: 800; color: #2c7be5; margin-bottom: 1rem; }
+        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(44,123,229,.1) 0%, transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(34,197,94,.1) 0%, transparent 50%); pointer-events: none; }
+        .logo { font-size: 2.5rem; font-weight: 800; color: #2c7be5; margin-bottom: .5rem; letter-spacing: -.02em; }
+        .badges { display: flex; gap: .5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .badges img { height: 22px; border-radius: 4px; }
         .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
-        .hero p { font-size: 1.1rem; color: #5e6870; max-width: 480px; margin: 0 auto 2rem; }
-        .btn-primary { background: #2c7be5; border: none; padding: .75rem 2rem; border-radius: .75rem; font-weight: 600; font-size: 1rem; }
-        .btn-primary:hover { background: #2563eb; }
+        .hero h1 span { color: #2c7be5; }
+        .hero p { font-size: 1.1rem; color: #5e6870; max-width: 520px; margin: 0 auto 2rem; line-height: 1.6; }
+        .btn-primary { background: #2c7be5; border: none; padding: .75rem 2rem; border-radius: .75rem; font-weight: 600; font-size: 1rem; transition: .15s; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
         .btn-outline { background: transparent; border: 2px solid #e8ecf1; padding: .75rem 2rem; border-radius: .75rem; font-weight: 600; color: #1a1a2e; text-decoration: none; transition: .15s; }
         .btn-outline:hover { border-color: #2c7be5; color: #2c7be5; }
-        .features { padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
-        .features h2 { text-align: center; font-weight: 700; margin-bottom: 3rem; font-size: 1.75rem; }
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
-        .feature-card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.06); transition: transform .2s; }
-        .feature-card:hover { transform: translateY(-3px); }
-        .feature-icon { font-size: 2rem; color: #2c7be5; margin-bottom: .75rem; }
-        .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .5rem; }
-        .feature-card p { font-size: .85rem; color: #5e6870; margin: 0; }
-        .footer { text-align: center; padding: 1.5rem 2rem 2.5rem; color: #959ca6; font-size: .85rem; }
-        .footer a { color: #5e6870; text-decoration: none; }
+        /* Sections */
+        section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+        section h2 { text-align: center; font-weight: 700; margin-bottom: .75rem; font-size: 1.85rem; }
+        section .subtitle { text-align: center; color: #5e6870; margin-bottom: 3rem; font-size: 1rem; max-width: 550px; margin-left: auto; margin-right: auto; }
+        /* Features */
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+        .feature-card { background: #fff; border-radius: 1rem; padding: 1.75rem; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.06); transition: transform .2s, box-shadow .2s; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(44,123,229,.12); }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+        .feature-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .5rem; }
+        .feature-card p { font-size: .85rem; color: #5e6870; margin: 0; line-height: 1.5; }
+        /* Stats */
+        .stats { background: #fff; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.06); display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem; text-align: center; }
+        .stat-item h3 { font-size: 2rem; font-weight: 800; color: #2c7be5; margin: 0; }
+        .stat-item p { font-size: .85rem; color: #5e6870; margin: 0; }
+        /* How it works */
+        .steps { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
+        .step-card { background: #fff; border-radius: 1rem; padding: 2rem; flex: 1 1 240px; max-width: 300px; text-align: center; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.06); position: relative; }
+        .step-num { width: 40px; height: 40px; background: #2c7be5; color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; margin-bottom: 1rem; }
+        .step-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .5rem; }
+        .step-card p { font-size: .85rem; color: #5e6870; line-height: 1.5; margin: 0; }
+        /* FAQ */
+        .faq-item { background: #fff; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 20px rgba(0,0,0,.06); }
+        .faq-item h4 { font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
+        .faq-item p { font-size: .85rem; color: #5e6870; margin: 0; line-height: 1.5; }
+        /* CTA */
+        .cta { text-align: center; background: linear-gradient(135deg, #2c7be5, #1a5fd4); border-radius: 1.5rem; padding: 3.5rem 2rem; color: #fff; margin-top: 2rem; }
+        .cta h2 { color: #fff; }
+        .cta .btn-light { background: #fff; color: #2c7be5; border: none; padding: .75rem 2.5rem; border-radius: .75rem; font-weight: 700; font-size: 1.05rem; text-decoration: none; transition: .15s; }
+        .cta .btn-light:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+        .cta p { color: rgba(255,255,255,.85); max-width: 420px; margin: 1rem auto 1.5rem; font-size: .95rem; }
+        /* Footer */
+        .footer { text-align: center; padding: 1.5rem 2rem 3rem; color: #959ca6; font-size: .85rem; display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; align-items: center; }
+        .footer a { color: #5e6870; text-decoration: none; transition: .15s; }
         .footer a:hover { color: #2c7be5; }
-        .footer .sep { margin: 0 .5rem; color: #d0d5dd; }
-        [data-bs-theme="dark"] body { background: #16181b; color: #f8f9fa; }
-        [data-bs-theme="dark"] .hero::before { background: radial-gradient(ellipse at 30% 50%, rgba(44,123,229,.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 50%, rgba(34,197,94,.12) 0%, transparent 50%); }
+        .footer .sep { color: #d0d5dd; }
+        /* Dark mode */
+        [data-bs-theme="dark"] body { background: #16181b; color: #cfd4da; }
+        [data-bs-theme="dark"] .hero::before { background: radial-gradient(ellipse at 30% 50%, rgba(44,123,229,.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(34,197,94,.15) 0%, transparent 50%); }
         [data-bs-theme="dark"] .hero p { color: #abb2bf; }
-        [data-bs-theme="dark"] .feature-card { background: #1e2024; box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 4px 16px rgba(0,0,0,.3); }
-        [data-bs-theme="dark"] .feature-card p { color: #8b95a5; }
-        [data-bs-theme="dark"] .btn-outline { border-color: #2c3035; color: #f8f9fa; }
+        [data-bs-theme="dark"] section .subtitle { color: #8b95a5; }
+        [data-bs-theme="dark"] .feature-card, [data-bs-theme="dark"] .stats, [data-bs-theme="dark"] .step-card, [data-bs-theme="dark"] .faq-item { background: #1e2024; box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 4px 20px rgba(0,0,0,.3); }
+        [data-bs-theme="dark"] .feature-card p, [data-bs-theme="dark"] .stat-item p, [data-bs-theme="dark"] .step-card p, [data-bs-theme="dark"] .faq-item p { color: #8b95a5; }
+        [data-bs-theme="dark"] .btn-outline { border-color: #2c3035; color: #cfd4da; }
         [data-bs-theme="dark"] .btn-outline:hover { border-color: #6ea8fe; color: #6ea8fe; }
         [data-bs-theme="dark"] .footer a { color: #8b95a5; }
         [data-bs-theme="dark"] .footer a:hover { color: #6ea8fe; }
@@ -70,55 +99,129 @@
 </head>
 <body>
     <div class="hero">
-        <div class="logo">ZiRa</div>
-        <h1>Catat Uang<br>Jadi Gampang</h1>
-        <p>Pantau pemasukan & pengeluaran, lihat laporan bulanan, atur keuangan sendiri tanpa ribet.</p>
-        <div class="d-flex gap-3 flex-wrap justify-content-center">
-            <a href="https://finance.zira.web.id/login" class="btn btn-primary"><i class="ti ti-login me-1"></i> Masuk</a>
-            <a href="https://finance.zira.web.id/login" class="btn-outline"><i class="ti ti-brand-google me-1"></i> Lanjut dengan Google</a>
+        <div class="logo">ZiRa Finance</div>
+        <div class="badges">
+            <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white" alt="Go">
+            <img src="https://img.shields.io/badge/License-Proprietary-red" alt="License">
         </div>
-        <p class="text-muted mt-3" style="font-size:.8rem">Atau <a href="https://finance.zira.web.id/register" class="text-muted">daftar</a> langsung</p>
+        <h1>Catat Uang <span>Jadi Gampang</span></h1>
+        <p>Pantau pemasukan & pengeluaran harian, dapatkan laporan bulanan, atur budget dari dompet virtual — semua gratis, tanpa iklan.</p>
+        <div class="d-flex gap-3 flex-wrap justify-content-center">
+            <a href="https://finance.zira.web.id/login" class="btn btn-primary"><i class="ti ti-login me-1"></i> Mulai Sekarang</a>
+            <a href="https://finance.zira.web.id/login" class="btn-outline"><i class="ti ti-brand-google me-1"></i> Masuk dengan Google</a>
+        </div>
+        <p class="text-muted mt-3" style="font-size:.8rem">Belum punya akun? <a href="https://finance.zira.web.id/register" class="text-muted"><strong>Daftar di sini</strong></a></p>
         <div class="mt-4">
             <a href="#" onclick="toggleTheme();return false" class="text-muted small text-decoration-none"><i class="ti ti-moon"></i> Ganti Tema</a>
         </div>
     </div>
-    <div class="features">
+
+    <section>
         <h2>Kenapa ZiRa?</h2>
+        <p class="subtitle">Semua fitur yang kamu butuhkan untuk mengatur keuangan pribadi, dikemas simpel dan mudah dipakai.</p>
         <div class="feature-grid">
             <div class="feature-card">
-                <div class="feature-icon"><i class="ti ti-chart-pie"></i></div>
-                <h3>Laporan Bulanan</h3>
-                <p>Lihat pengeluaran per kategori pakai grafik, tau kemana uang kamu pergi.</p>
+                <div class="feature-icon" style="background: #eef4ff; color: #2c7be5;"><i class="ti ti-chart-pie"></i></div>
+                <h3>Dashboard & Laporan</h3>
+                <p>Ringkasan saldo real-time, grafik pemasukan vs pengeluaran, laporan bulanan per kategori.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="ti ti-wallet"></i></div>
+                <div class="feature-icon" style="background: #ecfdf5; color: #10b981;"><i class="ti ti-wallet"></i></div>
                 <h3>Multi Dompet</h3>
-                <p>Pisahin saldo BCA, GoPay, Cash — semua di satu tempat.</p>
+                <p>Pisahkan saldo per dompet — BCA, GoPay, DANA, Cash — semua terpantau dari satu dashboard.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="ti ti-moon"></i></div>
-                <h3>Mode Gelap</h3>
-                <p>Enak dipake kapan aja, siang atau malem.</p>
+                <div class="feature-icon" style="background: #fef3c7; color: #f59e0b;"><i class="ti ti-history"></i></div>
+                <h3>Riwayat Transaksi</h3>
+                <p>Lihat, edit, dan hapus transaksi per bulan. Filter berdasarkan kategori dan tanggal.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="ti ti-device-mobile"></i></div>
-                <h3>Nyaman di HP</h3>
-                <p>Desain responsive, ada menu bawah biar gampang navigasi.</p>
+                <div class="feature-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="ti ti-brand-google"></i></div>
+                <h3>Login Google</h3>
+                <p>Langsung masuk pakai akun Google — tidak perlu daftar atau ingat password baru.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="ti ti-brand-google"></i></div>
-                <h3>Login dengan Google</h3>
-                <p>Gak perlu repot daftar — langsung masuk pake akun Google kamu.</p>
+                <div class="feature-icon" style="background: #fce4ec; color: #e91e63;"><i class="ti ti-moon"></i></div>
+                <h3>Dark Mode</h3>
+                <p>Nyaman dipakai siang atau malam. Toggle otomatis mengikuti pengaturan sistem kamu.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: #e0f2fe; color: #06b6d4;"><i class="ti ti-device-mobile"></i></div>
+                <h3>Install di HP</h3>
+                <p>Support PWA — bisa di-install langsung ke homescreen, buka seperti aplikasi native.</p>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section>
+        <h2>Dari Awal Sampai Pantau</h2>
+        <p class="subtitle">Hanya 3 langkah untuk mulai mencatat keuangan kamu.</p>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>Daftar</h3>
+                <p>Buat akun dengan Google atau username biasa. Gratis, tanpa verifikasi email.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>Tambah Dompet</h3>
+                <p>Buat dompet virtual — BCA Tabungan, GoPay, atau uang tunai. Saldo otomatis terhitung.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>Catat Transaksi</h3>
+                <p>Input pemasukan & pengeluaran harian. Lihat grafik dan laporan bulanan langsung.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Keamanan Data Kamu</h2>
+        <p class="subtitle">Kami serius menjaga privasi dan keamanan data keuangan kamu.</p>
+        <div class="stats" style="text-align:left; display:block;">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="d-flex gap-3"><i class="ti ti-shield-check fs-3 text-success"></i><div><h5 class="mb-1">Password Aman</h5><p class="small text-muted mb-0">Password di-hash dengan bcrypt — tidak ada yang bisa membaca password asli kamu, termasuk kami.</p></div></div></div>
+                <div class="col-md-4"><div class="d-flex gap-3"><i class="ti ti-cookie fs-3 text-primary"></i><div><h5 class="mb-1">Session Terenkripsi</h5><p class="small text-muted mb-0">Cookie session dibuat dengan crypto/rand, dikirim hanya melalui HTTPS (Secure + HttpOnly).</p></div></div></div>
+                <div class="col-md-4"><div class="d-flex gap-3"><i class="ti ti-database fs-3 text-warning"></i><div><h5 class="mb-1">Data Milik Kamu</h5><p class="small text-muted mb-0">Semua data disimpan di VPS pribadi, tidak dibagi ke pihak ketiga, tidak ada analytics tracker.</p></div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Pertanyaan Umum</h2>
+        <p class="subtitle">Beberapa hal yang mungkin kamu tanyakan.</p>
+        <div class="faq-item">
+            <h4><i class="ti ti-currency-dollar me-2 text-success"></i>Apakah aplikasi ini gratis?</h4>
+            <p>Ya, 100% gratis. Tidak ada biaya berlangganan, tidak ada iklan. Dibangun untuk penggunaan pribadi.</p>
+        </div>
+        <div class="faq-item">
+            <h4><i class="ti ti-cloud me-2 text-primary"></i>Data saya disimpan di mana?</h4>
+            <p>Disimpan di database SQLite di server VPS. Tidak ada data yang dikirim ke pihak ketiga. Kamu bisa request export data kapan saja.</p>
+        </div>
+        <div class="faq-item">
+            <h4><i class="ti ti-brand-google me-2 text-danger"></i>Kenapa pakai Google login? Aman?</h4>
+            <p>Google hanya memberikan nama & email kamu — kami tidak bisa mengakses data Google kamu. Password dikelola Google, kamu tidak perlu ingat password baru.</p>
+        </div>
+        <div class="faq-item">
+            <h4><i class="ti ti-code me-2 text-purple"></i>Dibangun dengan teknologi apa?</h4>
+            <p>Backend dengan <strong>Go</strong> (net/http), frontend <strong>Bootstrap 5</strong> + <strong>ApexCharts</strong>, database <strong>SQLite</strong> dengan WAL mode. Dijalankan di VPS Linux.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="cta">
+            <h2>Siap Catat Keuangan?</h2>
+            <p>Mulai sekarang — gratis selamanya, tanpa iklan, tanpa batasan transaksi.</p>
+            <a href="https://finance.zira.web.id/login" class="btn-light"><i class="ti ti-login me-1"></i> Mulai Sekarang</a>
+        </div>
+    </section>
+
     <div class="footer">
-        <p>
-            <a href="https://github.com/zidnyzd/finance-tracker" target="_blank" rel="noopener"><i class="ti ti-brand-github"></i> GitHub</a>
-            <span class="sep">|</span>
-            Made with Go by <a href="https://zidstore.net" target="_blank" rel="noopener">ZidStore</a>
-        </p>
-        <p class="mb-0">ZiRa Finance &copy; 2026</p>
+        <span>&copy; 2026 ZiRa Finance</span>
+        <span class="sep">|</span>
+        <a href="https://github.com/zidnyzd/finance-tracker" target="_blank" rel="noopener"><i class="ti ti-brand-github"></i> GitHub</a>
+        <span class="sep">|</span>
+        <span>Dibangun dengan Go oleh <a href="https://zidstore.net" target="_blank" rel="noopener">ZidStore</a></span>
     </div>
     <script>
         function toggleTheme(){var h=document.documentElement;var t=h.getAttribute('data-bs-theme')==='dark'?'light':'dark';h.setAttribute('data-bs-theme',t);localStorage.setItem('bsTheme',t);}
