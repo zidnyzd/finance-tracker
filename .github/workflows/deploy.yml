@@ -11,9 +11,14 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: SSH Stop Service
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.VPS_SSH_KEY }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'systemctl stop finance-tracker || true'
-          sleep 2
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            systemctl stop finance-tracker || true
+            sleep 2
 
       - name: SCP files
         uses: appleboy/scp-action@v1.0.0
@@ -26,5 +31,10 @@ jobs:
           strip_components: 0
 
       - name: SSH Restart Service
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.VPS_SSH_KEY }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'systemctl restart finance-tracker'
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            systemctl restart finance-tracker
