@@ -109,6 +109,7 @@
                 </div>
 {{end}}
 {{define "pagescripts"}}
+        {{if eq .Page "history"}}
         document.getElementById('search-input')?.addEventListener('input', function(){
             clearTimeout(this._timer);
             var inp = this;
@@ -119,6 +120,7 @@
                 window.location = url;
             }, 400);
         });
+        {{end}}
         try {
         var container = document.getElementById('chart-container');
         var textColor = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#cfd4da' : '#5e6870';

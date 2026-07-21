@@ -1,6 +1,43 @@
-*.db
-*.db-shm
-*.db-wal
-*.log
+# Binary
+finance-app
+*.exe
+
+# Database
+finance.db
+finance.db-journal
+finance.db-wal
+finance.db-shm
+finance.db*
+
+# Environment
 .env
-finance-app-old
+.env.*
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/dist/
+/build/
+
+# Logs
+*.log
+
+# Binary installers
+*.deb
+*.rpm
+
+# Reference/dev files
+inapp_reference.html
+
+# Internal docs (do not push to public repo)
+DEPLOY.md
