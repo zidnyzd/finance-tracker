@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Stop service before deploy
-        uses: appleboy/ssh-action@v1.2.1
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -27,7 +27,7 @@ jobs:
             pkill -x finance-app 2>/dev/null || true
 
       - name: Deploy to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -40,7 +40,7 @@ jobs:
           overwrite: true
 
       - name: Restart Systemd Service
-        uses: appleboy/ssh-action@v1.2.1
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
