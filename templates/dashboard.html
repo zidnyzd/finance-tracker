@@ -109,13 +109,15 @@
                 </div>
 {{end}}
 {{define "pagescripts"}}
-        document.getElementById('search-input')?.addEventListener('keydown', function(e){
-            if(e.key === 'Enter'){
-                var q = this.value.trim();
+        document.getElementById('search-input')?.addEventListener('input', function(){
+            clearTimeout(this._timer);
+            var inp = this;
+            inp._timer = setTimeout(function(){
+                var q = inp.value.trim();
                 var url = '/history?month={{.Month}}' + (q ? '&q='+encodeURIComponent(q) : '');
                 if('{{.FilterType}}') url += '&type={{.FilterType}}';
                 window.location = url;
-            }
+            }, 400);
         });
         try {
         var container = document.getElementById('chart-container');
