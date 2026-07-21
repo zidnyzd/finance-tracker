@@ -1,50 +1,30 @@
-name: Deploy Finance Tracker
+name: Deploy finance-tracker
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-      - name: Stop service before deploy
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
-            systemctl stop finance-tracker || true
-            for i in 1 2 3 4 5; do
-              if ! pgrep -x finance-app > /dev/null; then break; fi
-              sleep 1
-            done
-            pkill -x finance-app 2>/dev/null || true
+      - name: SSH Stop Service
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.VPS_SSH_KEY }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'systemctl stop finance-tracker || true'
+          sleep 2
 
-      - name: Deploy to VPS
+      - name: SCP files
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          source: "finance-app,templates/"
+          source: "finance-app,templates,static"
           target: "/root/finance-tracker"
           strip_components: 0
-          rm: false
-          overwrite: true
 
-      - name: Restart Systemd Service
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
-            systemctl restart finance-tracker
+      - name: SSH Restart Service
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.VPS_SSH_KEY }} ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'systemctl restart finance-tracker'
