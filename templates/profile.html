@@ -73,6 +73,48 @@
         </div>
     </div>
 
+    
+    <div class="col-12">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header border-bottom-0 py-3"><h5 class="mb-0 fs-6 fw-semibold"><i class="ti ti-brand-telegram me-2 text-primary"></i>Bot Telegram AI</h5></div>
+            <div class="card-body p-3">
+                <div class="alert small py-2 mb-3 profile-notice" style="background:#eaf2fb; border-color:#d4e3f4;">
+                    <i class="ti ti-robot text-primary me-1"></i>Kirim teks pengeluaran atau foto struk ke Telegram, otomatis tersimpan ke DB.
+                </div>
+                
+                {{if gt .TelegramID 0}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="badge bg-success"><i class="ti ti-check"></i> Terhubung</span>
+                        <div class="small text-muted mt-1">ID Telegram Anda: {{.TelegramID}}</div>
+                    </div>
+                    <form method="POST" action="/profile">
+                        <input type="hidden" name="action" value="telegram_unlink">
+                        <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Putuskan</button>
+                    </form>
+                </div>
+                {{else}}
+                    {{if .LinkToken}}
+                    <div class="mb-3">
+                        <label class="form-label small">Kode Tautan Anda:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control fw-bold text-center fs-5 text-primary" value="{{.LinkToken}}" readonly>
+                        </div>
+                        <div class="form-text small mt-2">1. Buka Bot Telegram: <b>@zirafinancebot</b><br>2. Kirim pesan: <code>/link {{.LinkToken}}</code></div>
+                    </div>
+                    {{else}}
+                    <form method="POST" action="/profile">
+                        <input type="hidden" name="action" value="telegram_link">
+                        <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                        <button type="submit" class="btn btn-primary btn-sm w-100"><i class="ti ti-link me-1"></i>Buat Kode Tautan</button>
+                    </form>
+                    {{end}}
+                {{end}}
+            </div>
+        </div>
+    </div>
+
     <div class="col-12">
         <div class="card border-0 shadow-sm overflow-hidden">
             <div class="card-header border-bottom-0 py-3"><h5 class="mb-0 fs-6 fw-semibold"><i class="ti ti-info-circle me-2 text-primary"></i>Info Akun</h5></div>
