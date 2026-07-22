@@ -1,0 +1,105 @@
+{{define "content"}}
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="fs-4 fw-semibold mb-1"><i class="ti ti-shield-lock text-danger me-2"></i>Dashboard Admin</h1>
+            <p class="text-muted small mb-0">Pusat kendali dan pantauan sistem ZiRa Finance</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-2 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-center">
+            <div class="text-muted small">Total Pengguna</div>
+            <div class="fs-4 fw-bold text-primary">{{.TotalUsers}}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-center">
+            <div class="text-muted small">Total Transaksi</div>
+            <div class="fs-4 fw-bold text-success">{{.TotalTxns}}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-center">
+            <div class="text-muted small">Sesi Aktif</div>
+            <div class="fs-4 fw-bold text-warning">{{.ActiveSessions}}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm text-center">
+            <div class="text-muted small">Bot Terhubung</div>
+            <div class="fs-4 fw-bold text-info">{{.TelegramUsers}}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Tables -->
+<div class="row g-3">
+    <!-- Users Table -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header border-bottom-0 py-3">
+                <h6 class="mb-0 fw-semibold"><i class="ti ti-users me-2 text-primary"></i>Pengguna Terdaftar</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                    <thead class="table-light">
+                        <tr><th>ID</th><th>Username</th><th>Role</th><th>TG ID</th></tr>
+                    </thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td class="text-muted">#{{.ID}}</td>
+                            <td class="fw-medium">{{.Username}}</td>
+                            <td>
+                                {{if eq .Role "admin"}}<span class="badge bg-danger">Admin</span>{{else}}<span class="badge bg-secondary">User</span>{{end}}
+                            </td>
+                            <td>{{if gt .TelegramID 0}}<i class="ti ti-check text-success"></i>{{else}}-{{end}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header border-bottom-0 py-3">
+                <h6 class="mb-0 fw-semibold"><i class="ti ti-history me-2 text-warning"></i>Audit Keamanan (50 Terakhir)</h6>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.75rem;">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                        <tr><th>Waktu</th><th>UID</th><th>Event</th><th>IP Address</th><th>Detail</th></tr>
+                    </thead>
+                    <tbody>
+                        {{range .Logs}}
+                        <tr>
+                            <td class="text-muted text-nowrap">{{.Time}}</td>
+                            <td class="text-center">{{if eq .UID "0"}}<span class="text-muted">-</span>{{else}}<b>{{.UID}}</b>{{end}}</td>
+                            <td>
+                                {{if eq .Event "LOGIN"}}<span class="badge bg-success">LOGIN</span>
+                                {{else if eq .Event "LOGIN_FAILED"}}<span class="badge bg-danger">LOGIN_FAIL</span>
+                                {{else if eq .Event "REGISTER"}}<span class="badge bg-primary">REGISTER</span>
+                                {{else}}<span class="badge bg-info">{{.Event}}</span>{{end}}
+                            </td>
+                            <td class="text-nowrap" style="font-family: monospace;">{{.IP}}</td>
+                            <td>{{.Details}}</td>
+                        </tr>
+                        {{end}}
+                        {{if not .Logs}}
+                        <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada log.</td></tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+{{define "pagescripts"}}{{end}}
