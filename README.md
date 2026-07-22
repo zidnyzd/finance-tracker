@@ -13,7 +13,10 @@ Kelola pemasukan & pengeluaran dengan mudah langsung dari browser.
 - **Dashboard** — ringkasan saldo, pemasukan & pengeluaran, 3 chart interaktif
 - **Tambah Transaksi** — income/expense, autocomplete kategori, datetime picker
 - **Riwayat** — per-bulan, paginasi, edit/delete
-- **Laporan Bulanan** — pemasukan vs pengeluaran per kategori
+- **Laporan Bulanan & Mingguan** — pemasukan vs pengeluaran per kategori
+- **Bot Telegram AI** — Terintegrasi dengan bot Telegram (@zirafinancebot) menggunakan Google Gemini 2.0 Flash Lite. Bisa parse teks natural ("makan 50rb bca") atau baca otomatis foto struk kasir ke dalam riwayat, lengkap dengan perlindungan tombol Batal.
+- **Manajemen Sesi Multi-Device** — Login di max 5 perangkat sekaligus, lihat detail IP & Browser, serta Force Logout jarak jauh dari Profil.
+- **Riwayat & Transfer Pintar** — Pencatatan saldo otomatis, laporan mingguan/bulanan, dan dukungan pembukuan ganda (Double Entry Ledger) untuk Pindah Saldo antar dompet.
 - **Dompet** — BCA, GoPay, Cash, saldo auto-hitung
 - **Google OAuth** — login/daftar dengan akun Google
 - **Profil** — ubah nama, email, & kata sandi
