@@ -101,7 +101,17 @@
                                 <div class="fw-medium " style="font-size:0.85rem">{{.IP}} {{if .IsCurrent}}<span class="badge bg-success ms-1">Saat Ini</span>{{end}}</div>
                                 <div class="text-muted" style="font-size:0.75rem"><i class="ti ti-browser me-1"></i>{{.UserAgent}}</div>
                             </div>
-                            <div class="text-muted text-end" style="font-size:0.75rem">{{.LastActive}}</div>
+                            <div class="text-end">
+                                <div class="text-muted mb-1" style="font-size:0.75rem">{{.LastActive}}</div>
+                                {{if not .IsCurrent}}
+                                <form method="POST" action="/profile" style="display:inline">
+                                    <input type="hidden" name="action" value="revoke">
+                                    <input type="hidden" name="session_id" value="{{.ID}}">
+                                    <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm p-1" style="font-size:0.65rem; line-height:1"><i class="ti ti-trash"></i> Hapus</button>
+                                </form>
+                                {{end}}
+                            </div>
                         </div>
                     </li>
                     {{end}}
