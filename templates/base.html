@@ -118,6 +118,9 @@
             <li><a href="/report" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a></li>
             <li><a href="/dompet" class="nav-link {{if eq .Page "accounts"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-wallet"></i><span>Dompet</span></a></li>
             <li class="px-4 pt-4 pb-2"><small class="nav-text">Lainnya</small></li>
+            {{if .IsAdmin}}
+            <li><a href="/admin" class="nav-link {{if eq .Page "admin"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-shield-lock"></i><span class="text-danger fw-semibold">Admin Panel</span></a></li>
+            {{end}}
             <li><a href="/profile" class="nav-link {{if eq .Page "profile"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-user"></i><span>Profil</span></a></li>
         </ul>
         <div style="padding:0 1.5rem;font-size:.85rem">
