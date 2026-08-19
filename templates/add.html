@@ -9,6 +9,7 @@
     <div class="card-body p-4">
         <form method="POST" action="/transactions" id="tx-form">
             <input type="hidden" name="default_account" value="0">
+            <input type="hidden" name="return_to" value="{{.ReturnURL}}">
             <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
 
             <!-- Tipe: 3 Toggle Buttons -->

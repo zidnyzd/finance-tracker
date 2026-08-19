@@ -113,7 +113,7 @@
         <ul class="nav flex-column">
             <li class="px-4 py-2"><small class="nav-text">Menu</small></li>
             <li><a href="/" class="nav-link {{if eq .Page "dashboard"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-home"></i><span>Beranda</span></a></li>
-            <li><a href="/add" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Catat</span></a></li>
+            <li><a href="{{if eq .Page "history"}}/add?return_to={{.EditReturnURL}}{{else}}/add{{end}}" class="nav-link {{if eq .Page "add"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-plus"></i><span>Catat</span></a></li>
             <li><a href="/history" class="nav-link {{if eq .Page "history"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-list"></i><span>Riwayat</span></a></li>
             <li><a href="/report" class="nav-link {{if eq .Page "report"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-chart-bar"></i><span>Laporan</span></a></li>
             <li><a href="/dompet" class="nav-link {{if eq .Page "accounts"}}active{{end}}" onclick="closeSidebar()"><i class="ti ti-wallet"></i><span>Dompet</span></a></li>
@@ -274,6 +274,7 @@
 <!-- Hidden delete form (POST + CSRF) -->
 <form id="delete-form" method="POST" action="/delete" style="display:none">
     <input type="hidden" name="id" id="delete-id">
+    <input type="hidden" name="return_to" value="{{if eq .Page "history"}}{{.DeleteReturnURL}}{{end}}">
     <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
 </form>
 <!-- Confirm Modal -->

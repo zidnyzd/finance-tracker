@@ -9,6 +9,7 @@
     <div class="card-body p-4">
         <form method="POST" action="/edit">
             <input type="hidden" name="id" value="{{.ID}}">
+            <input type="hidden" name="return_to" value="{{.ReturnURL}}">
             <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
 
             <!-- Tipe: Toggle Buttons -->
@@ -36,8 +37,9 @@
                 <label class="form-label small fw-medium text-muted">Jumlah</label>
                 <div class="input-group">
                     <span class="input-group-text bg-transparent fw-semibold border-end-0">Rp</span>
-                    <input type="number" name="amount" class="form-control border-start-0 ps-0" value="{{.Amount}}" step="any" required>
+                    <input type="text" inputmode="numeric" id="amount_display" class="form-control border-start-0 ps-0" value="{{.AmountFormatted}}" required oninput="formatCurrency(this)">
                 </div>
+                <input type="hidden" name="amount" id="amount_real" value="{{.AmountInput}}">
             </div>
 
             <!-- Kategori -->
@@ -70,11 +72,13 @@
 
             <!-- Tombol -->
             <div class="d-flex gap-2">
-                <a href="/" class="btn btn-outline-secondary flex-fill py-2">Batal</a>
+                <a href="{{.ReturnURL}}" class="btn btn-outline-secondary flex-fill py-2">Batal</a>
                 <button type="submit" class="btn btn-primary flex-fill py-2 fw-semibold"><i class="ti ti-check me-1"></i> Simpan</button>
             </div>
         </form>
     </div>
 </div>
 {{end}}
-{{define "pagescripts"}}{{end}}
+{{define "pagescripts"}}
+function formatCurrency(input){var v=input.value.replace(/\D/g,'');if(v===''){input.value='';document.getElementById('amount_real').value='';return}document.getElementById('amount_real').value=v;input.value=new Intl.NumberFormat('id-ID').format(v)}
+{{end}}
