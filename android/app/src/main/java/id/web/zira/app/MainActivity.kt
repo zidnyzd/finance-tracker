@@ -102,6 +102,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupListeners() {
         binding.btnToggleBalance.setOnClickListener {
             isBalanceHidden = !isBalanceHidden
+            if (isBalanceHidden) {
+                binding.btnToggleBalance.setImageResource(R.drawable.ic_eye_closed)
+            } else {
+                binding.btnToggleBalance.setImageResource(R.drawable.ic_eye_open)
+            }
             homeFragment.loadDashboard()
             historyFragment.loadTransactions()
             walletFragment.loadAccounts()

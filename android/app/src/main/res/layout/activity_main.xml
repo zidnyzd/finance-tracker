@@ -41,7 +41,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_view"
+            android:src="@drawable/ic_eye_open"
             android:contentDescription="Sembunyikan Saldo"
             android:layout_marginEnd="4dp"
             app:tint="@color/text_muted" />
@@ -52,7 +52,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_day"
+            android:src="@drawable/ic_theme_toggle"
             android:contentDescription="Ubah Tema"
             app:tint="@color/text_muted" />
     </LinearLayout>
@@ -71,12 +71,12 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
-        android:layout_height="58dp"
+        android:layout_height="64dp"
         android:background="@color/bottomnav_bg"
         app:elevation="8dp"
         app:menu="@menu/bottom_nav_menu"
-        app:itemTextColor="@color/text_muted"
-        app:itemIconTint="@color/text_muted"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemIconTint="@color/nav_item_color"
         app:itemActiveIndicatorStyle="@null"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
