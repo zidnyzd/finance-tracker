@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="10dp"
+    android:paddingHorizontal="4dp">
+
+    <TextView
+        android:id="@+id/tvTxnIcon"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:background="#F1F5F9"
+        android:gravity="center"
+        android:text="💸"
+        android:textSize="16sp"
+        android:layout_marginEnd="12dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTxnCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Makan &amp; Minum"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_main"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/tvTxnDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kopi Kenangan • BCA"
+            android:textSize="11sp"
+            android:textColor="@color/text_muted"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/tvTxnDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="31 Agu 2026, 12:30"
+            android:textSize="10sp"
+            android:textColor="#94A3B8" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTxnAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="- Rp 35.000"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/danger" />
+
+</LinearLayout>
