@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import id.web.zira.app.databinding.ActivityLoginBinding
@@ -87,9 +88,12 @@ class LoginActivity : AppCompatActivity() {
         binding.btnGoogleLogin.setOnClickListener {
             val authUrl = "https://zira.web.id/auth/google?app=1"
             try {
+                val colorParams = CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(ContextCompat.getColor(this, R.color.primary))
+                    .build()
                 val customTabsIntent = CustomTabsIntent.Builder()
                     .setShowTitle(true)
-                    .setToolbarColor(ContextCompat.getColor(this, R.color.primary))
+                    .setDefaultColorSchemeParams(colorParams)
                     .build()
                 customTabsIntent.launchUrl(this, Uri.parse(authUrl))
             } catch (e: Exception) {
@@ -101,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun handleOAuthSuccess(token: String, name: String) {
         setLoading(true)
-        ApiClient.get("/api/v1/auth/me", token, LoginResponse::class.java) { success, resp, _ ->
+        ApiClient.get("/api/v1/auth/me", token, LoginResponse::class.java) { _, resp, _ ->
             runOnUiThread {
                 setLoading(false)
                 val user = resp?.user ?: User(id = 1, username = name, displayName = name)
