@@ -1,4 +1,4 @@
-name: Build ZiRa Sync APK
+name: Build ZiRa Finance APK
 
 on:
   push:
@@ -39,7 +39,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ZiRa-Sync-v1.0.apk
+          name: ZiRa-Finance-v1.0.apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
