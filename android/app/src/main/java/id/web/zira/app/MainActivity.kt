@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             .add(R.id.fragmentContainer, walletFragment, "wallet").hide(walletFragment)
             .add(R.id.fragmentContainer, addFragment, "add").hide(addFragment)
             .add(R.id.fragmentContainer, historyFragment, "history").hide(historyFragment)
-            .add(R.id.fragmentContainer, homeFragment, "home")
+            .add(R.id.fragmentContainer, homeFragment, "home").show(homeFragment)
             .commit()
     }
 
