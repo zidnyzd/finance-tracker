@@ -18,14 +18,23 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- Login Activity (Launcher) -->
+        <!-- Login Activity (Launcher + Deep Link Callback) -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Deep link capture untuk Google OAuth Callback zira://auth -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="zira" android:host="auth" />
             </intent-filter>
         </activity>
 

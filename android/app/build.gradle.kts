@@ -46,9 +46,7 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
-
-    // Google Sign-In SDK
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("androidx.browser:browser:1.8.0")
 
     // Networking & Serialization
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
