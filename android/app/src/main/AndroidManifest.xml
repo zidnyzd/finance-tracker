@@ -40,27 +40,9 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Dashboard Activity -->
+        <!-- Main Activity (Host for all Fragments: Home, History, Add, Wallet, Settings) -->
         <activity
             android:name=".MainActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Add Transaction Form -->
-        <activity
-            android:name=".AddTransactionActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- History Activity -->
-        <activity
-            android:name=".HistoryActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Settings Activity -->
-        <activity
-            android:name=".SettingsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

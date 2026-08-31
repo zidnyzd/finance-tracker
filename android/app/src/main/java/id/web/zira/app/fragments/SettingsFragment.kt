@@ -1,26 +1,36 @@
-package id.web.zira.app
+package id.web.zira.app.fragments
 
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import id.web.zira.app.databinding.ActivitySettingsBinding
+import androidx.fragment.app.Fragment
+import id.web.zira.app.LoginActivity
+import id.web.zira.app.databinding.FragmentSettingsBinding
 import id.web.zira.app.models.LoginResponse
 import id.web.zira.app.network.ApiClient
+import id.web.zira.app.utils.AppUpdater
 import id.web.zira.app.utils.SessionManager
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsFragment : Fragment() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        sessionManager = SessionManager(this)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sessionManager = SessionManager(requireContext())
+
         loadProfileData()
         setupListeners()
     }
@@ -33,7 +43,8 @@ class SettingsActivity : AppCompatActivity() {
 
         val token = sessionManager.getToken() ?: return
         ApiClient.get("/api/v1/auth/me", token, LoginResponse::class.java) { success, resp, _ ->
-            runOnUiThread {
+            activity?.runOnUiThread {
+                if (_binding == null) return@runOnUiThread
                 if (success && resp != null && resp.user != null) {
                     binding.tvUsername.text = resp.user.username
                     binding.tvDisplayName.text = resp.user.displayName
@@ -44,27 +55,33 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.btnBack.setOnClickListener {
-            finish()
-        }
-
         binding.btnOpenNotifSetting.setOnClickListener {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
+        binding.btnCheckUpdate.setOnClickListener {
+            Toast.makeText(context, "Memeriksa pembaruan...", Toast.LENGTH_SHORT).show()
+            AppUpdater.checkForUpdate(requireActivity())
+        }
+
         binding.btnLogout.setOnClickListener {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(requireContext())
                 .setTitle("Keluar Akun")
                 .setMessage("Apakah Anda yakin ingin keluar dari ZiRa Finance?")
                 .setPositiveButton("Keluar") { _, _ ->
                     sessionManager.logout()
-                    val intent = Intent(this, LoginActivity::class.java)
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
-                    finish()
+                    activity?.finish()
                 }
                 .setNegativeButton("Batal", null)
                 .show()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

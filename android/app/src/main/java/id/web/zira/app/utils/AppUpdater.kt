@@ -28,9 +28,20 @@ data class VersionInfo(
 )
 
 object AppUpdater {
-    private const val CURRENT_VERSION_CODE = 2
 
     fun checkForUpdate(activity: Activity) {
+        val currentVersionCode = try {
+            val pInfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                pInfo.longVersionCode.toInt()
+            } else {
+                @Suppress("DEPRECATION")
+                pInfo.versionCode
+            }
+        } catch (e: Exception) {
+            1
+        }
+
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://zira.web.id/api/v1/app/version")
@@ -45,7 +56,7 @@ object AppUpdater {
                 val bodyStr = response.body?.string() ?: return
                 try {
                     val info = Gson().fromJson(bodyStr, VersionInfo::class.java)
-                    if (info != null && info.versionCode > CURRENT_VERSION_CODE) {
+                    if (info != null && info.versionCode > currentVersionCode) {
                         activity.runOnUiThread {
                             showUpdateDialog(activity, info)
                         }
@@ -60,12 +71,11 @@ object AppUpdater {
     private fun showUpdateDialog(activity: Activity, info: VersionInfo) {
         AlertDialog.Builder(activity)
             .setTitle("Pembaruan Aplikasi Tersedia 🚀")
-            .setMessage("Versi ${info.versionName} siap diunduh.\n\nCatatan:\n${info.changelog ?: "Peningkatan performa dan stabilitas."}")
+            .setMessage("Versi ${info.versionName} siap diunduh.\n\nCatatan Pembaruan:\n${info.changelog ?: "Peningkatan performa dan konsistensi antarmuka."}")
             .setPositiveButton("Update Sekarang") { _, _ ->
                 downloadAndInstall(activity, info.apkUrl)
             }
             .setNegativeButton("Nanti", null)
-            .setCancelable(false)
             .show()
     }
 
