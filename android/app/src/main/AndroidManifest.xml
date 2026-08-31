@@ -5,6 +5,8 @@
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -18,11 +20,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- Login Activity (Launcher + Deep Link Callback) -->
+        <!-- Main Activity -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,34 +41,27 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Dashboard Activity -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Add Transaction Form -->
-        <activity
-            android:name=".AddTransactionActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- History Activity -->
-        <activity
-            android:name=".HistoryActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Notification Listener Service -->
+        <!-- Notification Listener Service (Background 24/7) -->
         <service
             android:name=".NotificationListener"
-            android:label="ZiRa Auto-Sync Notifikasi"
+            android:label="ZiRa Auto-Catat Notifikasi"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <!-- File Provider untuk In-App APK Updater -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="id.web.zira.app.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

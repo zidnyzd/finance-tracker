@@ -1,0 +1,17 @@
+<resources>
+    <color name="primary">#38BDF8</color>
+    <color name="primary_dark">#0284C7</color>
+    <color name="accent">#FB923C</color>
+    <color name="bg_light">#16181B</color>
+    <color name="card_bg">#1E2024</color>
+    <color name="topbar_bg">#1E2024</color>
+    <color name="bottomnav_bg">#1E2024</color>
+    <color name="text_main">#F1F5F9</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="success">#4ADE80</color>
+    <color name="success_bg">#14532D</color>
+    <color name="danger">#F87171</color>
+    <color name="danger_bg">#7F1D1D</color>
+    <color name="border">#2C3035</color>
+    <color name="input_bg">#262A2E</color>
+</resources>
