@@ -3,6 +3,12 @@ name: Deploy finance-tracker
 on:
   push:
     branches: [main]
+    paths:
+      - 'finance-app'
+      - 'templates/**'
+      - 'static/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
