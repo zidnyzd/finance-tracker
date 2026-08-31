@@ -5,78 +5,381 @@
     android:layout_height="match_parent"
     android:background="@color/bg_light">
 
-    <!-- Swipe Refresh Layout -->
+    <!-- Top Bar Navigation -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="@color/topbar_bg"
+        android:elevation="1dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/app_icon"
+            android:layout_marginEnd="10dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ZiRa Finance"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary" />
+
+        <!-- Toggle Sembunyikan Saldo -->
+        <ImageButton
+            android:id="@+id/btnToggleBalance"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_view"
+            android:contentDescription="Sembunyikan Saldo"
+            android:layout_marginEnd="4dp"
+            app:tint="@color/text_muted" />
+
+        <!-- Toggle Dark Mode -->
+        <ImageButton
+            android:id="@+id/btnToggleTheme"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_day"
+            android:contentDescription="Ubah Tema"
+            app:tint="@color/text_muted" />
+    </LinearLayout>
+
+    <!-- Main Content Area -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <WebView
-            android:id="@+id/webView"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Saldo Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/primary">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Total Saldo Bersih"
+                            android:textSize="12sp"
+                            android:textColor="#E0F2FE" />
+
+                        <TextView
+                            android:id="@+id/tvTotalBalance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rp 0"
+                            android:textSize="26sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginVertical="6dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="6dp">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pemasukan"
+                                    android:textSize="11sp"
+                                    android:textColor="#E0F2FE" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalIncome"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rp 0"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#86EFAC" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pengeluaran"
+                                    android:textSize="11sp"
+                                    android:textColor="#E0F2FE" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalExpense"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rp 0"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:textColor="#FCA5A5" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Quick Action Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddIncome"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="+ Masuk"
+                        android:textSize="12sp"
+                        android:textColor="@color/success"
+                        android:layout_marginEnd="6dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddExpense"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="- Keluar"
+                        android:textSize="12sp"
+                        android:textColor="@color/danger"
+                        android:layout_marginEnd="6dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTransfer"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="⇄ Transfer"
+                        android:textSize="12sp"
+                        android:textColor="@color/primary" />
+                </LinearLayout>
+
+                <!-- Notification Auto-Sync Status Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardNotifStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardBackgroundColor="@color/card_bg">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:id="@+id/tvNotifIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="#E0F2FE"
+                            android:gravity="center"
+                            android:text="⚡"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvNotifTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Auto-Catat Notifikasi Aktif"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_main" />
+
+                            <TextView
+                                android:id="@+id/tvNotifSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Membaca otomatis mutasi bank &amp; e-wallet."
+                                android:textSize="10sp"
+                                android:textColor="@color/text_muted" />
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnConfigNotif"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Izin"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Wallets Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Dompet &amp; Rekening"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:id="@+id/tvAddAccount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ Tambah"
+                        android:textSize="12sp"
+                        android:textColor="@color/primary"
+                        android:padding="4dp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAccounts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- Recent Transactions Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Transaksi Terbaru"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_main" />
+
+                    <TextView
+                        android:id="@+id/tvSeeAllTxn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Riwayat Lengkap"
+                        android:textSize="12sp"
+                        android:textColor="@color/primary"
+                        android:padding="4dp" />
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardBackgroundColor="@color/card_bg">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvTransactions"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false" />
+
+                        <TextView
+                            android:id="@+id/tvEmptyTxn"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Belum ada transaksi."
+                            android:textSize="12sp"
+                            android:textColor="@color/text_muted"
+                            android:gravity="center"
+                            android:padding="20dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Thin Top Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- Bottom Navigation Bar Mirip Web -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:progressDrawable="@drawable/custom_progress_bar"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="58dp"
+        android:background="@color/bottomnav_bg"
+        app:elevation="8dp"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemTextColor="@color/text_muted"
+        app:itemIconTint="@color/text_muted"
+        app:itemActiveIndicatorStyle="@null"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Offline / Error Layout -->
-    <LinearLayout
-        android:id="@+id/errorLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="32dp"
-        android:background="@color/card_bg"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/app_icon"
-            android:layout_marginBottom="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Koneksi Terputus"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_main"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pastikan HP Anda terhubung ke internet dan coba muat ulang."
-            android:textSize="13sp"
-            android:textColor="@color/text_muted"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRetry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Coba Lagi"
-            android:backgroundTint="@color/primary" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

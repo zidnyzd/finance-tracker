@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/etAccountName"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nama Dompet (misal: BCA, Tunai, GoPay)"
+        android:textSize="14sp"
+        android:background="@drawable/spinner_bg"
+        android:textColor="@color/text_main"
+        android:textColorHint="@color/text_muted"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tipe Dompet:"
+        android:textSize="12sp"
+        android:textColor="@color/text_muted"
+        android:layout_marginBottom="6dp" />
+
+    <RadioGroup
+        android:id="@+id/rgAccountType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbBank"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Bank"
+            android:checked="true"
+            android:textColor="@color/text_main"
+            android:textSize="13sp" />
+
+        <RadioButton
+            android:id="@+id/rbEwallet"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="E-Wallet"
+            android:textColor="@color/text_main"
+            android:textSize="13sp" />
+
+        <RadioButton
+            android:id="@+id/rbCash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tunai"
+            android:textColor="@color/text_main"
+            android:textSize="13sp" />
+    </RadioGroup>
+
+</LinearLayout>

@@ -1,26 +1,28 @@
 package id.web.zira.app
 
-import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
-import android.webkit.CookieManager
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.EditText
+import android.widget.RadioGroup
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import id.web.zira.app.adapters.AccountAdapter
+import id.web.zira.app.adapters.TransactionAdapter
 import id.web.zira.app.databinding.ActivityMainBinding
+import id.web.zira.app.models.DashboardResponse
+import id.web.zira.app.models.SimpleApiResponse
+import id.web.zira.app.network.ApiClient
 import id.web.zira.app.utils.AppUpdater
 import id.web.zira.app.utils.SessionManager
 
@@ -28,223 +30,250 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var sessionManager: SessionManager
-    private val TARGET_URL = "https://zira.web.id/"
-    private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
+    private var isBalanceHidden = false
+    private var rawBalanceStr = "Rp 0"
+    private var rawIncomeStr = "Rp 0"
+    private var rawExpenseStr = "Rp 0"
 
-    private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (fileUploadCallback != null) {
-            val results = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
-            fileUploadCallback?.onReceiveValue(results)
-            fileUploadCallback = null
+    private val notifReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            loadDashboard()
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sessionManager = SessionManager(this)
+
+        if (!sessionManager.isLoggedIn()) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupWebView()
-        setupSwipeRefresh()
-        setupBackNavigation()
+        setupRecyclerViews()
+        setupListeners()
+        setupBottomNavigation()
+        loadDashboard()
 
-        binding.btnRetry.setOnClickListener {
-            binding.errorLayout.visibility = View.GONE
-            binding.webView.visibility = View.VISIBLE
-            binding.webView.reload()
-        }
-
-        // Cek jika dibuka via Deep Link Google OAuth Callback
-        handleDeepLinkIntent(intent)
-
-        if (savedInstanceState == null) {
-            binding.webView.loadUrl(TARGET_URL)
-        } else {
-            binding.webView.restoreState(savedInstanceState)
-        }
-
-        // Cek In-App Updater otomatis
+        // In-App Auto Updater Check
         AppUpdater.checkForUpdate(this)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        handleDeepLinkIntent(intent)
+    override fun onResume() {
+        super.onResume()
+        binding.bottomNavigation.selectedItemId = R.id.nav_home
+        checkNotificationPermission()
+        loadDashboard()
+
+        val filter = IntentFilter(NotificationListener.ACTION_NOTIFICATION_SYNCED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(notifReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(notifReceiver, filter)
+        }
     }
 
-    private fun handleDeepLinkIntent(intent: Intent?) {
-        intent?.data?.let { uri ->
-            if (uri.scheme == "zira" && uri.host == "auth") {
-                val token = uri.getQueryParameter("token")
-                val name = uri.getQueryParameter("name") ?: "User"
-                if (!token.isNullOrEmpty()) {
-                    // Inject session cookie ke WebView
-                    val cookieManager = CookieManager.getInstance()
-                    cookieManager.setAcceptCookie(true)
-                    cookieManager.setCookie("https://zira.web.id", "session=$token; Path=/; Domain=zira.web.id; Secure; SameSite=Lax")
-                    cookieManager.flush()
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(notifReceiver)
+        } catch (e: Exception) {
+            // Ignored
+        }
+    }
 
-                    // Simpan token untuk background NotificationListener
-                    sessionManager.saveAuth(token, id.web.zira.app.models.User(1, name, name, null))
+    private fun setupRecyclerViews() {
+        binding.rvAccounts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvTransactions.layoutManager = LinearLayoutManager(this)
+    }
 
-                    Toast.makeText(this, "Login Google berhasil: $name", Toast.LENGTH_SHORT).show()
-                    binding.webView.loadUrl("https://zira.web.id/")
+    private fun setupListeners() {
+        binding.swipeRefresh.setOnRefreshListener {
+            loadDashboard()
+        }
+
+        // Toggle Sembunyikan Saldo
+        binding.btnToggleBalance.setOnClickListener {
+            isBalanceHidden = !isBalanceHidden
+            updateBalanceViews()
+            loadDashboard()
+        }
+
+        // Toggle Dark / Light Theme
+        binding.btnToggleTheme.setOnClickListener {
+            val currentMode = AppCompatDelegate.getDefaultNightMode()
+            if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            }
+        }
+
+        binding.btnAddIncome.setOnClickListener {
+            val intent = Intent(this, AddTransactionActivity::class.java)
+            intent.putExtra("TYPE", "income")
+            startActivity(intent)
+        }
+
+        binding.btnAddExpense.setOnClickListener {
+            val intent = Intent(this, AddTransactionActivity::class.java)
+            intent.putExtra("TYPE", "expense")
+            startActivity(intent)
+        }
+
+        binding.btnTransfer.setOnClickListener {
+            val intent = Intent(this, AddTransactionActivity::class.java)
+            intent.putExtra("TYPE", "transfer")
+            startActivity(intent)
+        }
+
+        binding.tvSeeAllTxn.setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
+
+        binding.tvAddAccount.setOnClickListener {
+            showAddAccountDialog()
+        }
+
+        binding.btnConfigNotif.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> true
+                R.id.nav_history -> {
+                    startActivity(Intent(this, HistoryActivity::class.java))
+                    true
+                }
+                R.id.nav_add -> {
+                    startActivity(Intent(this, AddTransactionActivity::class.java))
+                    true
+                }
+                R.id.nav_wallet -> {
+                    showAddAccountDialog()
+                    true
+                }
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun loadDashboard() {
+        val token = sessionManager.getToken() ?: return
+        binding.swipeRefresh.isRefreshing = true
+
+        ApiClient.get("/api/v1/dashboard", token, DashboardResponse::class.java) { success, resp, err ->
+            runOnUiThread {
+                binding.swipeRefresh.isRefreshing = false
+                if (success && resp != null && resp.success) {
+                    rawBalanceStr = resp.balanceStr
+                    rawIncomeStr = resp.totalIncomeStr
+                    rawExpenseStr = resp.totalExpenseStr
+                    updateBalanceViews()
+
+                    // Accounts
+                    val accounts = resp.accounts ?: emptyList()
+                    binding.rvAccounts.adapter = AccountAdapter(accounts, isBalanceHidden)
+
+                    // Recent Txns
+                    val txns = resp.recentTxns ?: emptyList()
+                    if (txns.isEmpty()) {
+                        binding.tvEmptyTxn.visibility = View.VISIBLE
+                        binding.rvTransactions.visibility = View.GONE
+                    } else {
+                        binding.tvEmptyTxn.visibility = View.GONE
+                        binding.rvTransactions.visibility = View.VISIBLE
+                        binding.rvTransactions.adapter = TransactionAdapter(txns, isBalanceHidden)
+                    }
+                } else {
+                    if (err?.contains("401") == true) {
+                        sessionManager.logout()
+                        startActivity(Intent(this, LoginActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Gagal memuat data: ${err ?: "Error"}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        val webView = binding.webView
-        val settings = webView.settings
+    private fun updateBalanceViews() {
+        if (isBalanceHidden) {
+            binding.tvTotalBalance.text = "Rp ••••••"
+            binding.tvTotalIncome.text = "Rp ••••••"
+            binding.tvTotalExpense.text = "Rp ••••••"
+        } else {
+            binding.tvTotalBalance.text = rawBalanceStr
+            binding.tvTotalIncome.text = rawIncomeStr
+            binding.tvTotalExpense.text = rawExpenseStr
+        }
+    }
 
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.databaseEnabled = true
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
+    private fun checkNotificationPermission() {
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        val isGranted = flat != null && flat.contains(packageName)
 
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.setSupportZoom(false)
-        settings.builtInZoomControls = false
-        settings.displayZoomControls = false
+        if (isGranted) {
+            binding.tvNotifTitle.text = "⚡ Auto-Catat Notifikasi Aktif"
+            binding.tvNotifSub.text = "Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll."
+            binding.btnConfigNotif.text = "Aktif ✓"
+            binding.btnConfigNotif.setTextColor(ContextCompat.getColor(this, R.color.success))
+        } else {
+            binding.tvNotifTitle.text = "⚠️ Auto-Catat Belum Aktif"
+            binding.tvNotifSub.text = "Aktifkan akses notifikasi agar mutasi tercatat otomatis."
+            binding.btnConfigNotif.text = "Beri Izin"
+            binding.btnConfigNotif.setTextColor(ContextCompat.getColor(this, R.color.danger))
+        }
+    }
 
-        // Custom User-Agent
-        val defaultUa = settings.userAgentString
-        settings.userAgentString = "$defaultUa ZiRaApp/1.1.0"
+    private fun showAddAccountDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_account, null)
+        val etName = dialogView.findViewById<EditText>(R.id.etAccountName)
+        val rgType = dialogView.findViewById<RadioGroup>(R.id.rgAccountType)
 
-        val cookieManager = CookieManager.getInstance()
-        cookieManager.setAcceptCookie(true)
-        cookieManager.setAcceptThirdPartyCookies(webView, true)
+        AlertDialog.Builder(this)
+            .setTitle("Tambah Dompet / Rekening")
+            .setView(dialogView)
+            .setPositiveButton("Simpan") { _, _ ->
+                val name = etName.text.toString().trim()
+                if (name.isEmpty()) {
+                    Toast.makeText(this, "Nama dompet wajib diisi", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
 
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                binding.progressBar.visibility = View.VISIBLE
-                binding.errorLayout.visibility = View.GONE
+                val type = when (rgType.checkedRadioButtonId) {
+                    R.id.rbBank -> "bank"
+                    R.id.rbEwallet -> "ewallet"
+                    else -> "cash"
+                }
 
-                // Sinkronkan cookie session ke SessionManager untuk background notifikasi
-                val cookies = CookieManager.getInstance().getCookie("https://zira.web.id")
-                if (!cookies.isNullOrEmpty()) {
-                    cookies.split(";").forEach {
-                        val parts = it.trim().split("=")
-                        if (parts.size == 2 && parts[0] == "session") {
-                            val curToken = sessionManager.getToken()
-                            if (curToken != parts[1]) {
-                                sessionManager.saveAuth(parts[1], id.web.zira.app.models.User(1, "User", "User", null))
-                            }
+                val token = sessionManager.getToken() ?: return@setPositiveButton
+                val payload = mapOf("name" to name, "type" to type)
+
+                ApiClient.post("/api/v1/accounts", payload, token, SimpleApiResponse::class.java) { success, resp, err ->
+                    runOnUiThread {
+                        if (success && resp != null && resp.success) {
+                            Toast.makeText(this, "Dompet $name berhasil ditambahkan", Toast.LENGTH_SHORT).show()
+                            loadDashboard()
+                        } else {
+                            Toast.makeText(this, "Gagal menambah dompet: ${resp?.error ?: err ?: "Error"}", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                binding.progressBar.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-            }
-
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                super.onReceivedError(view, request, error)
-                if (request?.isForMainFrame == true) {
-                    binding.progressBar.visibility = View.GONE
-                    binding.swipeRefresh.isRefreshing = false
-                    binding.webView.visibility = View.GONE
-                    binding.errorLayout.visibility = View.VISIBLE
-                }
-            }
-
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val uri = request?.url ?: return false
-                val urlStr = uri.toString()
-
-                // Intercept Google Login klik agar dibuka lewat Chrome Custom Tabs (mendeteksi akun Google HP otomatis)
-                if (urlStr.contains("/auth/google") || urlStr.contains("accounts.google.com")) {
-                    val customTabsAuthUrl = "https://zira.web.id/auth/google?app=1"
-                    try {
-                        val customTabsIntent = CustomTabsIntent.Builder()
-                            .setShowTitle(true)
-                            .setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.primary))
-                            .build()
-                        customTabsIntent.launchUrl(this@MainActivity, Uri.parse(customTabsAuthUrl))
-                    } catch (e: Exception) {
-                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(customTabsAuthUrl))
-                        startActivity(browserIntent)
-                    }
-                    return true
-                }
-
-                // Internal navigasi ZiRa
-                if (uri.host?.contains("zira.web.id") == true) {
-                    return false
-                }
-
-                // Link eksternal keluar
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, uri)
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    // Ignored
-                }
-                return true
-            }
-        }
-
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                binding.progressBar.progress = newProgress
-                if (newProgress == 100) {
-                    binding.progressBar.visibility = View.GONE
-                }
-            }
-
-            // File chooser untuk upload foto struk belanja / mutasi
-            override fun onShowFileChooser(
-                webView: WebView?,
-                filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
-            ): Boolean {
-                fileUploadCallback?.onReceiveValue(null)
-                fileUploadCallback = filePathCallback
-
-                val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "image/*"
-                }
-
-                try {
-                    fileChooserLauncher.launch(intent)
-                } catch (e: Exception) {
-                    fileUploadCallback = null
-                    return false
-                }
-                return true
-            }
-        }
-    }
-
-    private fun setupSwipeRefresh() {
-        binding.swipeRefresh.setColorSchemeColors(
-            ContextCompat.getColor(this, R.color.primary),
-            ContextCompat.getColor(this, R.color.accent)
-        )
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.webView.reload()
-        }
-    }
-
-    private fun setupBackNavigation() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                } else {
-                    finish()
-                }
-            }
-        })
+            .setNegativeButton("Batal", null)
+            .show()
     }
 }

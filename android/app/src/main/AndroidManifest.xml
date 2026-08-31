@@ -20,12 +20,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- Main Activity -->
+        <!-- Login Activity (Launcher + Deep Link Callback) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,6 +39,30 @@
                 <data android:scheme="zira" android:host="auth" />
             </intent-filter>
         </activity>
+
+        <!-- Main Dashboard Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Add Transaction Form -->
+        <activity
+            android:name=".AddTransactionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- History Activity -->
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Notification Listener Service (Background 24/7) -->
         <service
