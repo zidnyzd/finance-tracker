@@ -165,7 +165,7 @@
                     android:id="@+id/tvAppVersionText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ZiRa Finance v1.2.0 (Native Android)"
+                    android:text="ZiRa Finance v1.3.0 (Native Android)"
                     android:textSize="12sp"
                     android:textColor="@color/text_muted"
                     android:layout_marginBottom="12dp" />
@@ -194,9 +194,10 @@
             android:layout_marginBottom="24dp" />
 
         <TextView
+            android:id="@+id/tvFooterVersion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ZiRa Finance • Hak Cipta ZidStore"
+            android:text="ZiRa Finance v1.3.0 • Hak Cipta ZidStore"
             android:textSize="11sp"
             android:textColor="@color/text_muted"
             android:gravity="center" />

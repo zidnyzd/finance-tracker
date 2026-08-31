@@ -32,7 +32,17 @@ class SettingsFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
 
         loadProfileData()
+        displayAppVersion()
         setupListeners()
+    }
+
+    private fun displayAppVersion() {
+        try {
+            val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            binding.tvAppVersionText.text = "ZiRa Finance v${pInfo.versionName} (Native Android)"
+        } catch (e: Exception) {
+            binding.tvAppVersionText.text = "ZiRa Finance v1.3.0 (Native Android)"
+        }
     }
 
     private fun loadProfileData() {
