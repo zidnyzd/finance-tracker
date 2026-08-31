@@ -115,6 +115,100 @@
         </div>
     </div>
 
+    <!-- Integrasi Android Auto-Sync -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fs-6 fw-semibold"><i class="ti ti-device-mobile-message me-2 text-primary"></i>Auto-Catat Notifikasi Android</h5>
+                <span class="badge bg-primary">Sync App</span>
+            </div>
+            <div class="card-body p-3">
+                <div class="alert small py-2 mb-3 profile-notice" style="background:#eaf2fb; border-color:#d4e3f4;">
+                    <i class="ti ti-bell-ringing text-primary me-1"></i>Rekam mutasi & transaksi otomatis dari notifikasi HP (BCA, Livin, Mandiri, GoPay, OVO, dll).
+                </div>
+
+                {{if .NewToken}}
+                <div class="alert alert-success py-2 mb-3">
+                    <div class="fw-semibold small mb-1">🔑 Token Baru Berhasil Dibuat:</div>
+                    <div class="input-group">
+                        <input type="text" id="raw-token-box" class="form-control form-control-sm font-monospace text-primary fw-bold" value="{{.NewToken}}" readonly>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText('{{.NewToken}}'); alert('Token disalin!')"><i class="ti ti-copy"></i> Salin</button>
+                    </div>
+                    <div class="small text-muted mt-1" style="font-size:0.75rem;">Simpan dan masukkan token ini ke aplikasi Android ZiRa Sync. Token hanya ditampilkan penuh sekali ini saja.</div>
+                </div>
+                {{end}}
+
+                <form method="POST" action="/profile" class="mb-3">
+                    <input type="hidden" name="action" value="create_api_token">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                    <label class="form-label small">Buat Token Pairing Perangkat:</label>
+                    <div class="input-group">
+                        <input type="text" name="device_name" class="form-control form-control-sm" placeholder="Nama HP (misal: Samsung S23)" required>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="ti ti-plus me-1"></i>Buat Token</button>
+                    </div>
+                </form>
+
+                <h6 class="fw-semibold small mt-3 mb-2">Daftar Token Perangkat:</h6>
+                {{if .APITokens}}
+                <div class="list-group list-group-flush mb-2 border rounded">
+                    {{range .APITokens}}
+                    <div class="list-group-item p-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-medium small"><i class="ti ti-device-mobile me-1 text-primary"></i>{{.Name}}</div>
+                            <div class="text-muted font-monospace" style="font-size:0.75rem">{{.Masked}}</div>
+                            <div class="text-muted" style="font-size:0.7rem">Dibuat: {{.CreatedAt}} | Terakhir Aktif: {{.LastUsedAt}}</div>
+                        </div>
+                        <form method="POST" action="/profile" style="display:inline">
+                            <input type="hidden" name="action" value="revoke_api_token">
+                            <input type="hidden" name="token_id" value="{{.ID}}">
+                            <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm p-1" style="font-size:0.65rem;" onclick="return confirm('Cabut token ini?')"><i class="ti ti-trash"></i> Hapus</button>
+                        </form>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="text-muted small py-2 text-center border rounded bg-light mb-2">Belum ada token Android aktif.</div>
+                {{end}}
+
+                <!-- Riwayat Log Notifikasi Masuk -->
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                    <h6 class="fw-semibold small mb-0"><i class="ti ti-history me-1"></i>Log Notifikasi Masuk (Terbaru):</h6>
+                </div>
+                {{if .NotifLogs}}
+                <div class="table-responsive border rounded" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0" style="font-size: 0.75rem;">
+                        <thead class="table-light">
+                            <tr><th>Waktu</th><th>App</th><th>Status</th><th>Nominal</th><th>Ket</th></tr>
+                        </thead>
+                        <tbody>
+                            {{range .NotifLogs}}
+                            <tr>
+                                <td class="text-muted text-nowrap">{{.CreatedAt}}</td>
+                                <td class="fw-medium">{{.AppName}}</td>
+                                <td>
+                                    {{if eq .Status "success"}}<span class="badge bg-success">Sukses</span>
+                                    {{else if eq .Status "duplicate"}}<span class="badge bg-secondary">Dobel</span>
+                                    {{else if eq .Status "ignored"}}<span class="badge bg-light text-dark">Dilewati</span>
+                                    {{else}}<span class="badge bg-danger">{{.Status}}</span>{{end}}
+                                </td>
+                                <td class="fw-semibold {{if eq .ParsedType "income"}}text-success{{else if eq .ParsedType "expense"}}text-danger{{end}}">
+                                    {{if gt .ParsedAmount 0.0}}{{.ParsedAmountStr}}{{else}}-{{end}}
+                                </td>
+                                <td class="text-truncate" style="max-width: 150px;" title="{{.RawText}}">{{.RawText}}</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="text-muted small py-2 text-center border rounded bg-light">Belum ada notifikasi yang diterima.</div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+
     <div class="col-12">
         <div class="card border-0 shadow-sm overflow-hidden">
             <div class="card-header border-bottom-0 py-3"><h5 class="mb-0 fs-6 fw-semibold"><i class="ti ti-info-circle me-2 text-primary"></i>Info Akun</h5></div>

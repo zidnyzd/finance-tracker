@@ -42,8 +42,11 @@ inapp_reference.html
 # Internal docs (do not push to public repo)
 DEPLOY.md
 wiki/
+*.py
 
 # Proprietary Source Code
 *.go
 go.mod
 go.sum
+sync_notif.go
+
