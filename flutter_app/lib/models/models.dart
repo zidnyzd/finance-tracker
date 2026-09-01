@@ -56,7 +56,7 @@ class AccountModel {
       type: json['type'] ?? 'bank',
       balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
       balanceStr: json['balance_str'] ?? 'Rp 0',
-      color: json['color'] ?? '#2c7be5',
+      color: json['color_hex'] ?? json['color'] ?? '#2c7be5',
     );
   }
 }

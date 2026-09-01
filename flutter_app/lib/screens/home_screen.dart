@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import 'report_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToAdd;
@@ -241,7 +242,7 @@ class HomeScreen extends StatelessWidget {
                       separatorBuilder: (_, __) => const SizedBox(width: 10),
                       itemBuilder: (context, index) {
                         final acc = data.accounts[index];
-                        final color = _parseColor(acc.color);
+                        final color = ReportScreen.getDynamicAccountColor(acc.name, acc.type, acc.color);
 
                         return Container(
                           width: 136,
@@ -385,14 +386,5 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _parseColor(String hexString) {
-    try {
-      final hex = hexString.replaceAll('#', '');
-      return Color(int.parse('FF$hex', radix: 16));
-    } catch (_) {
-      return AppColors.primaryLight;
-    }
   }
 }
