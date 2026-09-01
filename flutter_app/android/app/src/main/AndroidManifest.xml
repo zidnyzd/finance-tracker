@@ -1,10 +1,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="id.web.zira.app">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Queries for detecting installed banking and e-wallet apps on Android 11+ -->
+    <queries>
+        <package android:name="com.bca" />
+        <package android:name="com.bca.mybca" />
+        <package android:name="id.bmri.livin" />
+        <package android:name="com.bankmandiri.mandirimai" />
+        <package android:name="id.co.bri.brimo" />
+        <package android:name="src.com.bni" />
+        <package android:name="id.co.bni.wondr" />
+        <package android:name="com.btpn.seabank" />
+        <package android:name="com.shopee.seabank" />
+        <package android:name="com.jago.digitalBanking" />
+        <package android:name="id.co.bcadigital.blu" />
+        <package android:name="com.gojek.app" />
+        <package android:name="id.dana" />
+        <package android:name="com.shopee.id" />
+        <package android:name="com.tokopedia.tkpd" />
+        <package android:name="com.grabtaxi.passenger" />
+        <package android:name="ovo.id" />
+    </queries>
 
     <application
         android:label="ZiRa Finance"

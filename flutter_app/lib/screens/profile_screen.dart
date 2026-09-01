@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/bank_app_config.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../services/platform_service.dart';
@@ -17,13 +16,16 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.5.6';
-  int _buildNumber = 15;
+  String _appVersion = '1.5.7';
+  int _buildNumber = 16;
+  List<InstalledBankApp> _installedApps = [];
+  bool _isLoadingApps = true;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadInstalledApps();
   }
 
   Future<void> _loadVersion() async {
@@ -31,9 +33,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final pInfo = await PackageInfo.fromPlatform();
       setState(() {
         _appVersion = pInfo.version;
-        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 15;
+        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 16;
       });
     } catch (_) {}
+  }
+
+  Future<void> _loadInstalledApps() async {
+    setState(() => _isLoadingApps = true);
+    final apps = await PlatformService.getInstalledFinancialApps();
+    if (mounted) {
+      setState(() {
+        _installedApps = apps;
+        _isLoadingApps = false;
+      });
+    }
   }
 
   Future<void> _checkUpdate() async {
@@ -212,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Otomatis merekam mutasi transaksi dari BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay di background 24/7.',
+                  'Otomatis merekam mutasi transaksi dari aplikasi perbankan & e-wallet yang terpasang di HP Anda secara background 24/7.',
                   style: TextStyle(fontSize: 11, color: textMuted),
                 ),
                 const SizedBox(height: 12),
@@ -237,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 3. Per-App Banking & E-Wallet Notification Switches
+          // 3. Dynamic Installed Financial Apps Detected on Device
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -248,55 +261,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Pilih Aplikasi yang Di-Sync',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Aplikasi Finansial di HP',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain),
+                    ),
+                    InkWell(
+                      onTap: _loadInstalledApps,
+                      child: Text(
+                        'Pindai Ulang 🔄',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary),
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
-                  'Aktifkan atau nonaktifkan perekaman mutasi untuk tiap aplikasi bank / e-wallet.',
+                  'Hanya menampilkan bank & e-wallet yang terdeteksi terpasang di HP Anda.',
                   style: TextStyle(fontSize: 11, color: textMuted),
                 ),
                 const SizedBox(height: 14),
 
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: BankAppConfig.allApps.length,
-                  separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
-                  itemBuilder: (context, index) {
-                    final app = BankAppConfig.allApps[index];
-                    final isEnabled = provider.isAppNotifEnabled(app.packageName);
-
-                    return Row(
-                      children: [
-                        BankBadge(accountName: app.id, accountType: 'bank', size: 30),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                app.name,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                              ),
-                              Text(
-                                app.packageName,
-                                style: TextStyle(fontSize: 10, color: textMuted),
-                              ),
-                            ],
+                if (_isLoadingApps)
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                else if (_installedApps.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.account_balance_outlined, size: 36, color: textMuted),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Belum ada m-banking / e-wallet yang terdeteksi di HP ini.',
+                            style: TextStyle(fontSize: 12, color: textMuted),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        Switch(
-                          value: isEnabled,
-                          activeColor: primary,
-                          onChanged: (val) {
-                            provider.toggleAppNotif(app.packageName, val);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _installedApps.length,
+                    separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
+                    itemBuilder: (context, index) {
+                      final app = _installedApps[index];
+                      final isEnabled = provider.isAppNotifEnabled(app.packageName);
+
+                      return Row(
+                        children: [
+                          BankBadge(accountName: app.id, accountType: 'bank', size: 32),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  app.name,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                                ),
+                                Text(
+                                  app.packageName,
+                                  style: TextStyle(fontSize: 10, color: textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: isEnabled,
+                            activeColor: primary,
+                            onChanged: (val) {
+                              provider.toggleAppNotif(app.packageName, val);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
               ],
             ),
           ),
