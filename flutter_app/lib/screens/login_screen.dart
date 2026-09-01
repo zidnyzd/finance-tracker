@@ -63,10 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
           shareState: CustomTabsShareState.off,
           showTitle: true,
         ),
-        safariViewControllerOptions: const SafariViewControllerOptions(
-          barCollapsingEnabled: true,
-          dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
-        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
