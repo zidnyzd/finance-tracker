@@ -4,6 +4,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/platform_service.dart';
+import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
 import 'report_screen.dart';
 
@@ -380,15 +381,24 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Text(
-                                isHidden
-                                    ? 'Rp ••••••'
-                                    : '${isExpense ? "- " : "+ "}${tx.amountStr}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: isExpense ? AppColors.danger : AppColors.success,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    isHidden
+                                        ? 'Rp ••••••'
+                                        : '${isExpense ? "- " : "+ "}${tx.amountStr}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: isExpense ? AppColors.danger : AppColors.success,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateUtil.formatShort(tx.date),
+                                    style: TextStyle(fontSize: 9, color: textMuted),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

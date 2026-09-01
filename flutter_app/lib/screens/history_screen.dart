@@ -5,6 +5,7 @@ import '../models/models.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -649,7 +650,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           ),
                                         ),
                                         Text(
-                                          tx.date,
+                                          DateUtil.formatShort(tx.date),
                                           style: TextStyle(fontSize: 9, color: textMuted),
                                         ),
                                       ],
