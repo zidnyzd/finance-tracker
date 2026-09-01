@@ -1,17 +1,24 @@
 <resources>
-    <color name="primary">#0284C7</color>
-    <color name="primary_dark">#0369A1</color>
-    <color name="accent">#F97316</color>
+    <!-- Brand Primary -->
+    <color name="primary">#6EA8FE</color>
+    <color name="primary_dark">#2C7BE5</color>
+    <color name="accent">#FB923C</color>
+
+    <!-- Dark Theme Palette (100% Identical to Web) -->
     <color name="bg_light">#16181B</color>
     <color name="card_bg">#1E2024</color>
     <color name="topbar_bg">#1E2024</color>
     <color name="bottomnav_bg">#1E2024</color>
-    <color name="text_main">#F1F5F9</color>
-    <color name="text_muted">#94A3B8</color>
-    <color name="success">#16A34A</color>
-    <color name="success_bg">#14532D</color>
-    <color name="danger">#DC2626</color>
-    <color name="danger_bg">#7F1D1D</color>
     <color name="border">#2C3035</color>
+    <color name="text_main">#F8F9FA</color>
+    <color name="text_muted">#8B95A5</color>
     <color name="input_bg">#262A2E</color>
+
+    <color name="success">#22C55E</color>
+    <color name="success_bg">#14532D</color>
+    <color name="danger">#EF4444</color>
+    <color name="danger_bg">#7F1D1D</color>
+
+    <color name="avatar_bg">#2C3035</color>
+    <color name="avatar_text">#ABB2BF</color>
 </resources>

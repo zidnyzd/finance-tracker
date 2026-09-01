@@ -1,49 +1,70 @@
 package id.web.zira.app
 
 import android.app.Notification
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.PowerManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.work.*
+import com.google.gson.Gson
 import id.web.zira.app.models.SimpleApiResponse
 import id.web.zira.app.network.ApiClient
+import id.web.zira.app.network.SyncWorker
 import id.web.zira.app.utils.SessionManager
-import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class NotificationListener : NotificationListenerService() {
 
     companion object {
+        const val TAG = "ZiRaNotifListener"
         const val ACTION_NOTIFICATION_SYNCED = "id.web.zira.app.NOTIFICATION_SYNCED"
-        private const val TAG = "ZiRaNotifListener"
 
-        // Whitelist aplikasi finansial resmi Indonesia
-        private val WHITELIST = setOf(
+        private val WHITELIST_PACKAGES = setOf(
+            // Bank BCA
             "com.bca",
             "com.bca.mybca",
-            "id.co.bankmandiri.livin",
-            "id.co.mandiri.livin",
+            // Mandiri
+            "id.bmri.livin",
+            "com.bankmandiri.mandirimai",
+            // BRI
             "id.co.bri.brimo",
-            "id.co.bni.newmobile",
-            "com.seabank.mobile",
-            "com.jago.digitalbanking",
+            // BNI
+            "src.com.bni",
+            "id.co.bni.wondr",
+            // SeaBank
+            "com.btpn.seabank",
+            "com.shopee.seabank",
+            // Bank Jago
+            "com.jago.digitalBanking",
+            // BCA Digital Blu
             "id.co.bcadigital.blu",
+            // E-Wallets
             "com.gojek.app",
-            "com.gopay.wallet",
-            "ovo.id",
             "id.dana",
-            "com.shopee.id"
+            "com.shopee.id",
+            "com.tokopedia.tkpd",
+            "com.grabtaxi.passenger",
+            "ovo.id"
         )
+    }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        Log.d(TAG, "NotificationListenerService connected and active 24/7.")
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
         if (sbn == null) return
 
-        val packageName = sbn.packageName?.lowercase(Locale.ROOT) ?: return
+        val packageName = sbn.packageName ?: return
 
-        // 1. Cek Whitelist
-        if (!WHITELIST.contains(packageName)) {
+        // 1. Whitelist Filter - Abaikan notifikasi selain aplikasi finansial
+        val isFinancialApp = WHITELIST_PACKAGES.any { packageName.contains(it, ignoreCase = true) }
+        if (!isFinancialApp) {
             return
         }
 
@@ -78,7 +99,7 @@ class NotificationListener : NotificationListenerService() {
 
         Log.d(TAG, "Menangkap notifikasi finansial dari $appName: $title | $text")
 
-        val payload = mapOf(
+        val payloadMap = mapOf(
             "package_name" to packageName,
             "app_name" to appName,
             "title" to title,
@@ -86,18 +107,45 @@ class NotificationListener : NotificationListenerService() {
             "post_time" to sbn.postTime
         )
 
-        ApiClient.post("/api/v1/sync-notification", payload, token, SimpleApiResponse::class.java) { success, resp, err ->
+        // 2. Safe 3-Second WakeLock (Hanya aktif beberapa milidetik selama HTTP berlangsung)
+        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ZiRa::NotifInstantSync")
+        wakeLock?.acquire(3000) // Maksimum 3 detik lalu otomatis lepas
+
+        // 3. Fast Direct Sync (Instant Push)
+        ApiClient.post("/api/v1/sync-notification", payloadMap, token, SimpleApiResponse::class.java) { success, resp, err ->
+            try {
+                if (wakeLock?.isHeld == true) {
+                    wakeLock.release()
+                }
+            } catch (e: Exception) {}
+
             if (success && resp != null && resp.success) {
                 sessionManager.addLog("⚡ [$appName] Mutasi tercatat otomatis: $title")
-                Log.d(TAG, "Sync notifikasi sukses: ${resp.message}")
+                Log.d(TAG, "Instant sync notifikasi sukses: ${resp.message}")
             } else {
-                sessionManager.addLog("ℹ️ [$appName] Status sync: ${resp?.message ?: err ?: "Ignored"}")
-                Log.d(TAG, "Sync response: ${resp?.message ?: err}")
+                Log.d(TAG, "Instant sync offline/gagal (${err ?: resp?.message}), mendaftarkan WorkManager offline retry queue...")
+                scheduleOfflineRetry(payloadMap, token)
             }
 
             // Kirim broadcast agar UI Dashboard realtime refresh
             val intent = Intent(ACTION_NOTIFICATION_SYNCED)
             sendBroadcast(intent)
         }
+    }
+
+    private fun scheduleOfflineRetry(payloadMap: Map<String, Any>, token: String) {
+        val payloadJson = Gson().toJson(payloadMap)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .setInputData(workDataOf("payload" to payloadJson, "token" to token))
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueue(syncRequest)
     }
 }

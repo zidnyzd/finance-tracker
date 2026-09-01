@@ -155,6 +155,14 @@ class AddFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        binding.btnCancelTxn.setOnClickListener {
+            (activity as? MainActivity)?.navigateToHome()
+        }
+
+        binding.btnQuickAddAccount.setOnClickListener {
+            showAddAccountDialog()
+        }
+
         binding.btnSaveTxn.setOnClickListener {
             val amountStr = binding.etAmount.text.toString().trim()
             val amount = amountStr.toDoubleOrNull()
@@ -234,6 +242,46 @@ class AddFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun showAddAccountDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_account, null)
+        val etName = dialogView.findViewById<android.widget.EditText>(R.id.etAccountName)
+        val rgType = dialogView.findViewById<android.widget.RadioGroup>(R.id.rgAccountType)
+
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Tambah Dompet / Rekening")
+            .setView(dialogView)
+            .setPositiveButton("Simpan") { _, _ ->
+                val name = etName.text.toString().trim()
+                if (name.isEmpty()) {
+                    Toast.makeText(context, "Nama dompet wajib diisi", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val type = when (rgType.checkedRadioButtonId) {
+                    R.id.rbBank -> "bank"
+                    R.id.rbEwallet -> "ewallet"
+                    else -> "cash"
+                }
+
+                val token = sessionManager.getToken() ?: return@setPositiveButton
+                val payload = mapOf("name" to name, "type" to type)
+
+                ApiClient.post("/api/v1/accounts", payload, token, SimpleApiResponse::class.java) { success, resp, err ->
+                    activity?.runOnUiThread {
+                        if (success && resp != null && resp.success) {
+                            Toast.makeText(context, "Dompet $name berhasil ditambahkan", Toast.LENGTH_SHORT).show()
+                            loadAccounts()
+                            (activity as? MainActivity)?.refreshDashboardSilently()
+                        } else {
+                            Toast.makeText(context, "Gagal menambah dompet: ${resp?.error ?: err ?: "Error"}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     override fun onDestroyView() {

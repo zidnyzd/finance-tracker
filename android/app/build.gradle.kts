@@ -20,8 +20,8 @@ android {
         applicationId = "id.web.zira.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
-        versionName = "1.3.3"
+        versionCode = 8
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("release")
@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.browser:browser:1.8.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // Networking & Serialization
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

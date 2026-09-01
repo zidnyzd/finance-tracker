@@ -12,47 +12,17 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Type Selector Buttons -->
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggleTypeGroup"
-            android:layout_width="match_parent"
+        <!-- Page Title -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true"
-            app:selectionRequired="true">
+            android:text="Catat Transaksi"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_main"
+            android:layout_marginBottom="16dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTypeExpense"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_weight="1"
-                android:text="📉 Keluar"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTypeIncome"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_weight="1"
-                android:text="📈 Masuk"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTypeTransfer"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_weight="1"
-                android:text="⇄ Transfer"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-        <!-- Card Form Content -->
+        <!-- Main Form Card (Identical to Web) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,11 +38,51 @@
                 android:orientation="vertical"
                 android:padding="18dp">
 
-                <!-- Nominal Amount Input -->
+                <!-- 1. Segmented Toggle: Keluar / Masuk / Pindah -->
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toggleTypeGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="18dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTypeExpense"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="📉 Keluar"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTypeIncome"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="📈 Masuk"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTypeTransfer"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:text="⇄ Pindah"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <!-- 2. Input Jumlah (with prefix Rp) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nominal Transaksi (Rp):"
+                    android:text="Jumlah"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_main"
@@ -82,20 +92,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_marginBottom="14dp">
+                    app:prefixText="Rp "
+                    app:prefixTextColor="@color/text_main"
+                    android:layout_marginBottom="16dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="0"
-                        android:inputType="numberDecimal"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_main" />
+                        android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Kategori Input & Quick Chips -->
+                <!-- 3. Kategori Area (Hidden for Transfer) -->
                 <LinearLayout
                     android:id="@+id/layoutCategoryArea"
                     android:layout_width="match_parent"
@@ -105,7 +116,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kategori:"
+                        android:text="Kategori"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_main"
@@ -121,96 +132,117 @@
                             android:id="@+id/etCategory"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Nama Kategori"
-                            android:textSize="14sp" />
+                            android:hint="Contoh: Makanan, Transport, Gaji"
+                            android:textSize="14sp"
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Horizontal Category Suggestion Chips -->
+                    <!-- Category Chips -->
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scrollbars="none"
-                        android:layout_marginBottom="14dp">
+                        android:layout_marginBottom="16dp">
 
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/chipGroupCategory"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:singleLine="true">
+                            android:orientation="horizontal">
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipMakan"
-                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🍜 Makan &amp; Minum"
-                                android:textSize="11sp" />
+                                android:textSize="11sp"
+                                android:layout_marginEnd="6dp" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipBelanja"
-                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="🛒 Belanja"
-                                android:textSize="11sp" />
+                                android:textSize="11sp"
+                                android:layout_marginEnd="6dp" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipTagihan"
-                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="💡 Tagihan"
-                                android:textSize="11sp" />
+                                android:textSize="11sp"
+                                android:layout_marginEnd="6dp" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipTransport"
-                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="⛽ Transportasi"
-                                android:textSize="11sp" />
+                                android:textSize="11sp"
+                                android:layout_marginEnd="6dp" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipGaji"
-                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="💵 Pemasukan"
                                 android:textSize="11sp" />
-                        </com.google.android.material.chip.ChipGroup>
+                        </LinearLayout>
                     </HorizontalScrollView>
                 </LinearLayout>
 
-                <!-- Dompet Asal -->
+                <!-- 4. Dompet / Rekening Selector -->
                 <TextView
                     android:id="@+id/tvAccountLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pilih Dompet / Rekening:"
+                    android:text="Dompet"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_main"
                     android:layout_marginBottom="6dp" />
 
-                <Spinner
-                    android:id="@+id/spinnerAccount"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/spinner_bg"
-                    android:layout_marginBottom="14dp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-                <!-- Dompet Tujuan (Khusus Transfer) -->
+                    <Spinner
+                        android:id="@+id/spinnerAccount"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/spinner_bg"
+                        android:paddingHorizontal="12dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnQuickAddAccount"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:text="+"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="8dp" />
+                </LinearLayout>
+
+                <!-- Dompet Tujuan (Khusus Transfer/Pindah) -->
                 <LinearLayout
                     android:id="@+id/layoutTargetAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pilih Dompet Tujuan (Masuk):"
+                        android:text="Dompet Tujuan (Masuk)"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_main"
@@ -221,14 +253,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:background="@drawable/spinner_bg"
-                        android:layout_marginBottom="14dp" />
+                        android:paddingHorizontal="12dp" />
                 </LinearLayout>
 
-                <!-- Deskripsi Catatan -->
+                <!-- 5. Keterangan / Catatan Input -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Catatan / Keterangan:"
+                    android:text="Catatan / Keterangan (Opsional)"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_main"
@@ -238,26 +270,46 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginBottom="24dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Contoh: Kopi Janji Jiwa, Token Listrik, dsb."
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Submit Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSaveTxn"
+                <!-- 6. Action Buttons: Batal & Simpan (Identical to Web) -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:text="Simpan Transaksi"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="@color/primary"
-                    app:cornerRadius="10dp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCancelTxn"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="Batal"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_muted"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveTxn"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="2"
+                        android:text="+ Simpan"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/primary" />
+                </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

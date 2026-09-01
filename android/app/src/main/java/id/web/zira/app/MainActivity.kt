@@ -6,8 +6,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import id.web.zira.app.databinding.ActivityMainBinding
 import id.web.zira.app.fragments.AddFragment
@@ -52,11 +56,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupAvatarInitial()
         setupFragments()
         setupListeners()
         setupBottomNavigation()
 
-        // Check for Update
+        // In-App Auto-Updater
         AppUpdater.checkForUpdate(this)
     }
 
@@ -74,9 +79,14 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         try {
             unregisterReceiver(notifReceiver)
-        } catch (e: Exception) {
-            // Ignored
-        }
+        } catch (e: Exception) {}
+    }
+
+    private fun setupAvatarInitial() {
+        val user = sessionManager.getUser()
+        val displayName = user?.displayName?.ifEmpty { user.username } ?: "Z"
+        val initial = displayName.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "Z"
+        binding.tvAvatarInitial.text = initial
     }
 
     private fun setupFragments() {
@@ -120,50 +130,99 @@ class MainActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             }
         }
+
+        binding.btnProfileAvatar.setOnClickListener {
+            navigateToSettings()
+        }
     }
 
     private fun setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    switchFragment(homeFragment, "ZiRa Finance")
-                    homeFragment.loadDashboard()
-                    true
-                }
-                R.id.nav_history -> {
-                    switchFragment(historyFragment, "Riwayat Transaksi")
-                    historyFragment.loadTransactions()
-                    true
-                }
-                R.id.nav_add -> {
-                    switchFragment(addFragment, "Catat Transaksi")
-                    true
-                }
-                R.id.nav_wallet -> {
-                    switchFragment(walletFragment, "Dompet & Rekening")
-                    walletFragment.loadAccounts()
-                    true
-                }
-                R.id.nav_settings -> {
-                    switchFragment(settingsFragment, "Pengaturan Akun")
-                    true
-                }
-                else -> false
+        binding.navHome.setOnClickListener {
+            navigateToHome()
+        }
+
+        binding.navHistory.setOnClickListener {
+            navigateToHistory()
+        }
+
+        binding.navAdd.setOnClickListener {
+            navigateToAdd("expense")
+        }
+
+        binding.fabAdd.setOnClickListener {
+            navigateToAdd("expense")
+        }
+
+        binding.navWallet.setOnClickListener {
+            navigateToWallet()
+        }
+
+        binding.navSettings.setOnClickListener {
+            navigateToSettings()
+        }
+    }
+
+    private fun updateNavUI(activeId: String) {
+        val primaryColor = ContextCompat.getColor(this, R.color.primary)
+        val mutedColor = ContextCompat.getColor(this, R.color.text_muted)
+
+        // Reset All
+        binding.ivNavHome.setColorFilter(mutedColor)
+        binding.tvNavHome.setTextColor(mutedColor)
+        binding.ivNavHistory.setColorFilter(mutedColor)
+        binding.tvNavHistory.setTextColor(mutedColor)
+        binding.ivNavWallet.setColorFilter(mutedColor)
+        binding.tvNavWallet.setTextColor(mutedColor)
+        binding.ivNavSettings.setColorFilter(mutedColor)
+        binding.tvNavSettings.setTextColor(mutedColor)
+
+        when (activeId) {
+            "home" -> {
+                binding.ivNavHome.setColorFilter(primaryColor)
+                binding.tvNavHome.setTextColor(primaryColor)
+            }
+            "history" -> {
+                binding.ivNavHistory.setColorFilter(primaryColor)
+                binding.tvNavHistory.setTextColor(primaryColor)
+            }
+            "wallet" -> {
+                binding.ivNavWallet.setColorFilter(primaryColor)
+                binding.tvNavWallet.setTextColor(primaryColor)
+            }
+            "settings" -> {
+                binding.ivNavSettings.setColorFilter(primaryColor)
+                binding.tvNavSettings.setTextColor(primaryColor)
             }
         }
     }
 
     fun navigateToHome() {
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
+        switchFragment(homeFragment, "ZiRa Finance")
+        updateNavUI("home")
+        homeFragment.loadDashboard()
     }
 
     fun navigateToHistory() {
-        binding.bottomNavigation.selectedItemId = R.id.nav_history
+        switchFragment(historyFragment, "Riwayat Transaksi")
+        updateNavUI("history")
+        historyFragment.loadTransactions()
     }
 
     fun navigateToAdd(type: String) {
         addFragment.setTransactionType(type)
-        binding.bottomNavigation.selectedItemId = R.id.nav_add
+        switchFragment(addFragment, "Catat Transaksi")
+        updateNavUI("add")
+    }
+
+    fun navigateToWallet() {
+        switchFragment(walletFragment, "Dompet & Rekening")
+        updateNavUI("wallet")
+        walletFragment.loadAccounts()
+    }
+
+    fun navigateToSettings() {
+        switchFragment(settingsFragment, "Pengaturan Akun")
+        updateNavUI("settings")
     }
 
     fun refreshDashboardSilently() {

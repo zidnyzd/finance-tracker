@@ -82,6 +82,18 @@ class HomeFragment : Fragment() {
         binding.btnConfigNotif.setOnClickListener {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
+
+        binding.btnCardEye.setOnClickListener {
+            (activity as? MainActivity)?.let { main ->
+                main.isBalanceHidden = !main.isBalanceHidden
+                if (main.isBalanceHidden) {
+                    binding.ivEyeIcon.setImageResource(R.drawable.ic_eye_closed)
+                } else {
+                    binding.ivEyeIcon.setImageResource(R.drawable.ic_eye_open)
+                }
+                loadDashboard()
+            }
+        }
     }
 
     fun loadDashboard() {
