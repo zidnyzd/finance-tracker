@@ -171,7 +171,7 @@ class AppProvider extends ChangeNotifier {
     _isLoadingDashboard = true;
     notifyListeners();
 
-    final data = await ApiService.getDashboard();
+    final data = await ApiService.getDashboard(_token!);
     _isLoadingDashboard = false;
     if (data != null) {
       _dashboardData = data;
@@ -182,7 +182,7 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> fetchAccounts() async {
     if (_token == null) return;
-    final list = await ApiService.getAccounts();
+    final list = await ApiService.getAccounts(_token!);
     if (list != null) {
       _accounts = list;
       notifyListeners();
