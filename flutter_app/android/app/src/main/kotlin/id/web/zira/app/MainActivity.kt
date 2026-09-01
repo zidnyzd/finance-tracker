@@ -21,12 +21,12 @@ class MainActivity: FlutterActivity() {
 
     private val KNOWN_FINANCIAL_APPS = listOf(
         mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
+        mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
         mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "packages" to listOf("id.bmri.livin", "com.bankmandiri.mandirimai", "tl.bmdl.livin")),
         mapOf("id" to "bca", "name" to "BCA / myBCA", "packages" to listOf("com.bca", "com.bca.mybca", "com.bca.mybca.omni.android")),
         mapOf("id" to "brimo", "name" to "BRImo (Bank BRI)", "packages" to listOf("id.co.bri.brimo")),
-        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "packages" to listOf("src.com.bni", "id.bni.wondr", "id.co.bni.wondr")),
+        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "packages" to listOf("id.bni.wondr", "src.com.bni", "id.co.bni.wondr")),
         mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking")),
-        mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
         mapOf("id" to "dana", "name" to "DANA Indonesia", "packages" to listOf("id.dana")),
         mapOf("id" to "gopay", "name" to "GoPay / Gojek", "packages" to listOf("com.gojek.app", "com.gojek.gopay")),
         mapOf("id" to "ovo", "name" to "OVO Payment", "packages" to listOf("ovo.id")),
@@ -83,6 +83,7 @@ class MainActivity: FlutterActivity() {
                     try {
                         val pm = packageManager
                         val list = mutableListOf<Map<String, Any>>()
+                        val foundPackages = mutableSetOf<String>()
 
                         for (item in KNOWN_FINANCIAL_APPS) {
                             val pkgs = item["packages"] as? List<String> ?: emptyList()
@@ -97,11 +98,12 @@ class MainActivity: FlutterActivity() {
                                     appLabel = pm.getApplicationLabel(info).toString()
                                     val drawable = pm.getApplicationIcon(info)
                                     iconBase64 = drawableToBase64(drawable)
-                                    break // Found matching package
-                                } catch (_: PackageManager.NameNotFoundException) {}
+                                    break
+                                } catch (_: Exception) {}
                             }
 
                             if (foundPkg != null) {
+                                foundPackages.add(foundPkg)
                                 list.add(mapOf(
                                     "id" to (item["id"] ?: "bank"),
                                     "name" to (appLabel ?: (item["name"] ?: foundPkg)),
@@ -111,6 +113,40 @@ class MainActivity: FlutterActivity() {
                                 ))
                             }
                         }
+
+                        // Smart fallback: scan all installed applications for financial keywords if missed
+                        try {
+                            val allInstalled = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                            for (appInfo in allInstalled) {
+                                val pkg = appInfo.packageName ?: ""
+                                if (foundPackages.contains(pkg) || pkg == packageName) continue
+
+                                val label = pm.getApplicationLabel(appInfo).toString().lowercase()
+                                val pkgLower = pkg.lowercase()
+
+                                var matchedId: String? = null
+                                if (pkgLower.contains("seabank") || label.contains("seabank")) matchedId = "seabank"
+                                else if (pkgLower.contains("bcadigital") || label.contains("blu by")) matchedId = "blu"
+                                else if (pkgLower.contains("mybca") || label.contains("mybca")) matchedId = "bca"
+                                else if (pkgLower.contains("livin") || label.contains("livin")) matchedId = "mandiri"
+                                else if (pkgLower.contains("wondr") || label.contains("wondr")) matchedId = "bni"
+                                else if (pkgLower.contains("brimo") || label.contains("brimo")) matchedId = "brimo"
+
+                                if (matchedId != null) {
+                                    foundPackages.add(pkg)
+                                    val drawable = pm.getApplicationIcon(appInfo)
+                                    val iconBase64 = drawableToBase64(drawable)
+                                    list.add(mapOf(
+                                        "id" to matchedId,
+                                        "name" to pm.getApplicationLabel(appInfo).toString(),
+                                        "package_name" to pkg,
+                                        "icon_base64" to iconBase64,
+                                        "is_installed" to true
+                                    ))
+                                }
+                            }
+                        } catch (_: Exception) {}
+
                         result.success(list)
                     } catch (e: Exception) {
                         result.success(emptyList<Map<String, Any>>())
@@ -169,7 +205,6 @@ class MainActivity: FlutterActivity() {
             }
 
             val stream = ByteArrayOutputStream()
-            // 96x96 PNG for crisp native sharpness
             val scaled = Bitmap.createScaledBitmap(bitmap, 96, 96, true)
             scaled.compress(Bitmap.CompressFormat.PNG, 90, stream)
             Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)

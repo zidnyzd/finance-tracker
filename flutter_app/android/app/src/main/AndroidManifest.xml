@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="id.web.zira.app">
 
     <!-- Permissions -->
@@ -7,13 +8,19 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Membaca seluruh aplikasi m-banking terpasang tanpa terhalang sandbox Android 11+ -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
-    <!-- Queries for detecting installed banking and e-wallet apps on Android 11+ -->
+    <!-- Queries explicit fallback for all Indonesian banks & e-wallets -->
     <queries>
         <!-- SeaBank -->
         <package android:name="ph.seabank.seabank" />
         <package android:name="com.btpn.seabank" />
         <package android:name="com.shopee.seabank" />
+
+        <!-- Blu BCA Digital -->
+        <package android:name="com.bcadigital.blu" />
+        <package android:name="id.co.bcadigital.blu" />
 
         <!-- BCA & myBCA -->
         <package android:name="com.bca" />
@@ -36,11 +43,7 @@
         <!-- Bank Jago -->
         <package android:name="com.jago.digitalBanking" />
 
-        <!-- Blu by BCA Digital -->
-        <package android:name="com.bcadigital.blu" />
-        <package android:name="id.co.bcadigital.blu" />
-
-        <!-- E-Wallets -->
+        <!-- E-Wallets & Fintech -->
         <package android:name="id.dana" />
         <package android:name="com.gojek.app" />
         <package android:name="com.gojek.gopay" />
