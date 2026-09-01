@@ -4,6 +4,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/platform_service.dart';
+import '../widgets/bank_badge.dart';
 import 'report_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -265,12 +266,8 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                                  ),
-                                  const SizedBox(width: 6),
+                                  BankBadge(accountName: acc.name, accountType: acc.type, size: 24),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       acc.name,
@@ -281,7 +278,7 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
                                 isHidden ? 'Rp ••••••' : acc.balanceStr,
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain),
