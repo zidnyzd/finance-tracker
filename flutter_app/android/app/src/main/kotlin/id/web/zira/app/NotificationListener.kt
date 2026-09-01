@@ -21,7 +21,7 @@ class NotificationListener : NotificationListenerService() {
     companion object {
         const val TAG = "ZiRaFlutterNotif"
 
-        private val WHITELIST_PACKAGES = setOf(
+        val ALL_SUPPORTED_PACKAGES = setOf(
             "com.bca",
             "com.bca.mybca",
             "id.bmri.livin",
@@ -48,8 +48,17 @@ class NotificationListener : NotificationListenerService() {
 
         val packageName = sbn.packageName ?: return
 
-        val isFinancial = WHITELIST_PACKAGES.any { packageName.contains(it, ignoreCase = true) }
-        if (!isFinancial) return
+        // 1. Check if package is in all supported financial list
+        val matchedPackage = ALL_SUPPORTED_PACKAGES.firstOrNull { packageName.contains(it, ignoreCase = true) }
+        if (matchedPackage == null) return
+
+        // 2. Check user's per-app switch in Flutter SharedPreferences
+        val prefs = applicationContext.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val isAppEnabled = prefs.getBoolean("flutter.notif_app_enabled_$matchedPackage", true)
+        if (!isAppEnabled) {
+            Log.d(TAG, "Notifikasi dari $packageName diabaikan karena switch dinonaktifkan oleh pengguna.")
+            return
+        }
 
         val notification = sbn.notification ?: return
         val extras: Bundle = notification.extras ?: return
@@ -62,10 +71,7 @@ class NotificationListener : NotificationListenerService() {
 
         if (title.isEmpty() && text.isEmpty()) return
 
-        // Read token from Flutter SharedPreferences
-        val prefs = applicationContext.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val token = prefs.getString("flutter.auth_token", null)
-
         if (token.isNullOrEmpty()) {
             Log.d(TAG, "Notifikasi masuk tetapi belum login.")
             return

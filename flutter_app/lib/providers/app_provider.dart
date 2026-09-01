@@ -35,11 +35,35 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Map<String, bool> _appNotifSwitches = {};
+
+  Map<String, bool> get appNotifSwitches => _appNotifSwitches;
+
+  bool isAppNotifEnabled(String packageName) {
+    return _appNotifSwitches[packageName] ?? true;
+  }
+
+  Future<void> toggleAppNotif(String packageName, bool enabled) async {
+    _appNotifSwitches[packageName] = enabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_app_enabled_$packageName', enabled);
+    notifyListeners();
+  }
+
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('is_dark_mode') ?? true;
     _isBalanceHidden = prefs.getBool('is_balance_hidden') ?? false;
     _token = prefs.getString('auth_token');
+
+    // Load per-app switches
+    for (final app in [
+      'com.bca', 'id.bmri.livin', 'id.co.bri.brimo', 'src.com.bni',
+      'com.jago.digitalBanking', 'id.co.bcadigital.blu', 'com.btpn.seabank',
+      'id.dana', 'com.gojek.app', 'ovo.id', 'com.shopee.id'
+    ]) {
+      _appNotifSwitches[app] = prefs.getBool('notif_app_enabled_$app') ?? true;
+    }
     
     final username = prefs.getString('user_username');
     final displayName = prefs.getString('user_display_name');

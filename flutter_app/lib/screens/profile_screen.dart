@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../models/bank_app_config.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/bank_badge.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,15 +17,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.5.3';
-  int _buildNumber = 12;
-  bool _isNotifPermissionGranted = false;
+  String _appVersion = '1.5.6';
+  int _buildNumber = 15;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
-    _checkPermission();
   }
 
   Future<void> _loadVersion() async {
@@ -31,18 +31,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final pInfo = await PackageInfo.fromPlatform();
       setState(() {
         _appVersion = pInfo.version;
-        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 12;
+        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 15;
       });
     } catch (_) {}
-  }
-
-  Future<void> _checkPermission() async {
-    final granted = await PlatformService.isNotificationPermissionGranted();
-    if (mounted) {
-      setState(() {
-        _isNotifPermissionGranted = granted;
-      });
-    }
   }
 
   Future<void> _checkUpdate() async {
@@ -158,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 16),
 
-          // User Profile Card (Identical to Web)
+          // 1. User Profile Card
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -187,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Auto-Catat Notifikasi Setting Card
+          // 2. Auto-Catat Notifikasi Main Permission Card
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -231,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: OutlinedButton(
                     onPressed: () async {
                       await PlatformService.openNotificationSettings();
-                      Future.delayed(const Duration(seconds: 1), _checkPermission);
+                      Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: borderCol),
@@ -246,7 +237,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Version & Update Card
+          // 3. Per-App Banking & E-Wallet Notification Switches
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderCol),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pilih Aplikasi yang Di-Sync',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain),
+                ),
+                Text(
+                  'Aktifkan atau nonaktifkan perekaman mutasi untuk tiap aplikasi bank / e-wallet.',
+                  style: TextStyle(fontSize: 11, color: textMuted),
+                ),
+                const SizedBox(height: 14),
+
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: BankAppConfig.allApps.length,
+                  separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
+                  itemBuilder: (context, index) {
+                    final app = BankAppConfig.allApps[index];
+                    final isEnabled = provider.isAppNotifEnabled(app.packageName);
+
+                    return Row(
+                      children: [
+                        BankBadge(accountName: app.id, accountType: 'bank', size: 30),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                app.name,
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                              ),
+                              Text(
+                                app.packageName,
+                                style: TextStyle(fontSize: 10, color: textMuted),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isEnabled,
+                          activeColor: primary,
+                          onChanged: (val) {
+                            provider.toggleAppNotif(app.packageName, val);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 4. Version & Update Card
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -280,7 +336,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Logout Button
+          // 5. Logout Button
           SizedBox(
             width: double.infinity,
             height: 48,
