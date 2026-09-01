@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
-  tabler_icons: ^1.2.0
+  tabler_icons: ^2.5.0+1
   provider: ^6.1.2
   shared_preferences: ^2.3.3
   http: ^1.2.2
