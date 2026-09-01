@@ -59,18 +59,6 @@ class HomeFragment : Fragment() {
             loadDashboard()
         }
 
-        binding.btnAddIncome.setOnClickListener {
-            (activity as? MainActivity)?.navigateToAdd("income")
-        }
-
-        binding.btnAddExpense.setOnClickListener {
-            (activity as? MainActivity)?.navigateToAdd("expense")
-        }
-
-        binding.btnTransfer.setOnClickListener {
-            (activity as? MainActivity)?.navigateToAdd("transfer")
-        }
-
         binding.tvSeeAllTxn.setOnClickListener {
             (activity as? MainActivity)?.navigateToHistory()
         }
