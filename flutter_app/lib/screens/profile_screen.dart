@@ -16,8 +16,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.5.7';
-  int _buildNumber = 16;
+  String _appVersion = '1.5.8';
+  int _buildNumber = 17;
   List<InstalledBankApp> _installedApps = [];
   bool _isLoadingApps = true;
 
@@ -33,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final pInfo = await PackageInfo.fromPlatform();
       setState(() {
         _appVersion = pInfo.version;
-        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 16;
+        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 17;
       });
     } catch (_) {}
   }
@@ -49,6 +49,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  bool _isServerVersionNewer(String appVer, String serverVer, int appBuild, int serverBuild) {
+    if (serverBuild > appBuild) return true;
+
+    try {
+      final appParts = appVer.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      final serverParts = serverVer.replaceAll('v', '').split('.').map((e) => int.tryParse(e) ?? 0).toList();
+
+      for (int i = 0; i < 3; i++) {
+        final a = i < appParts.length ? appParts[i] : 0;
+        final s = i < serverParts.length ? serverParts[i] : 0;
+        if (s > a) return true;
+        if (s < a) return false;
+      }
+    } catch (_) {}
+
+    return serverVer.replaceAll('v', '').trim() != appVer.replaceAll('v', '').trim();
+  }
+
   Future<void> _checkUpdate() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Memeriksa pembaruan di server...')),
@@ -58,7 +76,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) return;
 
     if (versionData != null) {
-      final hasNewUpdate = versionData.versionCode > _buildNumber;
+      final hasNewUpdate = _isServerVersionNewer(
+        _appVersion,
+        versionData.versionName,
+        _buildNumber,
+        versionData.versionCode,
+      );
 
       showDialog(
         context: context,
@@ -71,11 +94,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Versi Aplikasi: v$_appVersion'),
-              Text('Versi Server: v${versionData.versionName}'),
+              Text('Versi Terpasang: v$_appVersion (Build $_buildNumber)'),
+              Text('Versi Server: v${versionData.versionName} (Build ${versionData.versionCode})'),
               const SizedBox(height: 10),
               if (hasNewUpdate) ...[
-                Text('Catatan Rilis:\n${versionData.changelog}', style: const TextStyle(fontSize: 12)),
+                const Text('Catatan Rilis:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                const SizedBox(height: 4),
+                Text(versionData.changelog, style: const TextStyle(fontSize: 12)),
               ] else ...[
                 const Text(
                   'Aplikasi Anda sudah menggunakan versi paling baru dan stabil.',
@@ -91,11 +116,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             if (hasNewUpdate && versionData.apkUrl.isNotEmpty)
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryLight,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.pop(ctx);
                   launchUrl(Uri.parse(versionData.apkUrl), mode: LaunchMode.externalApplication);
                 },
-                child: const Text('Unduh Update'),
+                child: const Text('Unduh Update Sekarang'),
               ),
           ],
         ),
