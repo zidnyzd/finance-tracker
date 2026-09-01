@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
+import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,12 +15,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.5.0';
+  String _appVersion = '1.5.3';
+  int _buildNumber = 12;
+  bool _isNotifPermissionGranted = false;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _checkPermission();
   }
 
   Future<void> _loadVersion() async {
@@ -27,8 +31,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final pInfo = await PackageInfo.fromPlatform();
       setState(() {
         _appVersion = pInfo.version;
+        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 12;
       });
     } catch (_) {}
+  }
+
+  Future<void> _checkPermission() async {
+    final granted = await PlatformService.isNotificationPermissionGranted();
+    if (mounted) {
+      setState(() {
+        _isNotifPermissionGranted = granted;
+      });
+    }
   }
 
   Future<void> _checkUpdate() async {
@@ -40,18 +54,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) return;
 
     if (versionData != null) {
+      final hasNewUpdate = versionData.versionCode > _buildNumber;
+
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Status Pembaruan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          title: Text(
+            hasNewUpdate ? '🚀 Pembaruan Tersedia' : '✅ Versi Terbaru',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Versi Aplikasi: v$_appVersion'),
-              Text('Versi Terbaru Server: v${versionData.versionName}'),
-              const SizedBox(height: 8),
-              Text('Catatan Rilis: ${versionData.changelog}', style: const TextStyle(fontSize: 12)),
+              Text('Versi Server: v${versionData.versionName}'),
+              const SizedBox(height: 10),
+              if (hasNewUpdate) ...[
+                Text('Catatan Rilis:\n${versionData.changelog}', style: const TextStyle(fontSize: 12)),
+              ] else ...[
+                const Text(
+                  'Aplikasi Anda sudah menggunakan versi paling baru dan stabil.',
+                  style: TextStyle(fontSize: 12, color: AppColors.success, fontWeight: FontWeight.w600),
+                ),
+              ],
             ],
           ),
           actions: [
@@ -59,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Tutup'),
             ),
-            if (versionData.apkUrl.isNotEmpty)
+            if (hasNewUpdate && versionData.apkUrl.isNotEmpty)
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);
@@ -170,7 +196,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Auto-Catat Notifikasi Bank', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Auto-Catat Notifikasi Bank', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _isNotifPermissionGranted ? AppColors.success.withOpacity(0.15) : AppColors.danger.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _isNotifPermissionGranted ? 'Aktif ✓' : 'Belum Izin',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _isNotifPermissionGranted ? AppColors.success : AppColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Text(
                   'Otomatis merekam mutasi transaksi dari BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay di background 24/7.',
@@ -181,8 +227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   height: 42,
                   child: OutlinedButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse("package:id.web.zira.app"));
+                    onPressed: () async {
+                      await PlatformService.openNotificationSettings();
+                      Future.delayed(const Duration(seconds: 1), _checkPermission);
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: borderCol),
@@ -210,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text('Versi & Pembaruan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
                 const SizedBox(height: 4),
-                Text('ZiRa Finance Flutter v$_appVersion (Release Build)', style: TextStyle(fontSize: 12, color: textMuted)),
+                Text('ZiRa Finance Flutter v$_appVersion (Build $_buildNumber)', style: TextStyle(fontSize: 12, color: textMuted)),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
@@ -251,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           Center(
             child: Text(
-              'ZiRa Finance v1.5.0 • Hak Cipta ZidStore',
+              'ZiRa Finance v$_appVersion • Hak Cipta ZidStore',
               style: TextStyle(fontSize: 11, color: textMuted),
             ),
           ),

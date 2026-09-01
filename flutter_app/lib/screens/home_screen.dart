@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/platform_service.dart';
 import 'report_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -169,45 +170,51 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 14),
 
             // 3. Auto-Catat Notifikasi Active Card
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol, width: 1),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: primary.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
+            InkWell(
+              onTap: () async {
+                await PlatformService.openNotificationSettings();
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.bolt, color: primary, size: 20),
                     ),
-                    child: Icon(Icons.bolt, color: primary, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Auto-Catat Notifikasi Aktif',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
-                        ),
-                        Text(
-                          'Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll.',
-                          style: TextStyle(fontSize: 10, color: textMuted),
-                        ),
-                      ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Auto-Catat Notifikasi Bank',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
+                          ),
+                          Text(
+                            'Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll.',
+                            style: TextStyle(fontSize: 10, color: textMuted),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Text(
-                    'Aktif ✓',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success),
-                  ),
-                ],
+                    const Text(
+                      'Izin ⚙️',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
