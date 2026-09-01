@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 
 class BankBadge extends StatelessWidget {
   final String accountName;
@@ -14,6 +17,28 @@ class BankBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AppProvider>(context);
+    final nativeBase64 = provider.getBankIconBase64(accountName);
+
+    if (nativeBase64 != null && nativeBase64.isNotEmpty) {
+      try {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(size * 0.28),
+          child: Image.memory(
+            base64Decode(nativeBase64),
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _renderAssetOrFallback(),
+          ),
+        );
+      } catch (_) {}
+    }
+
+    return _renderAssetOrFallback();
+  }
+
+  Widget _renderAssetOrFallback() {
     final name = accountName.toLowerCase();
     String? assetName;
 
@@ -29,7 +54,7 @@ class BankBadge extends StatelessWidget {
       assetName = 'assets/banks/bca.png';
     } else if (name.contains('bri') || name.contains('brimo')) {
       assetName = 'assets/banks/bri.png';
-    } else if (name.contains('bni')) {
+    } else if (name.contains('bni') || name.contains('wondr')) {
       assetName = 'assets/banks/bni.png';
     } else if (name.contains('dana')) {
       assetName = 'assets/banks/dana.png';
@@ -44,11 +69,15 @@ class BankBadge extends StatelessWidget {
     }
 
     if (assetName != null) {
-      return Image.asset(
-        assetName,
-        width: size,
-        height: size,
-        errorBuilder: (_, __, ___) => _fallbackBadge(),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.28),
+        child: Image.asset(
+          assetName,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallbackBadge(),
+        ),
       );
     }
 

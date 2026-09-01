@@ -10,23 +10,49 @@
 
     <!-- Queries for detecting installed banking and e-wallet apps on Android 11+ -->
     <queries>
-        <package android:name="com.bca" />
-        <package android:name="com.bca.mybca" />
-        <package android:name="id.bmri.livin" />
-        <package android:name="com.bankmandiri.mandirimai" />
-        <package android:name="id.co.bri.brimo" />
-        <package android:name="src.com.bni" />
-        <package android:name="id.co.bni.wondr" />
+        <!-- SeaBank -->
+        <package android:name="ph.seabank.seabank" />
         <package android:name="com.btpn.seabank" />
         <package android:name="com.shopee.seabank" />
+
+        <!-- BCA & myBCA -->
+        <package android:name="com.bca" />
+        <package android:name="com.bca.mybca" />
+        <package android:name="com.bca.mybca.omni.android" />
+
+        <!-- Mandiri / Livin -->
+        <package android:name="id.bmri.livin" />
+        <package android:name="com.bankmandiri.mandirimai" />
+        <package android:name="tl.bmdl.livin" />
+
+        <!-- BRI & BRImo -->
+        <package android:name="id.co.bri.brimo" />
+
+        <!-- BNI & Wondr -->
+        <package android:name="src.com.bni" />
+        <package android:name="id.bni.wondr" />
+        <package android:name="id.co.bni.wondr" />
+
+        <!-- Bank Jago -->
         <package android:name="com.jago.digitalBanking" />
+
+        <!-- Blu by BCA Digital -->
+        <package android:name="com.bcadigital.blu" />
         <package android:name="id.co.bcadigital.blu" />
-        <package android:name="com.gojek.app" />
+
+        <!-- E-Wallets -->
         <package android:name="id.dana" />
+        <package android:name="com.gojek.app" />
+        <package android:name="com.gojek.gopay" />
+        <package android:name="ovo.id" />
         <package android:name="com.shopee.id" />
+        <package android:name="co.id.bankbsi.superapp" />
+        <package android:name="com.bnc.finance" />
+        <package android:name="com.btpn.dc" />
+        <package android:name="com.danamon.dbank.reg" />
+        <package android:name="com.cimbniaga.octomobile" />
         <package android:name="com.tokopedia.tkpd" />
         <package android:name="com.grabtaxi.passenger" />
-        <package android:name="ovo.id" />
     </queries>
 
     <application

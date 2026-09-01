@@ -5,6 +5,8 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 
+import '../widgets/bank_badge.dart';
+
 class ReportScreen extends StatelessWidget {
   const ReportScreen({super.key});
 
@@ -189,7 +191,7 @@ class ReportScreen extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                                    BankBadge(accountName: acc.name, accountType: acc.type, size: 20),
                                     const SizedBox(width: 8),
                                     Text(acc.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain)),
                                   ],

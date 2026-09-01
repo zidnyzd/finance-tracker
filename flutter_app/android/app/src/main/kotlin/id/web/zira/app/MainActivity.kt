@@ -20,17 +20,21 @@ class MainActivity: FlutterActivity() {
     private val CHANNEL = "id.web.zira.app/settings"
 
     private val KNOWN_FINANCIAL_APPS = listOf(
-        mapOf("id" to "bca", "name" to "BCA / myBCA", "package" to "com.bca", "alt" to "com.bca.mybca"),
-        mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "package" to "id.bmri.livin", "alt" to "com.bankmandiri.mandirimai"),
-        mapOf("id" to "brimo", "name" to "BRImo (Bank BRI)", "package" to "id.co.bri.brimo", "alt" to ""),
-        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "package" to "src.com.bni", "alt" to "id.co.bni.wondr"),
-        mapOf("id" to "jago", "name" to "Bank Jago", "package" to "com.jago.digitalBanking", "alt" to ""),
-        mapOf("id" to "blu", "name" to "blu by BCA Digital", "package" to "id.co.bcadigital.blu", "alt" to ""),
-        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "package" to "com.btpn.seabank", "alt" to "com.shopee.seabank"),
-        mapOf("id" to "dana", "name" to "DANA Indonesia", "package" to "id.dana", "alt" to ""),
-        mapOf("id" to "gopay", "name" to "GoPay / Gojek", "package" to "com.gojek.app", "alt" to ""),
-        mapOf("id" to "ovo", "name" to "OVO Payment", "package" to "ovo.id", "alt" to ""),
-        mapOf("id" to "shopeepay", "name" to "ShopeePay / Shopee", "package" to "com.shopee.id", "alt" to "")
+        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
+        mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "packages" to listOf("id.bmri.livin", "com.bankmandiri.mandirimai", "tl.bmdl.livin")),
+        mapOf("id" to "bca", "name" to "BCA / myBCA", "packages" to listOf("com.bca", "com.bca.mybca", "com.bca.mybca.omni.android")),
+        mapOf("id" to "brimo", "name" to "BRImo (Bank BRI)", "packages" to listOf("id.co.bri.brimo")),
+        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "packages" to listOf("src.com.bni", "id.bni.wondr", "id.co.bni.wondr")),
+        mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking")),
+        mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
+        mapOf("id" to "dana", "name" to "DANA Indonesia", "packages" to listOf("id.dana")),
+        mapOf("id" to "gopay", "name" to "GoPay / Gojek", "packages" to listOf("com.gojek.app", "com.gojek.gopay")),
+        mapOf("id" to "ovo", "name" to "OVO Payment", "packages" to listOf("ovo.id")),
+        mapOf("id" to "shopeepay", "name" to "ShopeePay / Shopee", "packages" to listOf("com.shopee.id")),
+        mapOf("id" to "bsi", "name" to "BSI Mobile / SuperApp", "packages" to listOf("co.id.bankbsi.superapp")),
+        mapOf("id" to "neobank", "name" to "Neobank (BNC)", "packages" to listOf("com.bnc.finance")),
+        mapOf("id" to "jenius", "name" to "Jenius BTPN", "packages" to listOf("com.btpn.dc")),
+        mapOf("id" to "cimb", "name" to "OCTO Mobile CIMB", "packages" to listOf("com.cimbniaga.octomobile"))
     )
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -81,29 +85,19 @@ class MainActivity: FlutterActivity() {
                         val list = mutableListOf<Map<String, Any>>()
 
                         for (item in KNOWN_FINANCIAL_APPS) {
-                            val mainPkg = item["package"] as String
-                            val altPkg = item["alt"] as String
+                            val pkgs = item["packages"] as? List<String> ?: emptyList()
                             var foundPkg: String? = null
                             var appLabel: String? = null
                             var iconBase64 = ""
 
-                            // Check main package
-                            try {
-                                val info = pm.getApplicationInfo(mainPkg, 0)
-                                foundPkg = mainPkg
-                                appLabel = pm.getApplicationLabel(info).toString()
-                                val drawable = pm.getApplicationIcon(info)
-                                iconBase64 = drawableToBase64(drawable)
-                            } catch (_: PackageManager.NameNotFoundException) {}
-
-                            // Check alt package if main not found
-                            if (foundPkg == null && altPkg.isNotEmpty()) {
+                            for (pkg in pkgs) {
                                 try {
-                                    val info = pm.getApplicationInfo(altPkg, 0)
-                                    foundPkg = altPkg
+                                    val info = pm.getApplicationInfo(pkg, 0)
+                                    foundPkg = pkg
                                     appLabel = pm.getApplicationLabel(info).toString()
                                     val drawable = pm.getApplicationIcon(info)
                                     iconBase64 = drawableToBase64(drawable)
+                                    break // Found matching package
                                 } catch (_: PackageManager.NameNotFoundException) {}
                             }
 
@@ -175,7 +169,7 @@ class MainActivity: FlutterActivity() {
             }
 
             val stream = ByteArrayOutputStream()
-            // Resize to 96x96 for crisp, fast rendering in Flutter
+            // 96x96 PNG for crisp native sharpness
             val scaled = Bitmap.createScaledBitmap(bitmap, 96, 96, true)
             scaled.compress(Bitmap.CompressFormat.PNG, 90, stream)
             Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)

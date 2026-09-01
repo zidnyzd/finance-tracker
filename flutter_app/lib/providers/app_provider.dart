@@ -13,6 +13,7 @@ class AppProvider extends ChangeNotifier {
   DashboardData? _dashboardData;
   List<AccountModel> _accounts = [];
   bool _isLoadingDashboard = false;
+  List<InstalledBankApp> _installedApps = [];
 
   bool get isDarkMode => _isDarkMode;
   bool get isBalanceHidden => _isBalanceHidden;
@@ -22,11 +23,39 @@ class AppProvider extends ChangeNotifier {
   DashboardData? get dashboardData => _dashboardData;
   List<AccountModel> get accounts => _accounts;
   bool get isLoadingDashboard => _isLoadingDashboard;
+  List<InstalledBankApp> get installedApps => _installedApps;
   bool get isLoggedIn => _token != null && _token!.isNotEmpty;
 
   AppProvider() {
     _loadPreferences();
     checkNotifPermission();
+    loadInstalledFinancialApps();
+  }
+
+  Future<void> loadInstalledFinancialApps() async {
+    try {
+      final apps = await PlatformService.getInstalledFinancialApps();
+      _installedApps = apps;
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  String? getBankIconBase64(String accountName) {
+    if (_installedApps.isEmpty) return null;
+    final name = accountName.toLowerCase().trim();
+
+    for (final app in _installedApps) {
+      final appName = app.name.toLowerCase();
+      final appId = app.id.toLowerCase();
+      final pkg = app.packageName.toLowerCase();
+
+      if (name.contains(appId) || appName.contains(name) || name.contains(appName) || pkg.contains(name)) {
+        if (app.iconBase64.isNotEmpty) {
+          return app.iconBase64;
+        }
+      }
+    }
+    return null;
   }
 
   Future<void> checkNotifPermission() async {
@@ -58,9 +87,12 @@ class AppProvider extends ChangeNotifier {
 
     // Load per-app switches
     for (final app in [
-      'com.bca', 'id.bmri.livin', 'id.co.bri.brimo', 'src.com.bni',
-      'com.jago.digitalBanking', 'id.co.bcadigital.blu', 'com.btpn.seabank',
-      'id.dana', 'com.gojek.app', 'ovo.id', 'com.shopee.id'
+      'ph.seabank.seabank', 'com.btpn.seabank', 'com.shopee.seabank',
+      'com.bca', 'com.bca.mybca', 'com.bca.mybca.omni.android',
+      'id.bmri.livin', 'com.bankmandiri.mandirimai',
+      'id.co.bri.brimo', 'src.com.bni', 'id.bni.wondr',
+      'com.jago.digitalBanking', 'com.bcadigital.blu', 'id.co.bcadigital.blu',
+      'id.dana', 'com.gojek.app', 'com.gojek.gopay', 'ovo.id', 'com.shopee.id'
     ]) {
       _appNotifSwitches[app] = prefs.getBool('notif_app_enabled_$app') ?? true;
     }
@@ -139,16 +171,21 @@ class AppProvider extends ChangeNotifier {
     _isLoadingDashboard = true;
     notifyListeners();
 
-    final data = await ApiService.getDashboard(_token!);
-    _dashboardData = data;
+    final data = await ApiService.getDashboard();
     _isLoadingDashboard = false;
+    if (data != null) {
+      _dashboardData = data;
+      _accounts = data.accounts;
+    }
     notifyListeners();
   }
 
   Future<void> fetchAccounts() async {
     if (_token == null) return;
-    final accs = await ApiService.getAccounts(_token!);
-    _accounts = accs;
-    notifyListeners();
+    final list = await ApiService.getAccounts();
+    if (list != null) {
+      _accounts = list;
+      notifyListeners();
+    }
   }
 }
