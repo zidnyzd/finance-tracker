@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../services/platform_service.dart';
 
 class AppProvider extends ChangeNotifier {
   bool _isDarkMode = true;
   bool _isBalanceHidden = false;
+  bool _isNotifPermissionGranted = false;
   String? _token;
   UserModel? _currentUser;
   DashboardData? _dashboardData;
@@ -14,6 +16,7 @@ class AppProvider extends ChangeNotifier {
 
   bool get isDarkMode => _isDarkMode;
   bool get isBalanceHidden => _isBalanceHidden;
+  bool get isNotifPermissionGranted => _isNotifPermissionGranted;
   String? get token => _token;
   UserModel? get currentUser => _currentUser;
   DashboardData? get dashboardData => _dashboardData;
@@ -23,6 +26,13 @@ class AppProvider extends ChangeNotifier {
 
   AppProvider() {
     _loadPreferences();
+    checkNotifPermission();
+  }
+
+  Future<void> checkNotifPermission() async {
+    final granted = await PlatformService.isNotificationPermissionGranted();
+    _isNotifPermissionGranted = granted;
+    notifyListeners();
   }
 
   Future<void> _loadPreferences() async {

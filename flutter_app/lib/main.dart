@@ -33,20 +33,29 @@ class ZiRaApp extends StatefulWidget {
   State<ZiRaApp> createState() => _ZiRaAppState();
 }
 
-class _ZiRaAppState extends State<ZiRaApp> {
+class _ZiRaAppState extends State<ZiRaApp> with WidgetsBindingObserver {
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initDeepLinks();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _linkSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      Provider.of<AppProvider>(context, listen: false).checkNotifPermission();
+    }
   }
 
   Future<void> _initDeepLinks() async {

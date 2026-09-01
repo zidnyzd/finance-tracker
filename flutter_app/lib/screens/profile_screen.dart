@@ -126,7 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final user = Provider.of<AppProvider>(context).currentUser;
+    final provider = Provider.of<AppProvider>(context);
+    final user = provider.currentUser;
+    final isNotifGranted = provider.isNotifPermissionGranted;
 
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
@@ -203,15 +205,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: _isNotifPermissionGranted ? AppColors.success.withOpacity(0.15) : AppColors.danger.withOpacity(0.15),
+                        color: isNotifGranted ? AppColors.success.withOpacity(0.15) : AppColors.danger.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        _isNotifPermissionGranted ? 'Aktif ✓' : 'Belum Izin',
+                        isNotifGranted ? 'Aktif ✓' : 'Belum Izin',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _isNotifPermissionGranted ? AppColors.success : AppColors.danger,
+                          color: isNotifGranted ? AppColors.success : AppColors.danger,
                         ),
                       ),
                     ),

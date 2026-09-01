@@ -174,6 +174,7 @@ class HomeScreen extends StatelessWidget {
             InkWell(
               onTap: () async {
                 await PlatformService.openNotificationSettings();
+                Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(
@@ -189,10 +190,14 @@ class HomeScreen extends StatelessWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: primary.withOpacity(0.12),
+                        color: (provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(Icons.bolt, color: primary, size: 20),
+                      child: Icon(
+                        provider.isNotifPermissionGranted ? Icons.bolt : Icons.notifications_off_outlined,
+                        color: provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -200,19 +205,25 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Auto-Catat Notifikasi Bank',
+                            provider.isNotifPermissionGranted ? 'Auto-Catat Notifikasi Aktif' : 'Auto-Catat Belum Diizinkan',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
                           ),
                           Text(
-                            'Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll.',
+                            provider.isNotifPermissionGranted
+                                ? 'Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll.'
+                                : 'Tap di sini untuk mengaktifkan izin notifikasi HP.',
                             style: TextStyle(fontSize: 10, color: textMuted),
                           ),
                         ],
                       ),
                     ),
-                    const Text(
-                      'Izin ⚙️',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success),
+                    Text(
+                      provider.isNotifPermissionGranted ? 'Aktif ✓' : 'Beri Izin ⚙️',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger,
+                      ),
                     ),
                   ],
                 ),
