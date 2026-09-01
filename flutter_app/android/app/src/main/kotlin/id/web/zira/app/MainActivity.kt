@@ -2,13 +2,18 @@ package id.web.zira.app
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
+import android.util.Base64
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 class MainActivity: FlutterActivity() {
@@ -80,12 +85,15 @@ class MainActivity: FlutterActivity() {
                             val altPkg = item["alt"] as String
                             var foundPkg: String? = null
                             var appLabel: String? = null
+                            var iconBase64 = ""
 
                             // Check main package
                             try {
                                 val info = pm.getApplicationInfo(mainPkg, 0)
                                 foundPkg = mainPkg
                                 appLabel = pm.getApplicationLabel(info).toString()
+                                val drawable = pm.getApplicationIcon(info)
+                                iconBase64 = drawableToBase64(drawable)
                             } catch (_: PackageManager.NameNotFoundException) {}
 
                             // Check alt package if main not found
@@ -94,6 +102,8 @@ class MainActivity: FlutterActivity() {
                                     val info = pm.getApplicationInfo(altPkg, 0)
                                     foundPkg = altPkg
                                     appLabel = pm.getApplicationLabel(info).toString()
+                                    val drawable = pm.getApplicationIcon(info)
+                                    iconBase64 = drawableToBase64(drawable)
                                 } catch (_: PackageManager.NameNotFoundException) {}
                             }
 
@@ -102,6 +112,7 @@ class MainActivity: FlutterActivity() {
                                     "id" to (item["id"] ?: "bank"),
                                     "name" to (appLabel ?: (item["name"] ?: foundPkg)),
                                     "package_name" to foundPkg,
+                                    "icon_base64" to iconBase64,
                                     "is_installed" to true
                                 ))
                             }
@@ -146,6 +157,30 @@ class MainActivity: FlutterActivity() {
                     result.notImplemented()
                 }
             }
+        }
+    }
+
+    private fun drawableToBase64(drawable: Drawable): String {
+        return try {
+            val bitmap = if (drawable is BitmapDrawable && drawable.bitmap != null) {
+                drawable.bitmap
+            } else {
+                val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 96
+                val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 96
+                val bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bm)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+                bm
+            }
+
+            val stream = ByteArrayOutputStream()
+            // Resize to 96x96 for crisp, fast rendering in Flutter
+            val scaled = Bitmap.createScaledBitmap(bitmap, 96, 96, true)
+            scaled.compress(Bitmap.CompressFormat.PNG, 90, stream)
+            Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+        } catch (e: Exception) {
+            ""
         }
     }
 }

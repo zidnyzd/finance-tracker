@@ -4,12 +4,14 @@ class InstalledBankApp {
   final String id;
   final String name;
   final String packageName;
+  final String iconBase64;
   final bool isInstalled;
 
   InstalledBankApp({
     required this.id,
     required this.name,
     required this.packageName,
+    required this.iconBase64,
     required this.isInstalled,
   });
 
@@ -18,6 +20,7 @@ class InstalledBankApp {
       id: map['id']?.toString() ?? 'bank',
       name: map['name']?.toString() ?? 'Bank App',
       packageName: map['package_name']?.toString() ?? '',
+      iconBase64: map['icon_base64']?.toString() ?? '',
       isInstalled: map['is_installed'] == true,
     );
   }

@@ -1,7 +1,7 @@
 name: zira_finance
 description: "Aplikasi Manajemen Keuangan Pribadi ZiRa Finance - 100% Identik Web & Auto-Sync Notifikasi Perbankan"
 publish_to: 'none'
-version: 1.6.0+18
+version: 1.6.1+19
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -18,8 +19,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.6.0';
-  int _buildNumber = 18;
+  String _appVersion = '1.6.1';
+  int _buildNumber = 19;
   List<InstalledBankApp> _installedApps = [];
   bool _isLoadingApps = true;
 
@@ -33,9 +34,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadVersion() async {
     try {
       final pInfo = await PackageInfo.fromPlatform();
+      final rawBuild = int.tryParse(pInfo.buildNumber) ?? 19;
+      // Strip Flutter split-per-abi offset (e.g. 2018 -> 18, 1018 -> 18)
+      final cleanBuild = rawBuild > 1000 ? (rawBuild % 1000) : rawBuild;
+
       setState(() {
         _appVersion = pInfo.version;
-        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 18;
+        _buildNumber = cleanBuild;
       });
     } catch (_) {}
   }
@@ -214,7 +219,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         received += chunk.length;
         if (total > 0 && mounted) {
           progress = received / total;
-          // Refresh dialog state via global key or standard set state
         }
       }
 
@@ -222,8 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await sink.close();
 
       if (mounted) {
-        Navigator.pop(context); // Close download dialog
-        // Launch installer directly in Android
+        Navigator.pop(context);
         await PlatformService.installApk(apkFile.path);
       }
     } catch (e) {
@@ -383,7 +386,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 3. Dynamic Installed Financial Apps Detected on Device
+          // 3. Dynamic Installed Financial Apps Detected on Device (with Real Native App Icons)
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -450,7 +453,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       return Row(
                         children: [
-                          BankBadge(accountName: app.id, accountType: 'bank', size: 32),
+                          // Render REAL LIVE APP ICON from phone if available
+                          if (app.iconBase64.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                base64Decode(app.iconBase64),
+                                width: 34,
+                                height: 34,
+                                errorBuilder: (_, __, ___) => BankBadge(accountName: app.id, accountType: 'bank', size: 34),
+                              ),
+                            )
+                          else
+                            BankBadge(accountName: app.id, accountType: 'bank', size: 34),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
