@@ -35,6 +35,9 @@ Thumbs.db
 # Binary installers
 *.deb
 *.rpm
+*.apk
+static/*.apk
+build-artifacts/
 
 # Reference/dev files
 inapp_reference.html
