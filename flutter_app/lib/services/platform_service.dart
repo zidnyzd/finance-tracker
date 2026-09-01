@@ -64,4 +64,13 @@ class PlatformService {
       return [];
     }
   }
+
+  static Future<bool> installApk(String filePath) async {
+    try {
+      final res = await _channel.invokeMethod<bool>('installApk', {'filePath': filePath});
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
 }

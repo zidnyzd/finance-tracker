@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../services/platform_service.dart';
@@ -16,8 +18,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.5.8';
-  int _buildNumber = 17;
+  String _appVersion = '1.6.0';
+  int _buildNumber = 18;
   List<InstalledBankApp> _installedApps = [];
   bool _isLoadingApps = true;
 
@@ -33,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final pInfo = await PackageInfo.fromPlatform();
       setState(() {
         _appVersion = pInfo.version;
-        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 17;
+        _buildNumber = int.tryParse(pInfo.buildNumber) ?? 18;
       });
     } catch (_) {}
   }
@@ -122,13 +124,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onPressed: () {
                   Navigator.pop(ctx);
-                  launchUrl(Uri.parse(versionData.apkUrl), mode: LaunchMode.externalApplication);
+                  _startInAppDownload(versionData.apkUrl, versionData.versionName);
                 },
-                child: const Text('Unduh Update Sekarang'),
+                child: const Text('Update Sekarang'),
               ),
           ],
         ),
       );
+    }
+  }
+
+  Future<void> _startInAppDownload(String url, String versionName) async {
+    double progress = 0.0;
+    int received = 0;
+    int total = 0;
+    bool isDone = false;
+    String? errorMessage;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setProgressState) {
+          return AlertDialog(
+            title: Text(
+              isDone ? 'Pemasangan Update' : 'Mengunduh ZiRa Finance v$versionName',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (errorMessage != null)
+                  Text('Gagal mengunduh: $errorMessage', style: const TextStyle(color: AppColors.danger, fontSize: 12))
+                else if (isDone)
+                  const Text('Unduhan selesai! Menyiapkan pemasangan...')
+                else ...[
+                  LinearProgressIndicator(
+                    value: progress > 0 ? progress : null,
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                    backgroundColor: AppColors.borderLight,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${(received / (1024 * 1024)).toStringAsFixed(1)} MB / ${(total / (1024 * 1024)).toStringAsFixed(1)} MB',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textMutedLight),
+                      ),
+                      Text(
+                        '${(progress * 100).toStringAsFixed(0)}%',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              if (errorMessage != null)
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Tutup'),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    try {
+      final client = http.Client();
+      final request = http.Request('GET', Uri.parse(url));
+      final response = await client.send(request);
+
+      total = response.contentLength ?? 0;
+      final tempDir = await getTemporaryDirectory();
+      final apkFile = File('${tempDir.path}/update_zira.apk');
+      if (await apkFile.exists()) {
+        await apkFile.delete();
+      }
+
+      final sink = apkFile.openWrite();
+
+      await for (final chunk in response.stream) {
+        sink.add(chunk);
+        received += chunk.length;
+        if (total > 0 && mounted) {
+          progress = received / total;
+          // Refresh dialog state via global key or standard set state
+        }
+      }
+
+      await sink.flush();
+      await sink.close();
+
+      if (mounted) {
+        Navigator.pop(context); // Close download dialog
+        // Launch installer directly in Android
+        await PlatformService.installApk(apkFile.path);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengunduh update: $e'), backgroundColor: AppColors.danger),
+        );
+      }
     }
   }
 
