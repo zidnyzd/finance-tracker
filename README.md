@@ -1,113 +1,97 @@
 # ZiRa Finance
 
-Aplikasi pencatatan keuangan pribadi — sederhana, mobile-friendly, dark mode, Google OAuth, laporan bulanan.
-Kelola pemasukan & pengeluaran dengan mudah langsung dari browser.
+Aplikasi manajemen keuangan pribadi modern, cepat, dan terpadu — didukung oleh **Go Web Server**, **AI Telegram Bot (Gemini 2.0)**, dan **Aplikasi Mobile Flutter Native** dengan sinkronisasi mutasi perbankan otomatis 24/7.
 
-![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-3.27+-02569B?logo=flutter&logoColor=white)
+![Android](https://img.shields.io/badge/Android-API_24+-3DDC84?logo=android&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?logo=sqlite&logoColor=white)
+![Telegram Bot](https://img.shields.io/badge/Telegram_Bot-Gemini_AI-2CA5E0?logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
 
 ---
 
-## Fitur
+## 📱 Ekosistem ZiRa Finance
 
-- **Dashboard** — ringkasan saldo, pemasukan & pengeluaran, 3 chart interaktif
-- **Tambah Transaksi** — income/expense, autocomplete kategori, datetime picker
-- **Riwayat** — per-bulan, paginasi, edit/delete
-- **Laporan Bulanan & Mingguan** — pemasukan vs pengeluaran per kategori
-- **Bot Telegram AI** — Terintegrasi dengan bot Telegram (@zirafinancebot) menggunakan Google Gemini 2.0 Flash Lite. Bisa parse teks natural ("makan 50rb bca") atau baca otomatis foto struk kasir ke dalam riwayat, lengkap dengan perlindungan tombol Batal.
-- **Manajemen Sesi Multi-Device** — Login di max 5 perangkat sekaligus, lihat detail IP & Browser, serta Force Logout jarak jauh dari Profil.
-- **Riwayat & Transfer Pintar** — Pencatatan saldo otomatis, laporan mingguan/bulanan, dan dukungan pembukuan ganda (Double Entry Ledger) untuk Pindah Saldo antar dompet.
-- **Dompet** — BCA, GoPay, Cash, saldo auto-hitung
-- **Google OAuth** — login/daftar dengan akun Google
-- **Profil** — ubah nama, email, & kata sandi
-- **Dark Mode** — toggle tema, tersimpan di localStorage
-- **Responsive** — desktop & mobile
+ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *real-time*:
+
+1. **🌐 Web Dashboard (`https://zira.web.id`):** Antarmuka web responsif berbasis Go HTML template, Bootstrap 5, dan visualisasi grafik interaktif ApexCharts.
+2. **🤖 Bot Telegram AI (`@zirafinancebot`):** Asisten keuangan pintar berbasis Gemini 2.0 Flash Lite untuk pencatatan transaksi bahasa alami dan pembacaan foto struk belanja otomatis.
+3. **📱 Aplikasi Android Flutter Native:** Aplikasi mobile 100% identik dengan web, dilengkapi latar belakang **Auto-Catat Notifikasi Bank 24/7** yang hemat baterai.
 
 ---
 
-## Penjelasan Sistem
+## 🌟 Fitur Utama Aplikasi Mobile (Flutter Edition)
 
-### Arsitektur
+* **100% Pixel-Perfect UI Identik Web:** Dibangun dengan font resmi **Poppins**, iconset **Tabler Icons**, dan palet warna tema adaptif (Dark Mode `#16181B` / Light Mode `#F5F6FA`).
+* **Auto-Catat Notifikasi Bank 24/7:**
+  * Background listener berbasis **Event-Driven (0% CPU / 0% Battery Drain saat idle)**.
+  * Mendukung mutasi otomatis dari: **BCA**, **myBCA**, **Livin' by Mandiri**, **BRImo**, **BNI Mobile / Wondr**, **Bank Jago**, **blu by BCA Digital**, **SeaBank**, **DANA**, **GoPay**, **OVO**, dan **ShopeePay**.
+  * Dilengkapi proteksi anti-duplikasi mutasi berbasis hash SHA-256 (*Idempotent Transaction Lock*).
+  * Antrian offline cerdas (*WorkManager Exponential Retry Queue*) jika HP sempat offline.
+* **Deteksi Aplikasi Terpasang Dinamis:**
+  * Memindai dan mengekstrak icon resmi langsung dari aplikasi m-banking yang terpasang di HP pengguna.
+  * Switch On/Off mandiri untuk memilih bank mana saja yang ingin di-sync.
+* **In-App Direct Seamless Updater:**
+  * Cek update otomatis dari server `/api/v1/app/version`.
+  * Unduh pembaruan langsung di dalam aplikasi dengan progress bar live dan auto-launch installer via `FileProvider`.
+* **Google 1-Tap Sign-In:** Login cepat dan aman via Chrome Custom Tabs callback deep link `zira://auth`.
+* **Eye Balance Privacy:** Sembunyikan angka saldo (`Rp ••••••`) dengan satu tap.
+* **Visual Donut & Cashflow Chart:** Grafik lingkaran proporsi saldo per rekening bank yang berwarna-warni.
+
+---
+
+## 📦 Unduh Aplikasi Android (APK)
+
+| Versi Rilis | Tipe Build | Link Download |
+|---|---|---|
+| **v1.6.3 (Terbaru)** | ARM64-v8a Release | [Download ZiRa-Finance-v1.6.3.apk](https://zira.web.id/static/ZiRa-Finance-v1.6.3.apk) |
+| **GitHub Releases** | Official Artifacts | [Kunjungi Halaman Rilis GitHub](https://github.com/zidnyzd/finance-tracker/releases) |
+
+---
+
+## 🏗️ Arsitektur Sistem
 
 ```
-┌──────────────────┐      ┌──────────────────┐     ┌────────────┐
-│    Browser       │ ───▶ │  Go Web Server    │ ──▶ │  SQLite DB │
-│  (Bootstrap 5)   │ ◀─── │  (net/http + Go   │ ◀── │finance.db  │
-│  ApexCharts UI   │      │   html/template)  │     │ (WAL mode) │
-└──────────────────┘      └──────────────────┘     └────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             ARSITEKTUR ZIRA FINANCE                              │
+└──────────────────────────────────────────────────────────────────────────────────┘
+
+ [Frontend Clients]
+   ├── 🌐 Web Dashboard (Browser / Desktop & Mobile Web)
+   ├── 🤖 Telegram AI Bot (@zirafinancebot via Telebot + Gemini 2.0 AI)
+   └── 📱 Flutter Android App (Single-Activity + Material 3 + Poppins Theme)
+         └── ⚙️ Kotlin Native Bridge (NotificationListenerService 24/7 + WorkManager)
+
+                                   │
+                                   ▼ [HTTPS / REST API / Webhook]
+ ┌─────────────────────────────────────────────────────────────────────────────────┐
+ │                            GO WEB SERVER ENGINE                                 │
+ │  - Net/HTTP Core Server (Port 8081 behind Cloudflare Tunnel)                    │
+ │  - Google OAuth 2.0 & Session Middleware (HttpOnly + Secure + CSRF Token)       │
+ │  - REST JSON API Handlers (/api/v1/...)                                         │
+ │  - Regex Fast-Path Parser & Gemini AI Fallback Parser                           │
+ └─────────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────┐
+ │                         PERSISTENCE DATABASE (SQLite)                           │
+ │  - SQLite3 with Write-Ahead Logging (WAL Mode)                                  │
+ │  - Tabel: users, accounts, transactions, api_tokens, notification_logs          │
+ └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Alur Kerja
+---
 
-1. **Session & Auth** — Login via username/password (bcrypt) atau Google OAuth 2.0. Session token 16-byte random disimpan di HttpOnly + Secure cookie (7 hari). CSRF token per-session untuk proteksi mutasi data. Rate limiter per-IP: login 5/menit, register 3/jam.
+## 🔐 Keamanan & Privasi
 
-2. **Dashboard** — Saldo = total income − total expense. 3 chart ApexCharts: income/expense 7 hari terakhir, top expense categories (donut), saldo per dompet. 5 transaksi terbaru.
-
-3. **Transaksi** — Income/expense dengan amount, category (autocomplete), dompet, description, date. Edit & delete via POST + CSRF. Pagination per-bulan, 20 transaksi per halaman.
-
-4. **Laporan Bulanan** — Breakdown income dan expense per kategori dengan progress bar persentase.
-
-5. **Dompet** — CRUD dompet virtual (bank, ewallet, cash). Saldo otomatis dari transaksi. Brand colors otomatis untuk BCA, GoPay, Mandiri, Seabank, dll.
-
-### Keamanan
-
-| Lapisan | Detail |
-|---------|--------|
-| Password | bcrypt default cost |
-| Session | `crypto/rand` 16-byte, HttpOnly, Secure, SameSite=Lax, 7 hari |
-| CSRF | Per-session token pada semua POST/PUT/DELETE |
-| SQL Injection | Parameterized queries |
-| XSS | Go `html/template` auto-escaping |
-| Headers | HSTS, CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy |
-| Rate Limit | In-memory sliding window per IP/User |
-| Audit Log | Login/register/oauth success & failure |
+* **Tanpa Izin Storage Berbahaya:** Aplikasi mobile tidak meminta akses ke file/foto pribadi di galeri HP Anda.
+* **Autentikasi Sandi Kuat:** Password di-hash menggunakan algoritma `bcrypt` standar industri.
+* **Perlindungan Session:** Token 16-byte kriptografis acak dengan cookie `HttpOnly`, `SameSite=Lax`, dan pembatasan maksimal 5 sesi aktif multi-device.
+* **CSRF & Rate Limiting:** Proteksi token mutasi per-sesi dan sliding window rate limiter per IP.
 
 ---
 
-## API Endpoints
+## 📄 Riwayat Versi (Changelog)
 
-| Route | Auth | Methods | Deskripsi |
-|-------|------|---------|-----------|
-| `/` | ✅ | GET | Dashboard |
-| `/login` | ❌ | GET/POST | Login form |
-| `/register` | ❌ | GET/POST | Registrasi |
-| `/logout` | ✅ | GET | Logout |
-| `/auth/google` | ❌ | GET | Google OAuth |
-| `/add` | ✅ | GET/POST | Tambah transaksi |
-| `/edit` | ✅ | GET/POST | Edit transaksi |
-| `/delete` | ✅ | POST | Hapus transaksi |
-| `/history` | ✅ | GET | Riwayat per-bulan |
-| `/report` | ✅ | GET | Laporan bulanan |
-| `/dompet` | ✅ | GET/POST | Kelola dompet |
-| `/profile` | ✅ | GET/POST | Edit profil |
-
----
-
-## Stack
-
-| Layer | Teknologi |
-|-------|-----------|
-| Backend | Go (net/http + html/template) |
-| Database | SQLite 3 (WAL mode) |
-| Frontend | Bootstrap 5.3 + Tabler Icons + ApexCharts + Poppins |
-| Auth | bcrypt + crypto/rand session + Google OAuth 2.0 |
-
----
-
-## Resource Usage
-
-| Metric | Value |
-|--------|-------|
-| Memory | ~10 MB |
-| Binary | ~17 MB (static, single binary) |
-| CPU | Near zero idle |
-
----
-
-## Hak Milik
-
-**Proprietary — All Rights Reserved.**
-
-Aplikasi ini adalah hak milik eksklusif **ZidStore** dan dilindungi oleh hukum. Dilarang keras menyalin, mendistribusikan, memodifikasi, melakukan reverse engineering, atau menggunakan seluruh maupun sebagian kode, desain, logika bisnis, maupun aset dari aplikasi ini tanpa izin tertulis dari pemilik.
-
-Built with Go by [ZidStore](https://zidstore.net).
+Untuk melihat catatan rilis lengkap dari versi v1.0.0 hingga v1.6.3, silakan baca file **[CHANGELOG.md](CHANGELOG.md)**.
