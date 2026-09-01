@@ -1,0 +1,29 @@
+name: zira_finance
+description: "Aplikasi Manajemen Keuangan Pribadi ZiRa Finance - 100% Identik Web & Auto-Sync Notifikasi Perbankan"
+publish_to: 'none'
+version: 1.5.0+9
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  provider: ^6.1.2
+  http: ^1.2.1
+  shared_preferences: ^2.2.3
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+  flutter_custom_tabs: ^2.1.0
+  package_info_plus: ^8.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
