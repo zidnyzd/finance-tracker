@@ -109,6 +109,21 @@ class ApiService {
     }
   }
 
+  // Update Transaction
+  static Future<Map<String, dynamic>> updateTransaction(String token, Map<String, dynamic> payload) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/transactions/update'),
+        headers: _headers(token),
+        body: jsonEncode(payload),
+      ).timeout(const Duration(seconds: 15));
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': 'Gagal memperbarui transaksi: $e'};
+    }
+  }
+
   // Delete Transaction
   static Future<bool> deleteTransaction(String token, int id) async {
     try {
