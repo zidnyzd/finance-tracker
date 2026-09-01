@@ -14,8 +14,18 @@ import 'screens/report_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    ApiService.reportError(
+      errorType: 'flutter_framework_error',
+      message: details.exceptionAsString(),
+      stackTrace: details.stack?.toString() ?? '',
+    );
+  };
+
   runApp(
     MultiProvider(
       providers: [

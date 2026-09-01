@@ -124,7 +124,7 @@ class DashboardData {
       totalExpense: (json['total_expense'] as num?)?.toDouble() ?? 0.0,
       totalExpenseStr: json['total_expense_str'] ?? 'Rp 0',
       accounts: (json['accounts'] as List?)?.map((e) => AccountModel.fromJson(e)).toList() ?? [],
-      recentTxns: (json['recent_transactions'] as List?)?.map((e) => TransactionModel.fromJson(e)).toList() ?? [],
+      recentTxns: ((json['recent_txns'] ?? json['recent_transactions']) as List?)?.map((e) => TransactionModel.fromJson(e)).toList() ?? [],
     );
   }
 }

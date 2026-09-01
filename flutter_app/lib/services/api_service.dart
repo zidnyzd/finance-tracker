@@ -180,6 +180,31 @@ class ApiService {
     }
   }
 
+  // Report App Error to Backend Server
+  static Future<void> reportError({
+    required String errorType,
+    required String message,
+    String stackTrace = '',
+    String? token,
+  }) async {
+    try {
+      final payload = {
+        'app_version': '1.6.7',
+        'device_model': 'Android Mobile',
+        'os_version': 'Android',
+        'error_type': errorType,
+        'error_message': message,
+        'stack_trace': stackTrace,
+      };
+
+      await http.post(
+        Uri.parse('$baseUrl/api/v1/app/log-error'),
+        headers: _headers(token),
+        body: jsonEncode(payload),
+      ).timeout(const Duration(seconds: 8));
+    } catch (_) {}
+  }
+
   // Version Check
   static Future<AppVersionModel?> checkAppVersion() async {
     try {
