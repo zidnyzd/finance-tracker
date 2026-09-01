@@ -6,23 +6,26 @@ class ApiService {
   static const String baseUrl = "https://zira.web.id";
 
   static Map<String, String> _headers(String? token) {
-    final map = {
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
     if (token != null && token.isNotEmpty) {
-      map['Authorization'] = 'Bearer $token';
+      headers['Authorization'] = 'Bearer $token';
     }
-    return map;
+    return headers;
   }
 
-  // Auth: Login
+  // Auth Login
   static Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/v1/auth/login'),
         headers: _headers(null),
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }),
       ).timeout(const Duration(seconds: 15));
 
       final data = jsonDecode(response.body);
@@ -32,7 +35,7 @@ class ApiService {
     }
   }
 
-  // Auth: Me
+  // Get Current User Profile
   static Future<UserModel?> getProfile(String token) async {
     try {
       final response = await http.get(
@@ -52,7 +55,7 @@ class ApiService {
     }
   }
 
-  // Dashboard
+  // Dashboard Data
   static Future<DashboardData?> getDashboard(String token) async {
     try {
       final response = await http.get(
@@ -72,12 +75,13 @@ class ApiService {
     }
   }
 
-  // Transactions
-  static Future<List<TransactionModel>> getTransactions(String token, {String type = '', String query = ''}) async {
+  // Transactions History
+  static Future<List<TransactionModel>> getTransactions(String token, {String type = '', String query = '', String q = ''}) async {
     try {
       final queryParams = <String, String>{};
       if (type.isNotEmpty) queryParams['type'] = type;
-      if (query.isNotEmpty) queryParams['q'] = query;
+      final searchTerm = query.isNotEmpty ? query : q;
+      if (searchTerm.isNotEmpty) queryParams['q'] = searchTerm;
 
       final uri = Uri.parse('$baseUrl/api/v1/transactions').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
       final response = await http.get(uri, headers: _headers(token)).timeout(const Duration(seconds: 15));
@@ -176,7 +180,7 @@ class ApiService {
     }
   }
 
-  // App Version
+  // Version Check
   static Future<AppVersionModel?> checkAppVersion() async {
     try {
       final response = await http.get(

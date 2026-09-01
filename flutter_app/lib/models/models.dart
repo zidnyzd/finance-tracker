@@ -15,21 +15,13 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? 1,
+      id: json['id'] ?? 0,
       username: json['username'] ?? '',
       displayName: json['display_name'] ?? json['username'] ?? '',
       email: json['email'],
       role: json['role'] ?? 'user',
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'username': username,
-    'display_name': displayName,
-    'email': email,
-    'role': role,
-  };
 }
 
 class AccountModel {
@@ -38,7 +30,8 @@ class AccountModel {
   final String type;
   final double balance;
   final String balanceStr;
-  final String color;
+  final String? color;
+  final String? icon;
 
   AccountModel({
     required this.id,
@@ -46,7 +39,8 @@ class AccountModel {
     required this.type,
     required this.balance,
     required this.balanceStr,
-    required this.color,
+    this.color,
+    this.icon,
   });
 
   factory AccountModel.fromJson(Map<String, dynamic> json) {
@@ -56,7 +50,8 @@ class AccountModel {
       type: json['type'] ?? 'bank',
       balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
       balanceStr: json['balance_str'] ?? 'Rp 0',
-      color: json['color_hex'] ?? json['color'] ?? '#2c7be5',
+      color: json['color_hex'] ?? json['color'],
+      icon: json['icon'],
     );
   }
 }
@@ -68,6 +63,7 @@ class TransactionModel {
   final String amountStr;
   final String category;
   final String description;
+  final int accountId;
   final String accountName;
   final String date;
 
@@ -78,6 +74,7 @@ class TransactionModel {
     required this.amountStr,
     required this.category,
     required this.description,
+    required this.accountId,
     required this.accountName,
     required this.date,
   });
@@ -90,6 +87,7 @@ class TransactionModel {
       amountStr: json['amount_str'] ?? 'Rp 0',
       category: json['category'] ?? 'Lainnya',
       description: json['description'] ?? '',
+      accountId: json['account_id'] ?? 0,
       accountName: json['account_name'] ?? '',
       date: json['date'] ?? '',
     );
@@ -125,14 +123,8 @@ class DashboardData {
       totalIncomeStr: json['total_income_str'] ?? 'Rp 0',
       totalExpense: (json['total_expense'] as num?)?.toDouble() ?? 0.0,
       totalExpenseStr: json['total_expense_str'] ?? 'Rp 0',
-      accounts: (json['accounts'] as List<dynamic>?)
-              ?.map((e) => AccountModel.fromJson(e))
-              .toList() ??
-          [],
-      recentTxns: (json['recent_txns'] as List<dynamic>?)
-              ?.map((e) => TransactionModel.fromJson(e))
-              .toList() ??
-          [],
+      accounts: (json['accounts'] as List?)?.map((e) => AccountModel.fromJson(e)).toList() ?? [],
+      recentTxns: (json['recent_transactions'] as List?)?.map((e) => TransactionModel.fromJson(e)).toList() ?? [],
     );
   }
 }
@@ -152,8 +144,8 @@ class AppVersionModel {
 
   factory AppVersionModel.fromJson(Map<String, dynamic> json) {
     return AppVersionModel(
-      versionCode: json['version_code'] ?? 1,
-      versionName: json['version_name'] ?? '1.0.0',
+      versionCode: json['version_code'] ?? 0,
+      versionName: json['version_name'] ?? '',
       apkUrl: json['apk_url'] ?? '',
       changelog: json['changelog'] ?? '',
     );
