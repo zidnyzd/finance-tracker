@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -21,6 +22,9 @@ class ReportScreen extends StatelessWidget {
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
 
+    final validAccounts = accounts.where((a) => a.balance > 0).toList();
+    final totalBalance = (data?.balance ?? 1.0) > 0 ? (data?.balance ?? 1.0) : 1.0;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -37,7 +41,7 @@ class ReportScreen extends StatelessWidget {
             ),
           ),
           Text(
-            'Analisis sebaran saldo & arus kas Anda',
+            'Visualisasi alokasi saldo & rincian akun',
             style: TextStyle(fontSize: 12, color: textMuted),
           ),
           const SizedBox(height: 16),
@@ -75,6 +79,60 @@ class ReportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Donut Chart Card (Identical to Web ApexCharts Donut)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderCol),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Distribusi Saldo per Akun',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain),
+                ),
+                const SizedBox(height: 20),
+
+                if (validAccounts.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text('Belum ada saldo untuk divisualisasikan.', style: TextStyle(fontSize: 12, color: textMuted)),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 200,
+                    child: PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 46,
+                        sections: validAccounts.map((acc) {
+                          final color = _parseColor(acc.color);
+                          final percent = (acc.balance / totalBalance) * 100;
+                          return PieChartSectionData(
+                            color: color,
+                            value: acc.balance,
+                            title: percent >= 8 ? '${percent.toStringAsFixed(1)}%' : '',
+                            radius: 36,
+                            titleStyle: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Breakdown per Akun Section
           Text(
             'Rincian Saldo per Akun',
@@ -94,8 +152,7 @@ class ReportScreen extends StatelessWidget {
                 : Column(
                     children: accounts.map((acc) {
                       final color = _parseColor(acc.color);
-                      final totalBal = (data?.balance ?? 1.0) > 0 ? (data?.balance ?? 1.0) : 1.0;
-                      final percent = ((acc.balance / totalBal) * 100).clamp(0.0, 100.0);
+                      final percent = ((acc.balance / totalBalance) * 100).clamp(0.0, 100.0);
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),

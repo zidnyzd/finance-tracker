@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'models/models.dart';
 import 'providers/app_provider.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
@@ -7,6 +11,7 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/report_screen.dart';
+import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -21,12 +26,77 @@ void main() {
   );
 }
 
-class ZiRaApp extends StatelessWidget {
+class ZiRaApp extends StatefulWidget {
   const ZiRaApp({super.key});
+
+  @override
+  State<ZiRaApp> createState() => _ZiRaAppState();
+}
+
+class _ZiRaAppState extends State<ZiRaApp> {
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
+
+    // Check initial launch link (if cold opened from browser)
+    try {
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        _handleDeepLink(initialUri);
+      }
+    } catch (_) {}
+
+    // Listen to incoming deep links while app is open / foreground
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+  }
+
+  Future<void> _handleDeepLink(Uri uri) async {
+    // Expected: zira://auth?token=xxx&name=xxx
+    if (uri.scheme == 'zira' && uri.host == 'auth') {
+      final token = uri.queryParameters['token'];
+      final name = uri.queryParameters['name'] ?? 'Pengguna';
+
+      if (token != null && token.isNotEmpty) {
+        final profile = await ApiService.getProfile(token);
+        final user = profile ?? UserModel(id: 1, username: name, displayName: name, role: 'user');
+        
+        if (mounted) {
+          final provider = Provider.of<AppProvider>(context, listen: false);
+          await provider.saveAuth(token, user);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
+
+    // Synchronize native Android Status Bar & Navigation Bar style
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: provider.isDarkMode ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: provider.isDarkMode ? AppColors.bottomnavDark : AppColors.bottomnavLight,
+        systemNavigationBarIconBrightness: provider.isDarkMode ? Brightness.light : Brightness.dark,
+      ),
+    );
 
     return MaterialApp(
       title: 'ZiRa Finance',

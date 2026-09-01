@@ -53,6 +53,35 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     });
   }
 
+  Future<void> _pickDateTime() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDateTime,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+    );
+
+    if (pickedDate == null) return;
+
+    if (!mounted) return;
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      _selectedDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
+  }
+
   Future<void> _handleSubmit() async {
     final amountText = _amountController.text.replaceAll('.', '').replaceAll(',', '.').trim();
     final amount = double.tryParse(amountText);
@@ -76,6 +105,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     setState(() => _isLoading = true);
 
+    final dateStr = DateFormat('yyyy-MM-ddTHH:mm').format(_selectedDateTime);
+
     Map<String, dynamic> payload;
     if (_txnType == 'transfer') {
       if (_selectedTargetAccount == null || _selectedAccount!.id == _selectedTargetAccount!.id) {
@@ -91,6 +122,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         'account_id': _selectedAccount!.id,
         'target_account_id': _selectedTargetAccount!.id,
         'description': _descController.text.trim(),
+        'date': dateStr,
       };
     } else {
       payload = {
@@ -99,6 +131,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         'category': _categoryController.text.trim().isEmpty ? (_txnType == 'income' ? 'Pemasukan' : 'Lainnya') : _categoryController.text.trim(),
         'account_id': _selectedAccount!.id,
         'description': _descController.text.trim(),
+        'date': dateStr,
       };
     }
 
@@ -430,29 +463,33 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // 6. Tanggal & Waktu
+                // 6. Tanggal & Waktu (Interactive Date Picker)
                 Text(
                   'Tanggal & Waktu',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain),
                 ),
                 const SizedBox(height: 6),
-                Container(
-                  height: 46,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: inputBg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: borderCol),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('dd/MM/yyyy, HH:mm').format(_selectedDateTime) + ' WIB',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                      ),
-                      Icon(Icons.calendar_today_outlined, size: 18, color: textMuted),
-                    ],
+                InkWell(
+                  onTap: _pickDateTime,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 46,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: inputBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: borderCol),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          DateFormat('dd/MM/yyyy, HH:mm').format(_selectedDateTime) + ' WIB',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                        ),
+                        Icon(Icons.calendar_today_outlined, size: 18, color: textMuted),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
