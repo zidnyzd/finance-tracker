@@ -8,10 +8,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <!-- Membaca seluruh aplikasi m-banking terpasang tanpa terhalang sandbox Android 11+ -->
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
-    <!-- Queries explicit fallback for all Indonesian banks, digital banks, & e-wallets -->
+    <!-- Explicit queries for all Indonesian banks, digital banks, & e-wallets (100% Play Store compliant without high-risk permission) -->
     <queries>
         <!-- Bank Konvensional & BUMN -->
         <package android:name="com.bca" />
