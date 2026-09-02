@@ -1,28 +1,38 @@
 package id.web.zira.app
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.text.NumberFormat
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class NotificationListener : NotificationListenerService() {
 
     companion object {
         const val TAG = "ZiRaFlutterNotif"
+        const val CHANNEL_ID = "zira_tx_confirmation"
+        const val CHANNEL_NAME = "ZiRa Mutasi Transaksi"
 
         // Pure Banking & E-Wallet Packages Only (No merchant / ride-hailing / marketplace apps)
         val ALL_SUPPORTED_PACKAGES = setOf(
@@ -91,6 +101,7 @@ class NotificationListener : NotificationListenerService() {
     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d(TAG, "NotificationListener connected successfully to Android System 24/7 Service!")
+        createNotificationChannel()
     }
 
     override fun onListenerDisconnected() {
@@ -102,6 +113,23 @@ class NotificationListener : NotificationListenerService() {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to requestRebind: ${e.message}")
             }
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifikasi konfirmasi otomatis saat mutasi perbankan/e-wallet berhasil dicatat"
+                enableLights(true)
+                lightColor = Color.BLUE
+                enableVibration(true)
+            }
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            manager?.createNotificationChannel(channel)
         }
     }
 
@@ -198,9 +226,75 @@ class NotificationListener : NotificationListenerService() {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 try { if (wakeLock?.isHeld == true) wakeLock.release() } catch (_: Exception) {}
-                Log.d(TAG, "Sync success response code: ${response.code}")
+                val resBody = response.body?.string() ?: ""
+                Log.d(TAG, "Sync success response (${response.code}): $resBody")
+
+                if (response.isSuccessful && resBody.isNotEmpty()) {
+                    try {
+                        val resObj = Gson().fromJson(resBody, JsonObject::class.java)
+                        if (resObj.has("status") && resObj.get("status").asString == "success") {
+                            val amount = resObj.get("amount")?.asDouble ?: 0.0
+                            val type = resObj.get("type")?.asString ?: "expense"
+                            val account = resObj.get("account")?.asString ?: appName
+                            val category = resObj.get("category")?.asString ?: "Lainnya"
+                            
+                            showInstantConfirmationNotification(amount, type, account, category)
+                        }
+                    } catch (ex: Exception) {
+                        Log.e(TAG, "Error parsing sync response for local notification: ${ex.message}")
+                    }
+                }
             }
         })
+    }
+
+    private fun showInstantConfirmationNotification(amount: Double, type: String, account: String, category: String) {
+        try {
+            createNotificationChannel()
+
+            val isIncome = type == "income"
+            val formatRupiah = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
+                maximumFractionDigits = 0
+            }.format(amount).replace("Rp", "Rp ")
+
+            val notifTitle = if (isIncome) {
+                "💰 Pemasukan $formatRupiah Tercatat"
+            } else {
+                "💸 Pengeluaran $formatRupiah Tercatat"
+            }
+
+            val notifBody = "Akun: $account • Kategori: $category"
+
+            // Intent to launch MainActivity and open History tab
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("navigate_to", "history")
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                System.currentTimeMillis().toInt(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+            )
+
+            val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(notifTitle)
+                .setContentText(notifBody)
+                .setStyle(NotificationCompat.BigTextStyle().bigText("$notifBody\nTransaksi otomatis tersimpan ke pembukuan ZiRa Finance."))
+                .setColor(0xFF2C7BE5.toInt())
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            val notifId = (System.currentTimeMillis() % 100000).toInt()
+            manager?.notify(notifId, builder.build())
+            Log.d(TAG, "Instant confirmation notification shown successfully: $notifTitle")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to show instant confirmation notification: ${e.message}")
+        }
     }
 
     private fun scheduleOfflineRetry(payloadMap: Map<String, Any>, token: String) {
