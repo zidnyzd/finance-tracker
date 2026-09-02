@@ -233,10 +233,16 @@ async function handleSimulasiSubmit(e) {
 
     try {
         var formData = new FormData(form);
+        var params = new URLSearchParams();
+        for (var pair of formData.entries()) {
+            params.append(pair[0], pair[1]);
+        }
+
         var response = await fetch('/admin/test-notification', {
             method: 'POST',
-            body: formData,
+            body: params,
             headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
