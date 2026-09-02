@@ -265,12 +265,12 @@ class ApiService {
   }
 
   // Revoke Session
-  static Future<bool> revokeSession(String token, int sessionId) async {
+  static Future<bool> revokeSession(String token, String sessionToken) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/v1/sessions'),
         headers: _headers(token),
-        body: jsonEncode({'session_id': sessionId}),
+        body: jsonEncode({'token': sessionToken}),
       ).timeout(const Duration(seconds: 15));
 
       final data = jsonDecode(response.body);

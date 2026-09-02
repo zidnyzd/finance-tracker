@@ -1171,7 +1171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () async {
                                 final token = provider.token;
                                 if (token == null) return;
-                                final ok = await ApiService.revokeSession(token, s['id'] as int);
+                                final ok = await ApiService.revokeSession(token, s['token'] as String);
                                 if (ok) _loadSessions();
                               },
                             ),
