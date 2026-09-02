@@ -8,6 +8,7 @@ class AppProvider extends ChangeNotifier {
   bool _isDarkMode = true;
   bool _isBalanceHidden = false;
   bool _isNotifPermissionGranted = false;
+  bool _isConfirmNotificationEnabled = true;
   String? _token;
   UserModel? _currentUser;
   DashboardData? _dashboardData;
@@ -19,6 +20,7 @@ class AppProvider extends ChangeNotifier {
   bool get isDarkMode => _isDarkMode;
   bool get isBalanceHidden => _isBalanceHidden;
   bool get isNotifPermissionGranted => _isNotifPermissionGranted;
+  bool get isConfirmNotificationEnabled => _isConfirmNotificationEnabled;
   String? get token => _token;
   UserModel? get currentUser => _currentUser;
   DashboardData? get dashboardData => _dashboardData;
@@ -87,10 +89,21 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> toggleConfirmNotification(bool enabled) async {
+    _isConfirmNotificationEnabled = enabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('confirm_notification_enabled', enabled);
+    if (enabled) {
+      await PlatformService.requestPostNotificationPermission();
+    }
+    notifyListeners();
+  }
+
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('is_dark_mode') ?? true;
     _isBalanceHidden = prefs.getBool('is_balance_hidden') ?? false;
+    _isConfirmNotificationEnabled = prefs.getBool('confirm_notification_enabled') ?? true;
     _token = prefs.getString('auth_token');
 
     // Dynamically load ALL stored preferences that match notif_app_enabled_

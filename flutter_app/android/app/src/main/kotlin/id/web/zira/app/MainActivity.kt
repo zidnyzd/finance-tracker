@@ -117,6 +117,29 @@ class MainActivity: FlutterActivity() {
                         result.success(false)
                     }
                 }
+                "isPostNotificationPermissionGranted" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                            this,
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+                        result.success(granted)
+                    } else {
+                        result.success(true)
+                    }
+                }
+                "requestPostNotificationPermission" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        androidx.core.app.ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                            1001
+                        )
+                        result.success(true)
+                    } else {
+                        result.success(true)
+                    }
+                }
                 "getInstalledFinancialApps" -> {
                     try {
                         val pm = packageManager

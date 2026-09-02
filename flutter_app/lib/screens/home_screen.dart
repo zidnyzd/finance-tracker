@@ -314,6 +314,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () async {
+                      await PlatformService.requestPostNotificationPermission();
                       await PlatformService.openNotificationSettings();
                       Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
                     },

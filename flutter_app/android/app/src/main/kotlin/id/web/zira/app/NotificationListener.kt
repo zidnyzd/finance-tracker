@@ -238,7 +238,12 @@ class NotificationListener : NotificationListenerService() {
                             val account = resObj.get("account")?.asString ?: appName
                             val category = resObj.get("category")?.asString ?: "Lainnya"
                             
-                            showInstantConfirmationNotification(amount, type, account, category)
+                            val isConfirmEnabled = prefs.getBoolean("flutter.confirm_notification_enabled", true)
+                            if (isConfirmEnabled) {
+                                showInstantConfirmationNotification(amount, type, account, category)
+                            } else {
+                                Log.d(TAG, "Instant confirmation notification skipped (disabled by user)")
+                            }
                         }
                     } catch (ex: Exception) {
                         Log.e(TAG, "Error parsing sync response for local notification: ${ex.message}")

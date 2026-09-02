@@ -56,6 +56,21 @@ class PlatformService {
     }
   }
 
+  static Future<bool> isPostNotificationPermissionGranted() async {
+    try {
+      final res = await _channel.invokeMethod<bool>('isPostNotificationPermissionGranted');
+      return res ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  static Future<void> requestPostNotificationPermission() async {
+    try {
+      await _channel.invokeMethod('requestPostNotificationPermission');
+    } catch (_) {}
+  }
+
   static Future<List<InstalledBankApp>> getInstalledFinancialApps() async {
     try {
       final res = await _channel.invokeListMethod<Map<dynamic, dynamic>>('getInstalledFinancialApps');

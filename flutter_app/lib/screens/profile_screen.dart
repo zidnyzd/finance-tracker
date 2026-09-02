@@ -1210,6 +1210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 42,
                   child: OutlinedButton(
                     onPressed: () async {
+                      await PlatformService.requestPostNotificationPermission();
                       await PlatformService.openNotificationSettings();
                       Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
                     },
@@ -1220,6 +1221,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: Text('Buka Pengaturan Izin HP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain)),
                   ),
+                ),
+                const SizedBox(height: 14),
+                Divider(height: 1, color: borderCol),
+                const SizedBox(height: 14),
+
+                // Switch: Beritahu Saya Saat Mutasi Tercatat
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Notifikasi Konfirmasi Mutasi',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Munculkan notifikasi pop-up di HP saat mutasi bank/e-wallet berhasil dicatat otomatis',
+                            style: TextStyle(fontSize: 10, color: textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: provider.isConfirmNotificationEnabled,
+                      activeColor: primary,
+                      onChanged: (val) {
+                        provider.toggleConfirmNotification(val);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
