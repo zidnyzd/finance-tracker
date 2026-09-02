@@ -79,7 +79,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final token = res['token'] as String;
       final user = UserModel.fromJson(res['user']);
       await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
-      if (mounted) Navigator.pop(context);
+      
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          ),
+          (route) => false,
+        );
+      }
     } else {
       setState(() {
         _errorMessage = res['error'] ?? "Pendaftaran gagal. Username mungkin sudah digunakan.";
@@ -103,12 +115,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
 
-      if (idToken == null || idToken.isEmpty) {
-        throw Exception("Gagal mendapatkan ID Token Google dari perangkat.");
+      if ((idToken == null || idToken.isEmpty) && (accessToken == null || accessToken.isEmpty)) {
+        throw Exception("Gagal mendapatkan Token autentikasi Google dari perangkat.");
       }
 
-      final res = await ApiService.loginWithGoogleIdToken(idToken);
+      final res = await ApiService.loginWithGoogleTokens(idToken: idToken, accessToken: accessToken);
       if (!mounted) return;
       setState(() => _isGoogleLoading = false);
 
@@ -116,7 +129,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final token = res['token'] as String;
         final user = UserModel.fromJson(res['user']);
         await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
-        if (mounted) Navigator.pop(context);
+        
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            ),
+            (route) => false,
+          );
+        }
       } else {
         final err = res['error'] ?? "Gagal mendaftar via Google.";
         setState(() => _errorMessage = err);

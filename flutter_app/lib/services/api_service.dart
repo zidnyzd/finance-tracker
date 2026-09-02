@@ -55,13 +55,16 @@ class ApiService {
     }
   }
 
-  // Login with Google ID Token (Native One-Tap)
-  static Future<Map<String, dynamic>> loginWithGoogleIdToken(String idToken) async {
+  // Login with Google (ID Token or Access Token)
+  static Future<Map<String, dynamic>> loginWithGoogleTokens({String? idToken, String? accessToken}) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/v1/auth/google'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'id_token': idToken}),
+        body: jsonEncode({
+          'id_token': idToken ?? '',
+          'access_token': accessToken ?? '',
+        }),
       ).timeout(const Duration(seconds: 15));
 
       final data = jsonDecode(response.body);

@@ -61,6 +61,19 @@ class _LoginScreenState extends State<LoginScreen> {
       final token = res['token'] as String;
       final user = UserModel.fromJson(res['user']);
       await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
+      
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          ),
+          (route) => false,
+        );
+      }
     } else {
       setState(() {
         _errorMessage = res['error'] ?? "Username atau kata sandi salah.";
@@ -86,16 +99,17 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // 3. Get Auth Tokens (idToken)
+      // 3. Get Auth Tokens (idToken & accessToken)
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
 
-      if (idToken == null || idToken.isEmpty) {
-        throw Exception("Gagal mendapatkan ID Token Google dari perangkat.");
+      if ((idToken == null || idToken.isEmpty) && (accessToken == null || accessToken.isEmpty)) {
+        throw Exception("Gagal mendapatkan Token autentikasi Google dari perangkat.");
       }
 
-      // 4. Send ID Token to ZiRa Backend API
-      final res = await ApiService.loginWithGoogleIdToken(idToken);
+      // 4. Send Tokens to ZiRa Backend API
+      final res = await ApiService.loginWithGoogleTokens(idToken: idToken, accessToken: accessToken);
       if (!mounted) return;
       setState(() => _isGoogleLoading = false);
 
@@ -103,6 +117,19 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = res['token'] as String;
         final user = UserModel.fromJson(res['user']);
         await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
+        
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            ),
+            (route) => false,
+          );
+        }
       } else {
         final err = res['error'] ?? "Gagal autentikasi Google dengan server.";
         setState(() => _errorMessage = err);
