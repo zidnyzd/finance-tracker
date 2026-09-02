@@ -182,9 +182,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
+      body: SafeArea(
+        bottom: false,
+        child: IndexedStack(
+          index: _currentIndex,
+          children: screens,
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
