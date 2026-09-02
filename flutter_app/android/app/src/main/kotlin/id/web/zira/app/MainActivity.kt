@@ -123,16 +123,17 @@ class MainActivity: FlutterActivity() {
                                     val info = pm.getApplicationInfo(pkg, 0)
                                     foundPkg = pkg
                                     appLabel = pm.getApplicationLabel(info).toString()
-                                    val drawable = pm.getApplicationIcon(info)
+                                    val drawable = pm.getApplicationIcon(pkg)
                                     iconBase64 = drawableToBase64(drawable)
                                     break
                                 } catch (_: Exception) {
                                     try {
                                         val pkgInfo = pm.getPackageInfo(pkg, 0)
-                                        if (pkgInfo.applicationInfo != null) {
+                                        val appInfo = pkgInfo.applicationInfo
+                                        if (appInfo != null) {
                                             foundPkg = pkg
-                                            appLabel = pm.getApplicationLabel(pkgInfo.applicationInfo!).toString()
-                                            val drawable = pm.getApplicationIcon(pkgInfo.applicationInfo!)
+                                            appLabel = pm.getApplicationLabel(appInfo).toString()
+                                            val drawable = pm.getApplicationIcon(pkg)
                                             iconBase64 = drawableToBase64(drawable)
                                             break
                                         }
