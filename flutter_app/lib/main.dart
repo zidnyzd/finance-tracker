@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +26,49 @@ void main() async {
       errorType: 'flutter_framework_error',
       message: details.exceptionAsString(),
       stackTrace: details.stack?.toString() ?? '',
+    );
+  };
+
+  // Catch unhandled asynchronous errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    ApiService.reportError(
+      errorType: 'unhandled_async_error',
+      message: error.toString(),
+      stackTrace: stack.toString(),
+    );
+    return true;
+  };
+
+  // Custom fallback UI for widget build errors instead of grey screen
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    ApiService.reportError(
+      errorType: 'widget_build_error',
+      message: details.exceptionAsString(),
+      stackTrace: details.stack?.toString() ?? '',
+    );
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.refresh, size: 48, color: AppColors.primary),
+              const SizedBox(height: 16),
+              const Text(
+                'Memuat Tampilan...',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Sedang menyelaraskan data. Silakan tunggu sebentar atau ketuk untuk memuat ulang.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   };
 

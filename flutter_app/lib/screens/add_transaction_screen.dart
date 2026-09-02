@@ -24,8 +24,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _categoryController = TextEditingController(text: 'Makan & Minum');
   final _descController = TextEditingController();
   
-  AccountModel? _selectedAccount;
-  AccountModel? _selectedTargetAccount;
+  int? _selectedAccountId;
+  int? _selectedTargetAccountId;
   DateTime _selectedDateTime = DateTime.now();
   bool _isLoading = false;
   bool _isScanningReceipt = false;
@@ -38,9 +38,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.initState();
     final accounts = Provider.of<AppProvider>(context, listen: false).accounts;
     if (accounts.isNotEmpty) {
-      _selectedAccount = accounts.first;
+      _selectedAccountId = accounts.first.id;
       if (accounts.length > 1) {
-        _selectedTargetAccount = accounts[1];
+        _selectedTargetAccountId = accounts[1].id;
       }
     }
   }
@@ -164,15 +164,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         final accounts = Provider.of<AppProvider>(context, listen: false).accounts;
         if (data['account_id'] != null) {
           final accId = data['account_id'] as int;
-          final found = accounts.firstWhere((a) => a.id == accId, orElse: () => accounts.first);
-          _selectedAccount = found;
+          if (accounts.any((a) => a.id == accId)) {
+            _selectedAccountId = accId;
+          }
         } else if (data['account_name'] != null) {
           final accName = data['account_name'].toString().toLowerCase();
           final found = accounts.firstWhere(
             (a) => a.name.toLowerCase().contains(accName) || accName.contains(a.name.toLowerCase()),
-            orElse: () => _selectedAccount ?? accounts.first,
+            orElse: () => accounts.isNotEmpty ? accounts.first : AccountModel(id: 1, name: 'Tunai', type: 'cash', balance: 0, balanceStr: 'Rp 0'),
           );
-          _selectedAccount = found;
+          _selectedAccountId = found.id;
         }
 
         setState(() {
@@ -233,21 +234,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
 
-    if (_selectedAccount == null) {
+    if (_selectedAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih akun dompet'), backgroundColor: AppColors.danger),
       );
       return;
     }
 
-    if (_txnType == 'transfer' && _selectedTargetAccount == null) {
+    if (_txnType == 'transfer' && _selectedTargetAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih dompet tujuan transfer'), backgroundColor: AppColors.danger),
       );
       return;
     }
 
-    if (_txnType == 'transfer' && _selectedAccount?.id == _selectedTargetAccount?.id) {
+    if (_txnType == 'transfer' && _selectedAccountId == _selectedTargetAccountId) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Dompet asal dan tujuan tidak boleh sama'), backgroundColor: AppColors.danger),
       );
@@ -268,14 +269,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     Map<String, dynamic> payload = {
       'type': _txnType,
       'amount': amount,
-      'account_id': _selectedAccount!.id,
+      'account_id': _selectedAccountId!,
       'category': _txnType == 'transfer' ? 'Transfer' : _categoryController.text.trim(),
       'description': _descController.text.trim(),
       'date': dateStr,
     };
 
     if (_txnType == 'transfer') {
-      payload['target_account_id'] = _selectedTargetAccount!.id;
+      payload['target_account_id'] = _selectedTargetAccountId!;
     }
 
     final res = await ApiService.createTransaction(token, payload);
@@ -368,6 +369,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = Provider.of<AppProvider>(context);
     final accounts = provider.accounts;
+
+    // Safety sync: ensure selected account IDs exist in current accounts list
+    if (accounts.isNotEmpty) {
+      if (_selectedAccountId == null || !accounts.any((a) => a.id == _selectedAccountId)) {
+        _selectedAccountId = accounts.first.id;
+      }
+      if (accounts.length > 1) {
+        if (_selectedTargetAccountId == null || !accounts.any((a) => a.id == _selectedTargetAccountId)) {
+          _selectedTargetAccountId = accounts[1].id;
+        }
+      }
+    }
 
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
@@ -609,14 +622,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       border: Border.all(color: borderCol),
                     ),
                     child: DropdownButtonHideUnderline(
-                      child: DropdownButton<AccountModel>(
-                        value: _selectedAccount,
+                      child: DropdownButton<int>(
+                        value: _selectedAccountId,
                         isExpanded: true,
                         dropdownColor: cardBg,
                         icon: Icon(Icons.keyboard_arrow_down, color: textMuted),
                         items: accounts.map((acc) {
-                          return DropdownMenuItem(
-                            value: acc,
+                          return DropdownMenuItem<int>(
+                            value: acc.id,
                             child: Row(
                               children: [
                                 Text(acc.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMain)),
@@ -626,7 +639,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             ),
                           );
                         }).toList(),
-                        onChanged: (val) => setState(() => _selectedAccount = val),
+                        onChanged: (val) => setState(() => _selectedAccountId = val),
                       ),
                     ),
                   ),
@@ -647,14 +660,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         border: Border.all(color: borderCol),
                       ),
                       child: DropdownButtonHideUnderline(
-                        child: DropdownButton<AccountModel>(
-                          value: _selectedTargetAccount,
+                        child: DropdownButton<int>(
+                          value: _selectedTargetAccountId,
                           isExpanded: true,
                           dropdownColor: cardBg,
                           icon: Icon(Icons.keyboard_arrow_down, color: textMuted),
                           items: accounts.map((acc) {
-                            return DropdownMenuItem(
-                              value: acc,
+                            return DropdownMenuItem<int>(
+                              value: acc.id,
                               child: Row(
                                 children: [
                                   Text(acc.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMain)),
@@ -664,7 +677,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               ),
                             );
                           }).toList(),
-                          onChanged: (val) => setState(() => _selectedTargetAccount = val),
+                          onChanged: (val) => setState(() => _selectedTargetAccountId = val),
                         ),
                       ),
                     ),
