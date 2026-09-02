@@ -198,3 +198,26 @@ class MonthlyReportData {
     );
   }
 }
+
+class AppVersionModel {
+  final int versionCode;
+  final String versionName;
+  final String apkUrl;
+  final String changelog;
+
+  AppVersionModel({
+    required this.versionCode,
+    required this.versionName,
+    required this.apkUrl,
+    required this.changelog,
+  });
+
+  factory AppVersionModel.fromJson(Map<String, dynamic> json) {
+    return AppVersionModel(
+      versionCode: json['version_code'] ?? 0,
+      versionName: json['version_name'] ?? '',
+      apkUrl: json['apk_url'] ?? '',
+      changelog: json['changelog'] ?? '',
+    );
+  }
+}
