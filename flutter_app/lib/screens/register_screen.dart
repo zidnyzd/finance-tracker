@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons/tabler_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/models.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
@@ -33,17 +33,35 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _usernameController.dispose();
+    _displayNameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleRegister() async {
     final username = _usernameController.text.trim();
+    final displayName = _displayNameController.text.trim();
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
     if (username.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = "Harap isi username dan kata sandi.";
+        _errorMessage = "Harap lengkapi username dan kata sandi.";
+      });
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() {
+        _errorMessage = "Konfirmasi kata sandi tidak cocok.";
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      setState(() {
+        _errorMessage = "Kata sandi minimal 6 karakter.";
       });
       return;
     }
@@ -53,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-    final res = await ApiService.login(username, password);
+    final res = await ApiService.register(username, password, displayName: displayName);
     if (!mounted) return;
     setState(() => _isLoading = false);
 
@@ -61,9 +79,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final token = res['token'] as String;
       final user = UserModel.fromJson(res['user']);
       await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
+      if (mounted) Navigator.pop(context);
     } else {
       setState(() {
-        _errorMessage = res['error'] ?? "Username atau kata sandi salah.";
+        _errorMessage = res['error'] ?? "Pendaftaran gagal. Username mungkin sudah digunakan.";
       });
     }
   }
@@ -75,18 +94,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // 1. Sign out first to allow account selection
       await _googleSignIn.signOut();
-
-      // 2. Trigger native Android Google Account Picker
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        // User cancelled picker
         if (mounted) setState(() => _isGoogleLoading = false);
         return;
       }
 
-      // 3. Get Auth Tokens (idToken)
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
 
@@ -94,7 +108,6 @@ class _LoginScreenState extends State<LoginScreen> {
         throw Exception("Gagal mendapatkan ID Token Google dari perangkat.");
       }
 
-      // 4. Send ID Token to ZiRa Backend API
       final res = await ApiService.loginWithGoogleIdToken(idToken);
       if (!mounted) return;
       setState(() => _isGoogleLoading = false);
@@ -103,10 +116,11 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = res['token'] as String;
         final user = UserModel.fromJson(res['user']);
         await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
+        if (mounted) Navigator.pop(context);
       } else {
-        final err = res['error'] ?? "Gagal autentikasi Google dengan server.";
+        final err = res['error'] ?? "Gagal mendaftar via Google.";
         setState(() => _errorMessage = err);
-        ApiService.reportAppError(token: '', errorType: 'GoogleAuthError', message: 'Google Native Login Server Error: $err', stackTrace: jsonEncode(res));
+        ApiService.reportAppError(token: '', errorType: 'GoogleAuthError', message: 'Google Register Error: $err', stackTrace: jsonEncode(res));
       }
     } catch (e, stack) {
       if (!mounted) return;
@@ -115,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _isGoogleLoading = false;
         _errorMessage = errStr;
       });
-      // Always capture and send error log to server
       ApiService.reportAppError(token: '', errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
     }
   }
@@ -129,31 +142,21 @@ class _LoginScreenState extends State<LoginScreen> {
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: textMain),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo & App Name
-                Image.asset(
-                  'assets/logo.png',
-                  width: 72,
-                  height: 72,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Center(
-                      child: Text('Z', style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
@@ -163,6 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       letterSpacing: -0.5,
                     ),
                     children: const [
+                      TextSpan(text: 'Daftar '),
                       TextSpan(text: 'ZiRa ', style: TextStyle(color: AppColors.primary)),
                       TextSpan(text: 'Finance'),
                     ],
@@ -170,16 +174,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Masuk ke akun Anda untuk mengelola keuangan',
+                  'Buat akun gratis untuk mulai mengelola keuangan',
                   style: TextStyle(
                     fontSize: 13,
                     color: textMuted,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
-                // Card Form
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -221,40 +224,47 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                       ],
 
-                      // Username Input
+                      // Username
                       Text(
                         'Username',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: textMain,
-                        ),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan username',
-                          prefixIcon: const Icon(TablerIcons.user, size: 20),
+                        decoration: const InputDecoration(
+                          hintText: 'Pilih username unik',
+                          prefixIcon: Icon(TablerIcons.user, size: 20),
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
 
-                      // Password Input
+                      // Display Name
+                      Text(
+                        'Nama Tampilan (Opsional)',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _displayNameController,
+                        decoration: const InputDecoration(
+                          hintText: 'Nama panggilan Anda',
+                          prefixIcon: Icon(TablerIcons.id, size: 20),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Password
                       Text(
                         'Kata Sandi',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: textMain,
-                        ),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          hintText: 'Masukkan kata sandi',
+                          hintText: 'Minimal 6 karakter',
                           prefixIcon: const Icon(TablerIcons.lock, size: 20),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -269,13 +279,29 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+
+                      // Confirm Password
+                      Text(
+                        'Konfirmasi Kata Sandi',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscurePassword,
+                        decoration: const InputDecoration(
+                          hintText: 'Ulangi kata sandi di atas',
+                          prefixIcon: Icon(TablerIcons.lock_check, size: 20),
+                        ),
+                      ),
                       const SizedBox(height: 24),
 
-                      // Submit Button
+                      // Register Button
                       SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _isLoading || _isGoogleLoading ? null : _handleLogin,
+                          onPressed: _isLoading || _isGoogleLoading ? null : _handleRegister,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -288,36 +314,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                 )
                               : const Text(
-                                  'Masuk ke Akun',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  'Daftar Akun Baru',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                                 ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // Divider
                       Row(
                         children: [
                           Expanded(child: Divider(color: borderCol)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              'atau masuk dengan',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: textMuted,
-                              ),
-                            ),
+                            child: Text('atau daftar dengan', style: TextStyle(fontSize: 11, color: textMuted)),
                           ),
                           Expanded(child: Divider(color: borderCol)),
                         ],
@@ -325,7 +338,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 16),
 
-                      // Native Google Sign-In Button (Direct on Phone)
+                      // Native Google Sign-In Button
                       SizedBox(
                         height: 48,
                         child: OutlinedButton(
@@ -340,10 +353,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
-                                  ),
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                                 )
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -351,7 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     const Icon(TablerIcons.brand_google, size: 20, color: Colors.redAccent),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Masuk dengan Google',
+                                      'Daftar dengan Google',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -364,38 +374,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Register Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Belum punya akun? ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: textMuted,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                        );
-                      },
-                      child: const Text(
-                        'Daftar Sekarang',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
