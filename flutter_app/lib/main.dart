@@ -7,7 +7,7 @@ import 'models/models.dart';
 import 'providers/app_provider.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/report_screen.dart';
@@ -123,7 +123,7 @@ class _ZiRaAppState extends State<ZiRaApp> with WidgetsBindingObserver {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: provider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: provider.isLoggedIn ? const MainNavigationScreen() : const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }
