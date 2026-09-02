@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:tabler_icons/tabler_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../models/models.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import '../models/models.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,16 +20,30 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _errorMessage;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: '1007555443632-vvn7k1vj21t1npimv70oau29mioc1nkr.apps.googleusercontent.com',
+    scopes: ['email', 'profile', 'openid'],
+  );
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleLogin() async {
     final username = _usernameController.text.trim();
-    final password = _passwordController.text.trim();
+    final password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = "Nama pengguna dan kata sandi wajib diisi.";
+        _errorMessage = "Harap isi username dan kata sandi.";
       });
       return;
     }
@@ -36,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final res = await ApiService.login(username, password);
-
     if (!mounted) return;
     setState(() => _isLoading = false);
 
@@ -51,23 +68,55 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleLogin() async {
-    final theme = Theme.of(context);
+  Future<void> _handleNativeGoogleSignIn() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+
     try {
-      await launchUrl(
-        Uri.parse('https://zira.web.id/auth/google?app=1'),
-        customTabsOptions: CustomTabsOptions(
-          colorSchemes: CustomTabsColorSchemes.defaults(
-            toolbarColor: theme.colorScheme.primary,
-          ),
-          shareState: CustomTabsShareState.off,
-          showTitle: true,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal membuka browser: $e')),
-      );
+      // 1. Sign out first to allow account selection
+      await _googleSignIn.signOut();
+
+      // 2. Trigger native Android Google Account Picker
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // User cancelled picker
+        if (mounted) setState(() => _isGoogleLoading = false);
+        return;
+      }
+
+      // 3. Get Auth Tokens (idToken)
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception("Gagal mendapatkan ID Token Google dari perangkat.");
+      }
+
+      // 4. Send ID Token to ZiRa Backend API
+      final res = await ApiService.loginWithGoogleIdToken(idToken);
+      if (!mounted) return;
+      setState(() => _isGoogleLoading = false);
+
+      if (res['success'] == true && res['token'] != null && res['user'] != null) {
+        final token = res['token'] as String;
+        final user = UserModel.fromJson(res['user']);
+        await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
+      } else {
+        final err = res['error'] ?? "Gagal autentikasi Google dengan server.";
+        setState(() => _errorMessage = err);
+        ApiService.logError(token: '', errorText: 'Google Native Login Server Error: $err', stackTrace: jsonEncode(res));
+      }
+    } catch (e, stack) {
+      if (!mounted) return;
+      final errStr = "Kendala Google Sign-In: $e";
+      setState(() {
+        _isGoogleLoading = false;
+        _errorMessage = errStr;
+      });
+      // Always capture and send error log to server
+      ApiService.logError(token: '', errorText: errStr, stackTrace: stack.toString());
     }
   }
 
@@ -78,7 +127,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
     final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
 
     return Scaffold(
       body: SafeArea(
@@ -93,57 +141,65 @@ class _LoginScreenState extends State<LoginScreen> {
                   'assets/logo.png',
                   width: 72,
                   height: 72,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Center(
+                      child: Text('Z', style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  'ZiRa Finance',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: primary,
-                    letterSpacing: -0.02,
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: textMain,
+                      letterSpacing: -0.5,
+                    ),
+                    children: const [
+                      TextSpan(text: 'ZiRa ', style: TextStyle(color: AppColors.primary)),
+                      TextSpan(text: 'Finance'),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 6),
                 Text(
-                  'Kelola Keuangan Pribadi dengan Mudah',
+                  'Masuk ke akun Anda untuk mengelola keuangan',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: textMuted,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 32),
 
-                // Login Form Card
+                // Card Form
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: borderCol, width: 1),
+                    border: Border.all(color: borderCol),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                        color: Colors.black.withOpacity(0.04),
                         blurRadius: 16,
-                        offset: const Offset(0, 4),
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Masuk ke Akun',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: textMain,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
                       if (_errorMessage != null) ...[
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
                             color: AppColors.danger.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(10),
@@ -151,92 +207,80 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
+                              const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w500),
+                                  style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
                       ],
 
-                      // Username
+                      // Username Input
                       Text(
-                        'Nama Pengguna',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain),
+                        'Username',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: textMain,
+                        ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: _usernameController,
                         decoration: InputDecoration(
-                          hintText: 'Masukkan nama pengguna',
-                          hintStyle: TextStyle(fontSize: 13, color: textMuted),
-                          filled: true,
-                          fillColor: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: borderCol),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: borderCol),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: primary, width: 1.5),
-                          ),
+                          hintText: 'Masukkan username',
+                          prefixIcon: const Icon(TablerIcons.user, size: 20),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 18),
 
-                      // Password
+                      // Password Input
                       Text(
                         'Kata Sandi',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: textMain,
+                        ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Masukkan kata sandi',
-                          hintStyle: TextStyle(fontSize: 13, color: textMuted),
-                          filled: true,
-                          fillColor: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: borderCol),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: borderCol),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: primary, width: 1.5),
+                          prefixIcon: const Icon(TablerIcons.lock, size: 20),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? TablerIcons.eye_off : TablerIcons.eye,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Submit Button
                       SizedBox(
-                        width: double.infinity,
-                        height: 46,
+                        height: 48,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleLogin,
+                          onPressed: _isLoading || _isGoogleLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 0,
                           ),
@@ -244,52 +288,114 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
                                 )
-                              : const Text('Masuk', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                              : const Text(
+                                  'Masuk ke Akun',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
-                      const SizedBox(height: 16),
 
-                      // Divider Or
+                      const SizedBox(height: 20),
+
+                      // Divider
                       Row(
                         children: [
                           Expanded(child: Divider(color: borderCol)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('atau', style: TextStyle(fontSize: 11, color: textMuted)),
+                            child: Text(
+                              'atau masuk dengan',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: textMuted,
+                              ),
+                            ),
                           ),
                           Expanded(child: Divider(color: borderCol)),
                         ],
                       ),
+
                       const SizedBox(height: 16),
 
-                      // Google One-Tap
+                      // Native Google Sign-In Button (Direct on Phone)
                       SizedBox(
-                        width: double.infinity,
-                        height: 46,
-                        child: OutlinedButton.icon(
-                          onPressed: _handleGoogleLogin,
-                          icon: Image.network(
-                            'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                            width: 18,
-                            height: 18,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata, size: 22),
-                          ),
-                          label: Text(
-                            'Masuk dengan Google',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                          ),
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: _isLoading || _isGoogleLoading ? null : _handleNativeGoogleSignIn,
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: borderCol),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
+                          child: _isGoogleLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(TablerIcons.brand_google, size: 20, color: Colors.redAccent),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Masuk dengan Google',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: textMain,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Register Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Belum punya akun? ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: textMuted,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Daftar Sekarang',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

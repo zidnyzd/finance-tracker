@@ -35,6 +35,22 @@ class ApiService {
     }
   }
 
+  // Login with Google ID Token (Native One-Tap)
+  static Future<Map<String, dynamic>> loginWithGoogleIdToken(String idToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'id_token': idToken}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {'success': false, 'error': 'Koneksi ke server gagal: $e'};
+    }
+  }
+
   // Get Current User Profile
   static Future<UserModel?> getProfile(String token) async {
     try {
