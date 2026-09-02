@@ -22,6 +22,7 @@ class MainActivity: FlutterActivity() {
     private val KNOWN_FINANCIAL_APPS = listOf(
         mapOf("id" to "gopay", "name" to "GoPay", "packages" to listOf("com.gojek.gopay")),
         mapOf("id" to "gojek", "name" to "Gojek", "packages" to listOf("com.gojek.app")),
+        mapOf("id" to "shopeepay", "name" to "ShopeePay", "packages" to listOf("com.shopee.id", "com.shopeepay.id", "com.shopeepay.merchant.id")),
         mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
         mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
         mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "packages" to listOf("id.bmri.livin", "com.bankmandiri.mandirimai", "tl.bmdl.livin")),
@@ -31,7 +32,6 @@ class MainActivity: FlutterActivity() {
         mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking")),
         mapOf("id" to "dana", "name" to "DANA Indonesia", "packages" to listOf("id.dana")),
         mapOf("id" to "ovo", "name" to "OVO Payment", "packages" to listOf("ovo.id")),
-        mapOf("id" to "shopeepay", "name" to "ShopeePay / Shopee", "packages" to listOf("com.shopee.id")),
         mapOf("id" to "bsi", "name" to "BSI Mobile / SuperApp", "packages" to listOf("co.id.bankbsi.superapp")),
         mapOf("id" to "neobank", "name" to "Neobank (BNC)", "packages" to listOf("com.bnc.finance")),
         mapOf("id" to "jenius", "name" to "Jenius BTPN", "packages" to listOf("com.btpn.dc")),
@@ -105,9 +105,13 @@ class MainActivity: FlutterActivity() {
 
                             if (foundPkg != null) {
                                 foundPackages.add(foundPkg)
+                                
+                                // Explicitly display ShopeePay if package is com.shopee.id (financial wallet feature)
+                                val finalName = if (foundPkg == "com.shopee.id") "ShopeePay" else (item["name"] ?: foundPkg)
+
                                 list.add(mapOf(
                                     "id" to (item["id"] ?: "bank"),
-                                    "name" to (appLabel ?: (item["name"] ?: foundPkg)),
+                                    "name" to finalName,
                                     "package_name" to foundPkg,
                                     "icon_base64" to iconBase64,
                                     "is_installed" to true
@@ -126,13 +130,27 @@ class MainActivity: FlutterActivity() {
                                 val pkgLower = pkg.lowercase()
 
                                 var matchedId: String? = null
-                                if (pkgLower.contains("gopay") || label.contains("gopay")) matchedId = "gopay"
-                                else if (pkgLower.contains("seabank") || label.contains("seabank")) matchedId = "seabank"
-                                else if (pkgLower.contains("bcadigital") || label.contains("blu by")) matchedId = "blu"
-                                else if (pkgLower.contains("mybca") || label.contains("mybca")) matchedId = "bca"
-                                else if (pkgLower.contains("livin") || label.contains("livin")) matchedId = "mandiri"
-                                else if (pkgLower.contains("wondr") || label.contains("wondr")) matchedId = "bni"
-                                else if (pkgLower.contains("brimo") || label.contains("brimo")) matchedId = "brimo"
+                                var customName: String? = null
+
+                                if (pkgLower.contains("shopee") || label.contains("shopee")) {
+                                    matchedId = "shopeepay"
+                                    customName = "ShopeePay"
+                                } else if (pkgLower.contains("gopay") || label.contains("gopay")) {
+                                    matchedId = "gopay"
+                                    customName = "GoPay"
+                                } else if (pkgLower.contains("seabank") || label.contains("seabank")) {
+                                    matchedId = "seabank"
+                                } else if (pkgLower.contains("bcadigital") || label.contains("blu by")) {
+                                    matchedId = "blu"
+                                } else if (pkgLower.contains("mybca") || label.contains("mybca")) {
+                                    matchedId = "bca"
+                                } else if (pkgLower.contains("livin") || label.contains("livin")) {
+                                    matchedId = "mandiri"
+                                } else if (pkgLower.contains("wondr") || label.contains("wondr")) {
+                                    matchedId = "bni"
+                                } else if (pkgLower.contains("brimo") || label.contains("brimo")) {
+                                    matchedId = "brimo"
+                                }
 
                                 if (matchedId != null) {
                                     foundPackages.add(pkg)
@@ -140,7 +158,7 @@ class MainActivity: FlutterActivity() {
                                     val iconBase64 = drawableToBase64(drawable)
                                     list.add(mapOf(
                                         "id" to matchedId,
-                                        "name" to pm.getApplicationLabel(appInfo).toString(),
+                                        "name" to (customName ?: pm.getApplicationLabel(appInfo).toString()),
                                         "package_name" to pkg,
                                         "icon_base64" to iconBase64,
                                         "is_installed" to true
