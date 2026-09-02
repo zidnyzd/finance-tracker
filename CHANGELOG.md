@@ -4,6 +4,13 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.0.2] - 2026-09-02
+### 🚀 Added & Improved
+- **Unified Google OAuth (Project `zira-507415`):** Menyelaraskan seluruh kredensial Google OAuth 2.0 Web & Mobile Client ke project terpusat Google Cloud Console `zira-507415` (Client ID: `460896282100-f2jk9h4s...`).
+- **Google Play App Signing & Local Keystore Support:** Mendukung otentikasi ganda baik untuk rilis Google Play Store maupun instalasi APK mandiri.
+
+---
+
 ## [v2.0.1] - 2026-09-02
 ### 🚀 Added & Improved
 - **Native Debug Symbols & Obfuscation Mapping (`symbols.zip`):** Menambahkan generasi file simbol debug native ARM64/ARMv7/x64 (`app.android-arm64.symbols`) dan tabel mapping R8/ProGuard pada CI GitHub Actions (`--obfuscate --split-debug-info`) untuk analisis crash Google Play Vitals.
