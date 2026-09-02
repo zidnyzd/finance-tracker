@@ -71,6 +71,25 @@ class PlatformService {
     } catch (_) {}
   }
 
+  static Future<bool> testInstantNotification({
+    double amount = 50000.0,
+    String type = 'expense',
+    String account = 'DANA',
+    String category = 'Belanja',
+  }) async {
+    try {
+      final res = await _channel.invokeMethod<bool>('testInstantNotification', {
+        'amount': amount,
+        'type': type,
+        'account': account,
+        'category': category,
+      });
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<List<InstalledBankApp>> getInstalledFinancialApps() async {
     try {
       final res = await _channel.invokeListMethod<Map<dynamic, dynamic>>('getInstalledFinancialApps');

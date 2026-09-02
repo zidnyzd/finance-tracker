@@ -1254,6 +1254,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 38,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(TablerIcons.bell_ringing, size: 16),
+                    label: const Text('Uji Notifikasi Pop-up di HP Ini 🔔', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: primary,
+                      side: BorderSide(color: primary.withOpacity(0.4)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () async {
+                      final ok = await PlatformService.testInstantNotification(
+                        amount: 35899.0,
+                        type: 'expense',
+                        account: 'Blu BCA',
+                        category: 'Makanan & Minuman',
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(ok ? 'Notifikasi konfirmasi dikirim ke bar atas HP! ✓' : 'Gagal memicu notifikasi.'),
+                            backgroundColor: ok ? AppColors.success : AppColors.danger,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
           ),

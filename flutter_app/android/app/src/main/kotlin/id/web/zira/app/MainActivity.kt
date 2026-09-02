@@ -140,6 +140,67 @@ class MainActivity: FlutterActivity() {
                         result.success(true)
                     }
                 }
+                "testInstantNotification" -> {
+                    try {
+                        val amount = call.argument<Double>("amount") ?: 50000.0
+                        val type = call.argument<String>("type") ?: "expense"
+                        val account = call.argument<String>("account") ?: "DANA"
+                        val category = call.argument<String>("category") ?: "Belanja"
+
+                        val channelId = "zira_tx_confirmation"
+                        val channelName = "ZiRa Mutasi Transaksi"
+
+                        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val channel = android.app.NotificationChannel(
+                                channelId,
+                                channelName,
+                                android.app.NotificationManager.IMPORTANCE_HIGH
+                            ).apply {
+                                description = "Notifikasi konfirmasi otomatis saat mutasi perbankan/e-wallet berhasil dicatat"
+                                enableLights(true)
+                                lightColor = android.graphics.Color.BLUE
+                                enableVibration(true)
+                            }
+                            manager?.createNotificationChannel(channel)
+                        }
+
+                        val formatRupiah = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("id", "ID")).apply {
+                            maximumFractionDigits = 0
+                        }.format(amount).replace("Rp", "Rp ")
+
+                        val isIncome = type == "income"
+                        val notifTitle = if (isIncome) "💰 Pemasukan $formatRupiah Tercatat" else "💸 Pengeluaran $formatRupiah Tercatat"
+                        val notifBody = "Akun: $account • Kategori: $category"
+
+                        val intent = Intent(this, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("navigate_to", "history")
+                        }
+
+                        val pendingIntent = android.app.PendingIntent.getActivity(
+                            this,
+                            System.currentTimeMillis().toInt(),
+                            intent,
+                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.app.PendingIntent.FLAG_IMMUTABLE else 0)
+                        )
+
+                        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(notifTitle)
+                            .setContentText(notifBody)
+                            .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText("$notifBody\nTransaksi simulasi berhasil diuji pada perangkat Android."))
+                            .setColor(0xFF2C7BE5.toInt())
+                            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                            .setAutoCancel(true)
+                            .setContentIntent(pendingIntent)
+
+                        manager?.notify((System.currentTimeMillis() % 100000).toInt(), builder.build())
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("NOTIF_ERROR", e.message, null)
+                    }
+                }
                 "getInstalledFinancialApps" -> {
                     try {
                         val pm = packageManager
