@@ -50,70 +50,33 @@ class HomeScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Brand Title with Gradient Badge
-                  Row(
+                  // Clean Logo text identik dengan Web Sidebar: "ZiRa Finance"
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF2C7BE5), Color(0xFF1A58B0)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.02,
                           ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                          children: [
+                            TextSpan(
+                              text: 'ZiRa ',
+                              style: const TextStyle(color: Color(0xFF2C7BE5)),
+                            ),
+                            TextSpan(
+                              text: 'Finance',
+                              style: TextStyle(color: isDark ? const Color(0xFFF8F9FA) : const Color(0xFF1E293B)),
                             ),
                           ],
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Z',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'ZiRa ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: textMain,
-                                  letterSpacing: -0.02,
-                                ),
-                              ),
-                              Text(
-                                'Finance',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: primary,
-                                  letterSpacing: -0.02,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            'Halo, ${provider.currentUser?.displayName ?? "Zidstore"} 👋',
-                            style: TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w500),
-                          ),
-                        ],
+                      Text(
+                        'Halo, ${provider.currentUser?.displayName ?? "Zidstore"} 👋',
+                        style: TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),

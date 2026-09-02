@@ -584,6 +584,224 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showEditProfileDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    final user = provider.currentUser;
+
+    final nameController = TextEditingController(text: user?.displayName ?? '');
+    final oldPwController = TextEditingController();
+    final newPwController = TextEditingController();
+    final confirmPwController = TextEditingController();
+
+    bool isChangingPassword = false;
+    bool obscureOld = true;
+    bool obscureNew = true;
+    bool obscureConfirm = true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Edit Profil Pengguna', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textMain)),
+                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                      ],
+                    ),
+                    Text('Ubah nama tampilan atau kata sandi akun Anda', style: TextStyle(fontSize: 11, color: textMuted)),
+                    const SizedBox(height: 16),
+
+                    // Display Name Field
+                    Text('Nama Tampilan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: nameController,
+                      style: TextStyle(fontSize: 13, color: textMain),
+                      decoration: InputDecoration(
+                        hintText: 'Nama Anda...',
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password Accordion / Toggle
+                    InkWell(
+                      onTap: () => setModalState(() => isChangingPassword = !isChangingPassword),
+                      child: Row(
+                        children: [
+                          Icon(isChangingPassword ? Icons.check_box : Icons.check_box_outline_blank, size: 20, color: AppColors.primaryLight),
+                          const SizedBox(width: 8),
+                          Text('Ganti Kata Sandi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain)),
+                        ],
+                      ),
+                    ),
+
+                    if (isChangingPassword) ...[
+                      const SizedBox(height: 14),
+                      Text('Kata Sandi Lama', style: TextStyle(fontSize: 12, color: textMuted)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: oldPwController,
+                        obscureText: obscureOld,
+                        style: TextStyle(fontSize: 13, color: textMain),
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan sandi saat ini',
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          suffixIcon: IconButton(
+                            icon: Icon(obscureOld ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                            onPressed: () => setModalState(() => obscureOld = !obscureOld),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      Text('Kata Sandi Baru (min 6 karakter)', style: TextStyle(fontSize: 12, color: textMuted)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: newPwController,
+                        obscureText: obscureNew,
+                        style: TextStyle(fontSize: 13, color: textMain),
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan sandi baru',
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          suffixIcon: IconButton(
+                            icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                            onPressed: () => setModalState(() => obscureNew = !obscureNew),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      Text('Konfirmasi Kata Sandi Baru', style: TextStyle(fontSize: 12, color: textMuted)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: confirmPwController,
+                        obscureText: obscureConfirm,
+                        style: TextStyle(fontSize: 13, color: textMain),
+                        decoration: InputDecoration(
+                          hintText: 'Ulangi sandi baru',
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          suffixIcon: IconButton(
+                            icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                            onPressed: () => setModalState(() => obscureConfirm = !obscureConfirm),
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () async {
+                          final newName = nameController.text.trim();
+                          if (newName.isEmpty) return;
+
+                          String? oldP = oldPwController.text.trim();
+                          String? newP = newPwController.text.trim();
+                          String? confP = confirmPwController.text.trim();
+
+                          if (isChangingPassword) {
+                            if (newP.length < 6) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Kata sandi baru minimal 6 karakter!'), backgroundColor: AppColors.danger),
+                              );
+                              return;
+                            }
+                            if (newP != confP) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Konfirmasi kata sandi tidak cocok!'), backgroundColor: AppColors.danger),
+                              );
+                              return;
+                            }
+                          } else {
+                            oldP = null;
+                            newP = null;
+                          }
+
+                          Navigator.pop(ctx);
+                          final res = await ApiService.updateProfile(
+                            provider.token!,
+                            displayName: newName,
+                            oldPassword: oldP,
+                            newPassword: newP,
+                          );
+
+                          if (res['success'] == true) {
+                            final updatedUser = UserModel(
+                              id: user?.id ?? 1,
+                              username: user?.username ?? '',
+                              displayName: newName,
+                              email: user?.email,
+                              role: user?.role ?? 'user',
+                            );
+                            await provider.saveAuth(provider.token!, updatedUser);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Profil berhasil diperbarui!'), backgroundColor: AppColors.success),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(res['error'] ?? 'Gagal memperbarui profil'), backgroundColor: AppColors.danger),
+                            );
+                          }
+                        },
+                        child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _confirmDeleteAccount(AccountModel acc, VoidCallback onDone) {
     final provider = Provider.of<AppProvider>(context, listen: false);
 
@@ -691,7 +909,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Informasi Pengguna', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Informasi Pengguna', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain)),
+                    InkWell(
+                      onTap: _showEditProfileDialog,
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, size: 14, color: AppColors.primaryLight),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Edit Profil',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 14),
 
                 Text('Nama Pengguna', style: TextStyle(fontSize: 11, color: textMuted)),

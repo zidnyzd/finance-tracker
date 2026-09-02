@@ -55,6 +55,31 @@ class ApiService {
     }
   }
 
+  // Update User Profile (Display Name & Password)
+  static Future<Map<String, dynamic>> updateProfile(String token, {String? displayName, String? oldPassword, String? newPassword}) async {
+    try {
+      final body = <String, dynamic>{};
+      if (displayName != null && displayName.isNotEmpty) {
+        body['display_name'] = displayName;
+      }
+      if (oldPassword != null && newPassword != null && newPassword.isNotEmpty) {
+        body['old_password'] = oldPassword;
+        body['new_password'] = newPassword;
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/auth/me'),
+        headers: _headers(token),
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
   // Dashboard Data
   static Future<DashboardData?> getDashboard(String token) async {
     try {

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // Brand Colors
+  // Brand Colors (Solid Vibrant ZiRa Blue #2C7BE5)
+  static const Color primary = Color(0xFF2C7BE5);
   static const Color primaryLight = Color(0xFF2C7BE5);
-  static const Color primaryDark = Color(0xFF6EA8FE);
+  static const Color primaryDark = Color(0xFF2C7BE5); // Keep solid vibrant #2C7BE5 in dark mode
+  static const Color primaryAccent = Color(0xFF1A58B0);
+  static const Color linkDark = Color(0xFF6EA8FE);
   static const Color accent = Color(0xFFF97316);
 
   // Status Colors (Identical to Web)
@@ -43,10 +46,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppColors.primaryLight,
+      primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.bgLight,
       colorScheme: ColorScheme.light(
-        primary: AppColors.primaryLight,
+        primary: AppColors.primary,
         secondary: AppColors.accent,
         surface: AppColors.cardLight,
         background: AppColors.bgLight,
@@ -68,7 +71,6 @@ class AppTheme {
         backgroundColor: AppColors.topbarLight,
         elevation: 0,
         scrolledUnderElevation: 1,
-        iconTheme: IconThemeData(color: AppColors.textMutedLight),
       ),
     );
   }
@@ -77,10 +79,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.primaryDark,
+      primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.bgDark,
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primaryDark,
+        primary: AppColors.primary,
         secondary: AppColors.accent,
         surface: AppColors.cardDark,
         background: AppColors.bgDark,
@@ -102,7 +104,6 @@ class AppTheme {
         backgroundColor: AppColors.topbarDark,
         elevation: 0,
         scrolledUnderElevation: 1,
-        iconTheme: IconThemeData(color: AppColors.textMutedDark),
       ),
     );
   }
