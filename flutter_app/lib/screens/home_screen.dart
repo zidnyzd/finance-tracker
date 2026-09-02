@@ -26,6 +26,7 @@ class HomeScreen extends StatelessWidget {
     final provider = Provider.of<AppProvider>(context);
     final data = provider.dashboardData;
     final isHidden = provider.isBalanceHidden;
+    final isNotifGranted = provider.isNotifPermissionGranted;
 
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
