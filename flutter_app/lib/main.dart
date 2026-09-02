@@ -137,9 +137,17 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
+  final GlobalKey<HistoryScreenState> _historyKey = GlobalKey<HistoryScreenState>();
 
   void _onTabTapped(int index) {
     setState(() => _currentIndex = index);
+    final provider = Provider.of<AppProvider>(context, listen: false);
+
+    if (index == 0) {
+      provider.fetchDashboard();
+    } else if (index == 3) {
+      _historyKey.currentState?.loadHistory();
+    }
   }
 
   @override
@@ -166,7 +174,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       const ReportScreen(),
       AddTransactionScreen(onFinish: () => _onTabTapped(0)),
-      const HistoryScreen(),
+      HistoryScreen(key: _historyKey),
       const ProfileScreen(),
     ];
 

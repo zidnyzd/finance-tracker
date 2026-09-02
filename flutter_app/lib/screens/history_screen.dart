@@ -9,13 +9,15 @@ import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  final VoidCallback? onRefreshRequested;
+
+  const HistoryScreen({super.key, this.onRefreshRequested});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryScreen> createState() => HistoryScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class HistoryScreenState extends State<HistoryScreen> with WidgetsBindingObserver {
   List<TransactionModel> _transactions = [];
   bool _isLoading = true;
   String _currentFilter = '';
@@ -24,14 +26,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadHistory();
+    WidgetsBinding.instance.addObserver(this);
+    loadHistory();
   }
 
-  Future<void> _loadHistory() async {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      loadHistory();
+    }
+  }
+
+  Future<void> loadHistory() async {
     final token = Provider.of<AppProvider>(context, listen: false).token;
     if (token == null) return;
 
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
 
     final list = await ApiService.getTransactions(
       token,
@@ -432,7 +448,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 'amount': amt,
                                 'category': categoryController.text.trim().isEmpty ? 'Lainnya' : categoryController.text.trim(),
                                 'account_id': selectedAccountId,
-                                'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(selectedDateTime),
+                                'date': DateFormat('yyyy-MM-ddTHH:mm:ss').format(selectedDateTime),
                                 'description': descController.text.trim(),
                               };
 
@@ -441,7 +457,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Transaksi berhasil diperbarui!'), backgroundColor: AppColors.success),
                                 );
-                                _loadHistory();
+                                loadHistory();
                                 provider.fetchDashboard();
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -491,7 +507,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               if (token != null) {
                 final ok = await ApiService.deleteTransaction(token, tx.id);
                 if (ok) {
-                  _loadHistory();
+                  loadHistory();
                   Provider.of<AppProvider>(context, listen: false).fetchDashboard();
                 }
               }
@@ -514,156 +530,161 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Text(
-              'Riwayat Transaksi',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: textMain,
-                letterSpacing: -0.02,
+      body: RefreshIndicator(
+        onRefresh: loadHistory,
+        color: AppColors.primaryLight,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Text(
+                'Riwayat Transaksi',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: textMain,
+                  letterSpacing: -0.02,
+                ),
               ),
-            ),
-            Text(
-              'Seluruh catatan mutasi keuangan Anda (tap untuk edit/hapus)',
-              style: TextStyle(fontSize: 12, color: textMuted),
-            ),
-            const SizedBox(height: 16),
+              Text(
+                'Seluruh catatan mutasi keuangan Anda (tap untuk edit/hapus)',
+                style: TextStyle(fontSize: 12, color: textMuted),
+              ),
+              const SizedBox(height: 16),
 
-            // Search & Filter Card (Identical to Web)
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol, width: 1),
-              ),
-              child: Column(
-                children: [
-                  // Search Box
-                  Container(
-                    height: 42,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: borderCol),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.search, size: 18, color: textMuted),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (_) => _loadHistory(),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                            decoration: InputDecoration(
-                              hintText: 'Cari transaksi, merchant, dompet...',
-                              hintStyle: TextStyle(fontSize: 12, color: textMuted),
-                              border: InputBorder.none,
-                              isDense: true,
+              // Search & Filter Card (Identical to Web)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    // Search Box
+                    Container(
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: borderCol),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, size: 18, color: textMuted),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (_) => loadHistory(),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                              decoration: InputDecoration(
+                                hintText: 'Cari transaksi, merchant, dompet...',
+                                hintStyle: TextStyle(fontSize: 12, color: textMuted),
+                                border: InputBorder.none,
+                                isDense: true,
+                              ),
                             ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Filter Chips (Semua / Masuk / Keluar)
+                    Row(
+                      children: [
+                        _buildFilterChip('', 'Semua'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('income', '📈 Masuk'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('expense', '📉 Keluar'),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Filter Chips (Semua / Masuk / Keluar)
-                  Row(
-                    children: [
-                      _buildFilterChip('', 'Semua'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('income', '📈 Masuk'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('expense', '📉 Keluar'),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
+              const SizedBox(height: 14),
 
-            // Transaction List
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol, width: 1),
-              ),
-              child: _isLoading
-                  ? const Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : _transactions.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Center(
-                            child: Text('Tidak ada riwayat transaksi.', style: TextStyle(fontSize: 13, color: textMuted)),
-                          ),
-                        )
-                      : Column(
-                          children: _transactions.map((tx) {
-                            final isExpense = tx.type == 'expense';
-                            return InkWell(
-                              onTap: () => _showTransactionActions(tx),
-                              borderRadius: BorderRadius.circular(10),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 11),
-                                child: Row(
-                                  children: [
-                                    BankBadge(accountName: tx.accountName, accountType: 'bank', size: 36),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+              // Transaction List
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol, width: 1),
+                ),
+                child: _isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : _transactions.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Center(
+                              child: Text('Tidak ada riwayat transaksi.', style: TextStyle(fontSize: 13, color: textMuted)),
+                            ),
+                          )
+                        : Column(
+                            children: _transactions.map((tx) {
+                              final isExpense = tx.type == 'expense';
+                              return InkWell(
+                                onTap: () => _showTransactionActions(tx),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 11),
+                                  child: Row(
+                                    children: [
+                                      BankBadge(accountName: tx.accountName, accountType: 'bank', size: 36),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              tx.category,
+                                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                                            ),
+                                            Text(
+                                              '${tx.description.isNotEmpty ? "${tx.description} • " : ""}${tx.accountName}',
+                                              style: TextStyle(fontSize: 11, color: textMuted),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            tx.category,
-                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                                            isHidden ? 'Rp ••••••' : '${isExpense ? "- " : "+ "}${tx.amountStr}',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: isExpense ? AppColors.danger : AppColors.success,
+                                            ),
                                           ),
                                           Text(
-                                            '${tx.description.isNotEmpty ? "${tx.description} • " : ""}${tx.accountName}',
-                                            style: TextStyle(fontSize: 11, color: textMuted),
+                                            DateUtil.formatShort(tx.date),
+                                            style: TextStyle(fontSize: 9, color: textMuted),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          isHidden ? 'Rp ••••••' : '${isExpense ? "- " : "+ "}${tx.amountStr}',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700,
-                                            color: isExpense ? AppColors.danger : AppColors.success,
-                                          ),
-                                        ),
-                                        Text(
-                                          DateUtil.formatShort(tx.date),
-                                          style: TextStyle(fontSize: 9, color: textMuted),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-            ),
-            const SizedBox(height: 30),
-          ],
+                              );
+                            }).toList(),
+                          ),
+              ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -680,7 +701,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return InkWell(
       onTap: () {
         setState(() => _currentFilter = type);
-        _loadHistory();
+        loadHistory();
       },
       borderRadius: BorderRadius.circular(20),
       child: Container(
