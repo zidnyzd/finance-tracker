@@ -101,6 +101,14 @@ class MainActivity: FlutterActivity() {
                     try {
                         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
                         val isGranted = flat != null && flat.contains(packageName)
+                        
+                        // If granted, ensure service is actively connected/rebound
+                        if (isGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            try {
+                                NotificationListener.requestRebind(ComponentName(this, NotificationListener::class.java))
+                            } catch (_: Exception) {}
+                        }
+                        
                         result.success(isGranted)
                     } catch (e: Exception) {
                         result.success(false)

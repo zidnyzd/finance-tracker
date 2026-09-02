@@ -1,8 +1,11 @@
 package id.web.zira.app
 
 import android.app.Notification
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.service.notification.NotificationListenerService
@@ -42,6 +45,8 @@ class NotificationListener : NotificationListenerService() {
             "ph.seabank.seabank",
             "com.btpn.seabank",
             "com.shopee.seabank",
+            "com.shopee.seabank.id",
+            "id.co.seabank.mobile",
             "com.bcadigital.blu",
             "id.co.bcadigital.blu",
             "com.jago.digitalBanking",
@@ -81,6 +86,23 @@ class NotificationListener : NotificationListenerService() {
             "id.co.panin.mobile",
             "com.dbs.id.dbsmbanking"
         )
+    }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        Log.d(TAG, "NotificationListener connected successfully to Android System 24/7 Service!")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        Log.d(TAG, "NotificationListener disconnected! Requesting automatic rebind to stay alive...")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                requestRebind(ComponentName(this, NotificationListener::class.java))
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to requestRebind: ${e.message}")
+            }
+        }
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
