@@ -14,6 +14,7 @@ class AppProvider extends ChangeNotifier {
   List<AccountModel> _accounts = [];
   bool _isLoadingDashboard = false;
   List<InstalledBankApp> _installedApps = [];
+  final Map<String, bool> _appNotifSwitches = {};
 
   bool get isDarkMode => _isDarkMode;
   bool get isBalanceHidden => _isBalanceHidden;
@@ -25,6 +26,7 @@ class AppProvider extends ChangeNotifier {
   bool get isLoadingDashboard => _isLoadingDashboard;
   List<InstalledBankApp> get installedApps => _installedApps;
   bool get isLoggedIn => _token != null && _token!.isNotEmpty;
+  Map<String, bool> get appNotifSwitches => _appNotifSwitches;
 
   AppProvider() {
     _loadPreferences();
@@ -36,6 +38,14 @@ class AppProvider extends ChangeNotifier {
     try {
       final apps = await PlatformService.getInstalledFinancialApps();
       _installedApps = apps;
+      
+      // Load saved switches for all detected apps
+      final prefs = await SharedPreferences.getInstance();
+      for (final app in apps) {
+        if (prefs.containsKey('notif_app_enabled_${app.packageName}')) {
+          _appNotifSwitches[app.packageName] = prefs.getBool('notif_app_enabled_${app.packageName}')!;
+        }
+      }
       notifyListeners();
     } catch (_) {}
   }
@@ -59,14 +69,12 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> checkNotifPermission() async {
-    final granted = await PlatformService.isNotificationPermissionGranted();
-    _isNotifPermissionGranted = granted;
-    notifyListeners();
+    try {
+      final granted = await PlatformService.isNotificationPermissionGranted();
+      _isNotifPermissionGranted = granted;
+      notifyListeners();
+    } catch (_) {}
   }
-
-  Map<String, bool> _appNotifSwitches = {};
-
-  Map<String, bool> get appNotifSwitches => _appNotifSwitches;
 
   bool isAppNotifEnabled(String packageName) {
     return _appNotifSwitches[packageName] ?? true;
@@ -85,16 +93,13 @@ class AppProvider extends ChangeNotifier {
     _isBalanceHidden = prefs.getBool('is_balance_hidden') ?? false;
     _token = prefs.getString('auth_token');
 
-    // Load per-app switches
-    for (final app in [
-      'ph.seabank.seabank', 'com.btpn.seabank', 'com.shopee.seabank',
-      'com.bca', 'com.bca.mybca', 'com.bca.mybca.omni.android',
-      'id.bmri.livin', 'com.bankmandiri.mandirimai',
-      'id.co.bri.brimo', 'src.com.bni', 'id.bni.wondr',
-      'com.jago.digitalBanking', 'com.bcadigital.blu', 'id.co.bcadigital.blu',
-      'id.dana', 'com.gojek.app', 'com.gojek.gopay', 'ovo.id', 'com.shopee.id'
-    ]) {
-      _appNotifSwitches[app] = prefs.getBool('notif_app_enabled_$app') ?? true;
+    // Dynamically load ALL stored preferences that match notif_app_enabled_
+    final keys = prefs.getKeys();
+    for (final key in keys) {
+      if (key.startsWith('notif_app_enabled_')) {
+        final pkg = key.replaceFirst('notif_app_enabled_', '');
+        _appNotifSwitches[pkg] = prefs.getBool(key) ?? true;
+      }
     }
     
     final username = prefs.getString('user_username');

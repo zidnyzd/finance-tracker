@@ -263,14 +263,18 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // 2. Notification Sync Status Banner
+            // 2. Notification Sync Status Banner (Dynamic Realtime Permission State)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF132238) : const Color(0xFFEBF3FE),
+                color: isNotifGranted
+                    ? (isDark ? const Color(0xFF132238) : const Color(0xFFEBF3FE))
+                    : (isDark ? const Color(0xFF2D181B) : const Color(0xFFFEECEE)),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF1B3D6B) : const Color(0xFFCCE0FD),
+                  color: isNotifGranted
+                      ? (isDark ? const Color(0xFF1B3D6B) : const Color(0xFFCCE0FD))
+                      : (isDark ? const Color(0xFF5C2329) : const Color(0xFFFDCFD4)),
                 ),
               ),
               child: Row(
@@ -278,8 +282,8 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.success,
+                    decoration: BoxDecoration(
+                      color: isNotifGranted ? AppColors.success : AppColors.danger,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -289,15 +293,19 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Auto-Catat Notifikasi Aktif',
+                          isNotifGranted ? 'Auto-Catat Notifikasi Aktif' : 'Auto-Catat Belum Diizinkan',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.primaryDark : AppColors.primaryLight,
+                            color: isNotifGranted
+                                ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
+                                : AppColors.danger,
                           ),
                         ),
                         Text(
-                          'BCA, Mandiri, BRI, GoPay, Dana, & m-banking lainnya',
+                          isNotifGranted
+                              ? 'BCA, Mandiri, BRI, GoPay, Dana, & m-banking lainnya'
+                              : 'Ketuk untuk izinkan akses notifikasi di pengaturan HP',
                           style: TextStyle(fontSize: 10, color: textMuted),
                         ),
                       ],
@@ -309,11 +317,13 @@ class HomeScreen extends StatelessWidget {
                       Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
                     },
                     child: Text(
-                      'Izin HP ➔',
+                      isNotifGranted ? 'Kelola ➔' : 'Izinkan HP ➔',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.primaryDark : AppColors.primaryLight,
+                        color: isNotifGranted
+                            ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
+                            : AppColors.danger,
                       ),
                     ),
                   ),
