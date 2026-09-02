@@ -78,4 +78,37 @@ void main() {
       expect(blu.packageAliases.contains('com.bcadigital.blu'), true);
     });
   });
+
+  group('MonthlyReportData Tests', () {
+    test('MonthlyReportData fromJson parsing', () {
+      final json = {
+        'month': '2026-09',
+        'month_label': 'September 2026',
+        'prev_month': '2026-08',
+        'next_month': '2026-10',
+        'next_disabled': true,
+        'income': 200000.0,
+        'income_str': 'Rp 200.000',
+        'expense': 50000.0,
+        'expense_str': 'Rp 50.000',
+        'balance': 150000.0,
+        'balance_str': 'Rp 150.000',
+        'expense_categories': [
+          {'name': 'Makan & Minum', 'amount': 30000.0, 'amount_str': 'Rp 30.000', 'pct': 60.0},
+          {'name': 'Belanja', 'amount': 20000.0, 'amount_str': 'Rp 20.000', 'pct': 40.0},
+        ],
+        'income_categories': [
+          {'name': 'Gaji & Upah', 'amount': 200000.0, 'amount_str': 'Rp 200.000', 'pct': 100.0},
+        ],
+      };
+
+      final report = MonthlyReportData.fromJson(json);
+      expect(report.month, '2026-09');
+      expect(report.monthLabel, 'September 2026');
+      expect(report.expenseCategories.length, 2);
+      expect(report.expenseCategories[0].name, 'Makan & Minum');
+      expect(report.expenseCategories[0].pct, 60.0);
+      expect(report.incomeCategories.length, 1);
+    });
+  });
 }

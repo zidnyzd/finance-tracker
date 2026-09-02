@@ -237,6 +237,27 @@ class ApiService {
     }
   }
 
+  // Get Monthly Report Data
+  static Future<MonthlyReportData?> getReport(String token, {String month = ''}) async {
+    try {
+      final queryParams = <String, String>{};
+      if (month.isNotEmpty) queryParams['month'] = month;
+
+      final uri = Uri.parse('$baseUrl/api/v1/report').replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+      final response = await http.get(uri, headers: _headers(token)).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return MonthlyReportData.fromJson(data);
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // Telegram Link Data
   static Future<Map<String, dynamic>?> getTelegramLink(String token) async {
     try {
