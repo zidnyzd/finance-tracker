@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Permintaan Penghapusan Akun & Data - ZiRa Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #16181B;
+            --card-bg: #1E2024;
+            --card-sub: #262A2E;
+            --border-color: #2C3035;
+            --primary: #2C7BE5;
+            --primary-light: rgba(44, 123, 229, 0.12);
+            --text-main: #F8F9FA;
+            --text-body: #CFD4DA;
+            --text-muted: #8B95A5;
+            --danger: #EF4444;
+            --danger-light: rgba(239, 68, 68, 0.12);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-body);
+            line-height: 1.65;
+            padding: 32px 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .top-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-logo .zira { color: var(--primary); }
+        .brand-logo .finance { color: var(--text-main); }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .hero-section {
+            margin-bottom: 24px;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--danger-light);
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: var(--text-main);
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .last-updated {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title .icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: var(--card-sub);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        p {
+            font-size: 13px;
+            color: var(--text-body);
+            margin-bottom: 14px;
+        }
+
+        .step-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: var(--card-sub);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            font-size: 13px;
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+
+        .step-content strong {
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin-top: 10px;
+        }
+
+        .table-custom th, .table-custom td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom th {
+            color: var(--text-muted);
+            background: var(--card-sub);
+            font-weight: 600;
+        }
+
+        .table-custom td {
+            color: var(--text-body);
+        }
+
+        .table-custom td strong {
+            color: var(--text-main);
+        }
+
+        .contact-action-box {
+            background: var(--card-sub);
+            padding: 22px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .btn-email-request {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--danger);
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-email-request:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .page-footer {
+            text-align: center;
+            padding: 24px 0 12px;
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px 12px; }
+            .container { padding: 20px 16px; }
+            h1 { font-size: 21px; }
+            .section-card { padding: 18px 14px; }
+            .table-custom th, .table-custom td { padding: 8px 10px; font-size: 11.5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="top-navbar">
+            <a href="/" class="brand-logo">
+                <span class="zira">ZiRa</span><span class="finance">Finance</span>
+            </a>
+            <a href="/" class="btn-back">
+                <span>←</span> Beranda
+            </a>
+        </nav>
+
+        <div class="hero-section">
+            <div class="badge-pill">
+                <span>🗑️</span> Kebijakan Penghapusan Akun & Data
+            </div>
+            <h1>Permintaan Penghapusan Akun Pengguna</h1>
+            <div class="last-updated">Aplikasi: ZiRa Finance • Pengembang: ZidStore (zidzdev@gmail.com)</div>
+        </div>
+
+        <!-- 1. Langkah-Langkah Penghapusan -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon-box">📋</div>
+                <span>Cara Meminta Penghapusan Akun & Data</span>
+            </div>
+            <p>Pengguna aplikasi <strong>ZiRa Finance</strong> memiliki hak penuh untuk meminta penghapusan akun serta seluruh data terkait kapan saja. Anda dapat memilih salah satu dari 2 cara mudah berikut:</p>
+            
+            <div class="step-box">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Metode 1: Kirim Permintaan via Email Resmi (Rekomendasi)</strong>
+                        Kirimkan email permohonan ke <a href="mailto:zidzdev@gmail.com" style="color:var(--primary);text-decoration:none;font-weight:600">zidzdev@gmail.com</a> menggunakan alamat email yang terdaftar di akun Anda dengan subjek <em>"Permintaan Hapus Akun ZiRa Finance"</em>.
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Metode 2: Melalui Pengaturan Aplikasi Mobile / Web</strong>
+                        Buka aplikasi <strong>ZiRa Finance</strong> ➔ Masuk ke menu <strong>Pengaturan Akun</strong> ➔ Hubungi layanan dukungan pengembang atau klik tombol kontak bantuan yang tersedia.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Jenis Data yang Dihapus vs Disimpan -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon-box">📊</div>
+                <span>Jenis Data yang Dihapus & Disimpan</span>
+            </div>
+            <p>Berikut adalah rincian perlakuan data saat permohonan penghapusan akun Anda diproses:</p>
+
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Kategori Data</th>
+                        <th>Status Penghapusan</th>
+                        <th>Keterangan Retensi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Profil Pengguna</strong><br><small style="color:var(--text-muted)">Username, Display Name, Email, Google OAuth ID</small></td>
+                        <td><span style="color:var(--danger);font-weight:700">Dihapus Permanen</span></td>
+                        <td>Dihapus total dari database dalam waktu maksimal 24 jam.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Catatan Finansial & Transaksi</strong><br><small style="color:var(--text-muted)">Riwayat pemasukan, pengeluaran, saldo, transfer</small></td>
+                        <td><span style="color:var(--danger);font-weight:700">Dihapus Permanen</span></td>
+                        <td>Seluruh mutasi keuangan dihapus dan tidak dapat dipulihkan.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Daftar Rekening & Dompet</strong><br><small style="color:var(--text-muted)">Nama dompet bank, e-wallet, konfigurasi switch</small></td>
+                        <td><span style="color:var(--danger);font-weight:700">Dihapus Permanen</span></td>
+                        <td>Seluruh data dompet dihapus seketika.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Token Sesi & Bot Telegram</strong><br><small style="color:var(--text-muted)">Bearer token, Telegram ID pairing, log notifikasi</small></td>
+                        <td><span style="color:var(--danger);font-weight:700">Dihapus Permanen</span></td>
+                        <td>Seluruh sesi dicabut dan log dihapus total.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data yang Disimpan Tambahan</strong></td>
+                        <td><span style="color:var(--text-muted);font-weight:600">Tidak Ada (0%)</span></td>
+                        <td>Kami tidak menyimpan cadangan data apa pun setelah akun dihapus.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 3. Periode Retensi Data -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon-box">⏳</div>
+                <span>Periode Retensi Data</span>
+            </div>
+            <p>Setelah permohonan penghapusan akun diverifikasi oleh tim pengembang:</p>
+            <p>• <strong>Waktu Proses:</strong> Akun dan seluruh data transaksi keuangan akan dihapus secara permanen dari server aktif dalam kurun waktu <strong>maksimal 24–48 jam</strong>.</p>
+            <p>• <strong>Pemulihan:</strong> Proses penghapusan bersifat permanen dan tidak dapat dibatalkan atau dipulihkan kembali.</p>
+
+            <div class="contact-action-box">
+                <div style="font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:4px">Kirim Permintaan Hapus Akun Sekarang</div>
+                <div style="font-size:12px;color:var(--text-muted)">Tim pengembang kami siap memproses permohonan Anda dengan cepat.</div>
+                <a href="mailto:zidzdev@gmail.com?subject=Permintaan%20Hapus%20Akun%20ZiRa%20Finance&body=Halo%20Pengembang%20ZiRa%20Finance,%0A%0ASaya%20ingin%20meminta%20penghapusan%20akun%20dan%20seluruh%20data%20saya.%0AUsername%20/%20Email:%20" class="btn-email-request">
+                    <span>📧</span> Ajukan via Email: zidzdev@gmail.com
+                </a>
+            </div>
+        </div>
+
+        <footer class="page-footer">
+            <p>&copy; 2026 ZiRa Finance • Hak Cipta Dilindungi Undang-Undang</p>
+        </footer>
+    </div>
+</body>
+</html>
