@@ -1,11 +1,12 @@
-# ZiRa Finance
+# 🎯 ZiRa Finance
 
-Aplikasi manajemen keuangan pribadi modern, cepat, dan terpadu — didukung oleh **Go Web Server**, **AI Telegram Bot (Gemini 2.0)**, dan **Aplikasi Mobile Flutter Native** dengan sinkronisasi mutasi perbankan otomatis 24/7.
+Aplikasi manajemen keuangan pribadi modern, cepat, dan terpadu — didukung oleh **Go Web Server Engine**, **AI Telegram Bot (Gemini AI Vision)**, dan **Aplikasi Mobile Flutter Native** dengan sinkronisasi mutasi perbankan otomatis 24/7 & pemindai struk pintar AI.
 
 ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-3.27+-02569B?logo=flutter&logoColor=white)
-![Android](https://img.shields.io/badge/Android-API_24+-3DDC84?logo=android&logoColor=white)
+![Android](https://img.shields.io/badge/Android-API_24+_--_Target_SDK_35-3DDC84?logo=android&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?logo=sqlite&logoColor=white)
+![Google Play](https://img.shields.io/badge/Google_Play-Ready_(AAB)-34A853?logo=googleplay&logoColor=white)
 ![Telegram Bot](https://img.shields.io/badge/Telegram_Bot-Gemini_AI-2CA5E0?logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-Proprietary-red)
 
@@ -15,38 +16,58 @@ Aplikasi manajemen keuangan pribadi modern, cepat, dan terpadu — didukung oleh
 
 ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *real-time*:
 
-1. **🌐 Web Dashboard (`https://zira.web.id`):** Antarmuka web responsif berbasis Go HTML template, Bootstrap 5, dan visualisasi grafik interaktif ApexCharts.
-2. **🤖 Bot Telegram AI (`@zirafinancebot`):** Asisten keuangan pintar berbasis Gemini 2.0 Flash Lite untuk pencatatan transaksi bahasa alami dan pembacaan foto struk belanja otomatis.
-3. **📱 Aplikasi Android Flutter Native:** Aplikasi mobile 100% identik dengan web, dilengkapi latar belakang **Auto-Catat Notifikasi Bank 24/7** yang hemat baterai.
+1. **🌐 Web Dashboard ([https://zira.web.id](https://zira.web.id)):** Antarmuka web modern & responsif berbasis Go HTML template, Bootstrap 5, visualisasi grafik ApexCharts, laporan bulanan, dan simulator uji coba notifikasi admin.
+2. **🤖 Bot Telegram AI ([@zirafinancebot](https://t.me/zirafinancebot)):** Asisten keuangan pintar berbasis Gemini AI Flash Lite untuk pencatatan transaksi bahasa alami dan pembacaan foto struk belanja otomatis.
+3. **📱 Aplikasi Android Flutter Native (`id.web.zira.app`):** Aplikasi mobile 100% identik web (*Full Parity*), dilengkapi fitur **Auto-Catat Notifikasi Bank 24/7**, **Pindai Struk AI Vision (0.7 Detik)**, dan **Notifikasi Konfirmasi Mutasi Instan**.
 
 ---
 
-## 🌟 Fitur Utama Aplikasi Mobile (Flutter Edition)
+## 🌟 Fitur Unggulan Aplikasi Mobile (Flutter Edition)
 
-* **100% Pixel-Perfect UI Identik Web:** Dibangun dengan font resmi **Poppins**, iconset **Tabler Icons**, dan palet warna tema adaptif (Dark Mode `#16181B` / Light Mode `#F5F6FA`).
-* **Auto-Catat Notifikasi Bank 24/7:**
-  * Background listener berbasis **Event-Driven (0% CPU / 0% Battery Drain saat idle)**.
-  * Mendukung mutasi otomatis dari: **BCA**, **myBCA**, **Livin' by Mandiri**, **BRImo**, **BNI Mobile / Wondr**, **Bank Jago**, **blu by BCA Digital**, **SeaBank**, **DANA**, **GoPay**, **OVO**, dan **ShopeePay**.
-  * Dilengkapi proteksi anti-duplikasi mutasi berbasis hash SHA-256 (*Idempotent Transaction Lock*).
-  * Antrian offline cerdas (*WorkManager Exponential Retry Queue*) jika HP sempat offline.
-* **Deteksi Aplikasi Terpasang Dinamis:**
-  * Memindai dan mengekstrak icon resmi langsung dari aplikasi m-banking yang terpasang di HP pengguna.
-  * Switch On/Off mandiri untuk memilih bank mana saja yang ingin di-sync.
-* **In-App Direct Seamless Updater:**
-  * Cek update otomatis dari server `/api/v1/app/version`.
-  * Unduh pembaruan langsung di dalam aplikasi dengan progress bar live dan auto-launch installer via `FileProvider`.
-* **Google 1-Tap Sign-In:** Login cepat dan aman via Chrome Custom Tabs callback deep link `zira://auth`.
-* **Eye Balance Privacy:** Sembunyikan angka saldo (`Rp ••••••`) dengan satu tap.
-* **Visual Donut & Cashflow Chart:** Grafik lingkaran proporsi saldo per rekening bank yang berwarna-warni.
+* **🎨 100% Desain & Fitur Identik Web (Full Parity):**
+  * Tipografi resmi Google Fonts **Poppins**, iconset **Tabler Icons**, dan palet warna brand solid (`#2C7BE5`).
+  * Tema ganda konsisten: **Dark Mode (`#16181B`)** dan **Light Mode (`#F5F6FA`)**.
+  * **Laporan Keuangan Bulanan Lengkap:** Selector bulan (`◀ Bulan ▶`), kartu ringkasan saldo, breakdown pengeluaran dengan indikator persentase visual, breakdown pemasukan, dan donat chart distribusi aset per rekening.
+
+* **📸 Pindai Struk Belanja & Resi Transfer AI (0.7 Detik):**
+  * Card pintar di layar Tambah Transaksi: **[ 📷 Ambil Foto ]** dan **[ 🖼️ Dari Galeri ]**.
+  * Didukung engine **Gemini AI Flash-Lite** berkecepatan tinggi: otomatis mengekstrak nominal, tipe transaksi, kategori, dompet rekening, keterangan toko/item, dan tanggal transaksi langsung ke form tanpa perlu ketik manual.
+
+* **⚡ Auto-Catat Notifikasi Bank 24/7 (Always-Alive Background Sync):**
+  * Background listener asli Android `NotificationListenerService` berbasis **Event-Driven (0% baterai saat idle)** dengan safe 3s WakeLock & auto-rebind hook.
+  * Mendukung 40+ M-Banking & E-Wallet resmi Indonesia: **BCA**, **Livin' by Mandiri**, **BRImo**, **BNI Mobile / Wondr**, **Bank Jago**, **blu by BCA Digital**, **SeaBank (`id.co.bankbkemobile.digitalbank`)**, **DANA**, **GoPay**, **OVO**, **ShopeePay**, **Flip**, dll.
+  * **Anti-Duplikasi & Filter Merchant:** Mengabaikan notifikasi status pesanan / pre-auth hold (Grab, Shopee) dan mengunci duplikasi mutasi dengan enkripsi SHA-256 idempotency.
+
+* **🔔 Notifikasi Konfirmasi Mutasi Instan di Layar HP:**
+  * Memberikan pop-up notifikasi konfirmasi lokal di status bar HP begitu mutasi bank berhasil dicatat (contoh: `💸 Pengeluaran Rp 35.899 Tercatat (Blu BCA • Makanan & Minuman)`).
+  * Mengetuk notifikasi langsung mengarahkan pengguna ke tab Riwayat Transaksi.
+  * Sakelar mandiri: `[✓] Notifikasi Konfirmasi Mutasi` di menu Pengaturan Akun.
+
+* **🔍 Pindai Aplikasi Finansial Terpasang Dinamis (*Installed-Only*):**
+  * Hanya menampilkan aplikasi perbankan yang benar-benar terpasang di HP pengguna, lengkap dengan icon aplikasi asli resolusi tinggi (*Real Native App Icon*).
+  * Sakelar On/Off mandiri per-rekening yang tersimpan permanen.
+
+* **🔐 Kepatuhan Penuh Google Play Store (Ready to Publish):**
+  * **Target SDK 35 (Android 15)** & Min SDK 24 (Android 7.0+).
+  * **Scoped Queries Compliant:** Menggunakan tag `<queries>` eksplisit tanpa izin berisiko tinggi `QUERY_ALL_PACKAGES` (Bebas formulir video YouTube di Play Console).
+  * **Native 1-Tap Google Sign-In:** Dialog pemilih akun resmi Google Play Services langsung di HP tanpa browser redirect.
+  * Halaman Resmi:
+    * 📜 **Privacy Policy:** `https://zira.web.id/privacy` (Kontak: `zidzdev@gmail.com`)
+    * 🗑️ **Account & Data Deletion:** `https://zira.web.id/delete-account`
+
+* **🔄 Seamless In-App Auto-Updater:**
+  * Deteksi pembaruan otomatis dari endpoint `/api/v1/app/version`.
+  * Unduh langsung di aplikasi dengan live progress bar dan instalasi otomatis via `FileProvider`.
 
 ---
 
-## 📦 Unduh Aplikasi Android (APK)
+## 📦 Unduh Aplikasi Android (Release Artifacts)
 
-| Versi Rilis | Tipe Build | Link Download |
-|---|---|---|
-| **v1.6.3 (Terbaru)** | ARM64-v8a Release | [Download ZiRa-Finance-v1.6.3.apk](https://zira.web.id/static/ZiRa-Finance-v1.6.3.apk) |
-| **GitHub Releases** | Official Artifacts | [Kunjungi Halaman Rilis GitHub](https://github.com/zidnyzd/finance-tracker/releases) |
+| Format Berkas | Versi Target | Keterangan & Tujuan | Tautan Unduh |
+|---|:---:|---|:---:|
+| **APK (Direct Install)** | **v1.9.9** | File installer langsung untuk HP Android (ARM64-v8a) | [⬇️ Download ZiRa-Finance-v1.9.9.apk](https://zira.web.id/static/ZiRa-Finance-v1.9.9.apk) |
+| **AAB (Play Store Bundle)** | **v1.9.9** | Format bundle resmi siap upload ke Google Play Console | [⬇️ Download ZiRa-Finance-v1.9.9-release.aab](https://github.com/zidnyzd/finance-tracker/releases/tag/v1.9.9) |
+| **GitHub Releases** | **Semua Versi** | Arsip rilis resmi lengkap beserta changelog | [🚀 Kunjungi GitHub Releases](https://github.com/zidnyzd/finance-tracker/releases) |
 
 ---
 
@@ -58,40 +79,60 @@ ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *r
 └──────────────────────────────────────────────────────────────────────────────────┘
 
  [Frontend Clients]
-   ├── 🌐 Web Dashboard (Browser / Desktop & Mobile Web)
-   ├── 🤖 Telegram AI Bot (@zirafinancebot via Telebot + Gemini 2.0 AI)
+   ├── 🌐 Web Dashboard (HTML5 / Bootstrap 5 / ApexCharts / Admin Test Simulator)
+   ├── 🤖 Telegram AI Bot (@zirafinancebot via Telebot + Gemini AI Vision)
    └── 📱 Flutter Android App (Single-Activity + Material 3 + Poppins Theme)
-         └── ⚙️ Kotlin Native Bridge (NotificationListenerService 24/7 + WorkManager)
+         ├── ⚙️ Kotlin Native Bridge (NotificationListenerService + 24/7 Auto-Rebind)
+         ├── 📸 Gemini AI Receipt Vision Engine (0.7s Fast Scan)
+         └── 🔔 Local Transaction Confirmation Notification Channel
 
                                    │
                                    ▼ [HTTPS / REST API / Webhook]
  ┌─────────────────────────────────────────────────────────────────────────────────┐
  │                            GO WEB SERVER ENGINE                                 │
- │  - Net/HTTP Core Server (Port 8081 behind Cloudflare Tunnel)                    │
+ │  - Net/HTTP Core Server (Port 8081 behind Cloudflare Tunnel & WAF)              │
  │  - Google OAuth 2.0 & Session Middleware (HttpOnly + Secure + CSRF Token)       │
  │  - REST JSON API Handlers (/api/v1/...)                                         │
- │  - Regex Fast-Path Parser & Gemini AI Fallback Parser                           │
+ │  - Fast-Path Regex Indonesian Banking Parsers & Gemini AI Fallback              │
+ │  - Telemetry Error Reporter (/api/v1/app/log-error)                             │
  └─────────────────────────────────────────────────────────────────────────────────┘
                                    │
                                    ▼
  ┌─────────────────────────────────────────────────────────────────────────────────┐
  │                         PERSISTENCE DATABASE (SQLite)                           │
  │  - SQLite3 with Write-Ahead Logging (WAL Mode)                                  │
- │  - Tabel: users, accounts, transactions, api_tokens, notification_logs          │
+ │  - Tables: users, accounts, transactions, api_tokens, notification_logs,        │
+ │            app_error_logs, sessions, audit_logs                                 │
  └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔐 Keamanan & Privasi
+## 🧪 Pengujian Otomatis (*Zero Blind Deployments*)
 
-* **Tanpa Izin Storage Berbahaya:** Aplikasi mobile tidak meminta akses ke file/foto pribadi di galeri HP Anda.
-* **Autentikasi Sandi Kuat:** Password di-hash menggunakan algoritma `bcrypt` standar industri.
-* **Perlindungan Session:** Token 16-byte kriptografis acak dengan cookie `HttpOnly`, `SameSite=Lax`, dan pembatasan maksimal 5 sesi aktif multi-device.
-* **CSRF & Rate Limiting:** Proteksi token mutasi per-sesi dan sliding window rate limiter per IP.
+Setiap perubahan kode wajib melalui automated unit testing sebelum rilis:
+* **Backend Go:**
+  ```bash
+  go test -v .
+  ```
+  *(Menguji akurasi regex currency parsing, bilingual income detection, pemfilteran Grab hold, SeaBank domestic package, dan deduplikasi hash)*.
+* **Mobile Flutter:**
+  ```bash
+  flutter test
+  ```
+  *(Menguji serialisasi JSON model, date formatting, dan konfigurasi master metadata bank)*.
 
 ---
 
-## 📄 Riwayat Versi (Changelog)
+## 🔐 Keamanan & Privasi
 
-Untuk melihat catatan rilis lengkap dari versi v1.0.0 hingga v1.6.3, silakan baca file **[CHANGELOG.md](CHANGELOG.md)**.
+* **Arsitektur Tanpa Izin Storage Bebas:** Menggunakan Android 13+ System Photo Picker sehingga tidak membutuhkan izin akses file/galeri keseluruhan (`READ_EXTERNAL_STORAGE`).
+* **Enkripsi Kredensial:** Kata sandi dienkripsi dengan algoritma `bcrypt`, transmisi REST API dilindungi SSL/TLS HTTPS + HSTS Preload.
+* **Manajemen Sesi Cerdas:** Sesi multi-device dibatasi maksimal 3 perangkat aktif secara otomatis (*auto-prune stale sessions*).
+* **Proteksi Mutasi Idempoten:** Hashing SHA-256 mencegah mutasi ganda tercatat di database.
+
+---
+
+## 📄 Riwayat Versi Lengkap
+
+Catatan rilis lengkap dari versi v1.0.0 hingga v1.9.9 didokumentasikan pada file **[CHANGELOG.md](CHANGELOG.md)**.
