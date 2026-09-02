@@ -21,10 +21,10 @@ class NotificationListener : NotificationListenerService() {
     companion object {
         const val TAG = "ZiRaFlutterNotif"
 
+        // Pure Banking & E-Wallet Packages Only (No merchant / ride-hailing / marketplace apps)
         val ALL_SUPPORTED_PACKAGES = setOf(
             // E-Wallet & Fintech
             "com.gojek.gopay",
-            "com.gojek.app",
             "com.shopeepay.id",
             "com.shopeepay.merchant.id",
             "com.shopee.id",
@@ -36,8 +36,6 @@ class NotificationListener : NotificationListenerService() {
             "com.bca.sakuku",
             "id.flip",
             "com.dokuwallet.android",
-            "com.tokopedia.tkpd",
-            "com.grabtaxi.passenger",
 
             // Bank Digital
             "ph.seabank.seabank",
@@ -112,6 +110,18 @@ class NotificationListener : NotificationListenerService() {
         }
 
         if (title.isEmpty() && text.isEmpty()) return
+
+        // 3. Skip Ride-Hailing Hold / Food Preparation / Non-settlement alerts immediately
+        val lowerText = "$title $text".lowercase()
+        if (lowerText.contains("currently on hold") || 
+            lowerText.contains("is on hold") || 
+            lowerText.contains("in the kitchen") || 
+            lowerText.contains("preparing your order") || 
+            lowerText.contains("driver is on the way") || 
+            lowerText.contains("pesanan sedang disiapkan")) {
+            Log.d(TAG, "Notifikasi $packageName diabaikan karena bersifat pre-auth/hold status.")
+            return
+        }
 
         val token = prefs.getString("flutter.auth_token", null)
         if (token.isNullOrEmpty()) {
