@@ -23,8 +23,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.7.5';
-  int _buildNumber = 33;
+  String _appVersion = '1.8.0';
+  int _buildNumber = 38;
   List<InstalledBankApp> _installedApps = [];
   bool _isLoadingApps = true;
 
@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadVersion() async {
     try {
       final pInfo = await PackageInfo.fromPlatform();
-      final rawBuild = int.tryParse(pInfo.buildNumber) ?? 33;
+      final rawBuild = int.tryParse(pInfo.buildNumber) ?? 38;
       final cleanBuild = rawBuild > 1000 ? (rawBuild % 1000) : rawBuild;
 
       setState(() {
@@ -181,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (hasNewUpdate && versionData.apkUrl.isNotEmpty)
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLight,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
@@ -226,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     minHeight: 8,
                     borderRadius: BorderRadius.circular(4),
                     backgroundColor: AppColors.borderLight,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -238,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       Text(
                         '${(progress * 100).toStringAsFixed(0)}%',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
                       ),
                     ],
                   ),
@@ -296,294 +296,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showManageWalletsModal() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
-    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
-    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final provider = Provider.of<AppProvider>(context, listen: false);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: cardBg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final accounts = provider.accounts;
-
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Kelola Dompet & Rekening', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textMain)),
-                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
-                      ],
-                    ),
-                    Text('Ubah nama atau hapus dompet pencatatan Anda', style: TextStyle(fontSize: 11, color: textMuted)),
-                    const SizedBox(height: 16),
-
-                    if (accounts.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Center(child: Text('Belum ada dompet terdaftar.', style: TextStyle(color: textMuted))),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: accounts.length,
-                        separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
-                        itemBuilder: (context, index) {
-                          final acc = accounts[index];
-                          return Row(
-                            children: [
-                              BankBadge(accountName: acc.name, accountType: acc.type, size: 34),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(acc.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain)),
-                                    Text('${acc.type.toUpperCase()} • ${acc.balanceStr}', style: TextStyle(fontSize: 11, color: textMuted)),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 18),
-                                color: AppColors.primaryLight,
-                                onPressed: () {
-                                  _showEditAccountDialog(acc, () {
-                                    setModalState(() {});
-                                  });
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18),
-                                color: AppColors.danger,
-                                onPressed: () {
-                                  _confirmDeleteAccount(acc, () {
-                                    setModalState(() {});
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    const SizedBox(height: 20),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Tambah Dompet Baru', style: TextStyle(fontWeight: FontWeight.w700)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          _showAddAccountDialog(() {
-                            setModalState(() {});
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showEditAccountDialog(AccountModel acc, VoidCallback onDone) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
-    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
-    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
-    final provider = Provider.of<AppProvider>(context, listen: false);
-
-    final nameController = TextEditingController(text: acc.name);
-    String selectedType = acc.type;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDlgState) {
-          return AlertDialog(
-            backgroundColor: cardBg,
-            title: Text('Ubah Dompet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Nama / Label Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: nameController,
-                  style: TextStyle(fontSize: 13, color: textMain),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: inputBg,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderCol)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text('Jenis Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: borderCol)),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedType,
-                      isExpanded: true,
-                      dropdownColor: cardBg,
-                      items: const [
-                        DropdownMenuItem(value: 'bank', child: Text('🏦 Rekening Bank')),
-                        DropdownMenuItem(value: 'ewallet', child: Text('📱 E-Wallet')),
-                        DropdownMenuItem(value: 'cash', child: Text('💵 Tunai / Kas')),
-                      ],
-                      onChanged: (v) {
-                        if (v != null) setDlgState(() => selectedType = v);
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryLight, foregroundColor: Colors.white),
-                onPressed: () async {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) return;
-
-                  Navigator.pop(ctx);
-                  final ok = await ApiService.updateAccount(provider.token!, acc.id, name, selectedType);
-                  if (ok) {
-                    await provider.fetchAccounts();
-                    await provider.fetchDashboard();
-                    onDone();
-                  }
-                },
-                child: const Text('Simpan'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showAddAccountDialog(VoidCallback onDone) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
-    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
-    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
-    final provider = Provider.of<AppProvider>(context, listen: false);
-
-    final nameController = TextEditingController();
-    String selectedType = 'bank';
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDlgState) {
-          return AlertDialog(
-            backgroundColor: cardBg,
-            title: Text('Tambah Dompet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Nama / Label Dompet (misal: BCA, GoPay)', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: nameController,
-                  style: TextStyle(fontSize: 13, color: textMain),
-                  decoration: InputDecoration(
-                    hintText: 'Contoh: SeaBank, Blu',
-                    filled: true,
-                    fillColor: inputBg,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderCol)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text('Jenis Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: borderCol)),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedType,
-                      isExpanded: true,
-                      dropdownColor: cardBg,
-                      items: const [
-                        DropdownMenuItem(value: 'bank', child: Text('🏦 Rekening Bank')),
-                        DropdownMenuItem(value: 'ewallet', child: Text('📱 E-Wallet')),
-                        DropdownMenuItem(value: 'cash', child: Text('💵 Tunai / Kas')),
-                      ],
-                      onChanged: (v) {
-                        if (v != null) setDlgState(() => selectedType = v);
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryLight, foregroundColor: Colors.white),
-                onPressed: () async {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) return;
-
-                  Navigator.pop(ctx);
-                  final ok = await ApiService.createAccount(provider.token!, name, selectedType);
-                  if (ok) {
-                    await provider.fetchAccounts();
-                    await provider.fetchDashboard();
-                    onDone();
-                  }
-                },
-                child: const Text('Tambah'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   void _showEditProfileDialog() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
@@ -603,6 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     bool obscureOld = true;
     bool obscureNew = true;
     bool obscureConfirm = true;
+    String? modalErrorMsg;
 
     showModalBottomSheet(
       context: context,
@@ -636,6 +349,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text('Ubah nama tampilan atau kata sandi akun Anda', style: TextStyle(fontSize: 11, color: textMuted)),
                     const SizedBox(height: 16),
 
+                    // In-Modal Live Error Banner
+                    if (modalErrorMsg != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.danger.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                modalErrorMsg!,
+                                style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
                     // Display Name Field
                     Text('Nama Tampilan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain)),
                     const SizedBox(height: 6),
@@ -654,10 +392,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Password Accordion / Toggle
                     InkWell(
-                      onTap: () => setModalState(() => isChangingPassword = !isChangingPassword),
+                      onTap: () => setModalState(() {
+                        isChangingPassword = !isChangingPassword;
+                        modalErrorMsg = null;
+                      }),
                       child: Row(
                         children: [
-                          Icon(isChangingPassword ? Icons.check_box : Icons.check_box_outline_blank, size: 20, color: AppColors.primaryLight),
+                          Icon(isChangingPassword ? Icons.check_box : Icons.check_box_outline_blank, size: 20, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Text('Ganti Kata Sandi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain)),
                         ],
@@ -732,29 +473,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 46,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: () async {
                           final newName = nameController.text.trim();
-                          if (newName.isEmpty) return;
+                          if (newName.isEmpty) {
+                            setModalState(() => modalErrorMsg = 'Nama tampilan tidak boleh kosong!');
+                            return;
+                          }
 
                           String? oldP = oldPwController.text.trim();
                           String? newP = newPwController.text.trim();
                           String? confP = confirmPwController.text.trim();
 
                           if (isChangingPassword) {
+                            if (oldP.isEmpty) {
+                              setModalState(() => modalErrorMsg = 'Kata sandi lama wajib diisi!');
+                              return;
+                            }
                             if (newP.length < 6) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Kata sandi baru minimal 6 karakter!'), backgroundColor: AppColors.danger),
-                              );
+                              setModalState(() => modalErrorMsg = 'Kata sandi baru minimal 6 karakter!');
                               return;
                             }
                             if (newP != confP) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Konfirmasi kata sandi tidak cocok!'), backgroundColor: AppColors.danger),
-                              );
+                              setModalState(() => modalErrorMsg = 'Konfirmasi kata sandi baru tidak cocok!');
                               return;
                             }
                           } else {
@@ -762,7 +506,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             newP = null;
                           }
 
-                          Navigator.pop(ctx);
                           final res = await ApiService.updateProfile(
                             provider.token!,
                             displayName: newName,
@@ -771,6 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
 
                           if (res['success'] == true) {
+                            Navigator.pop(ctx);
                             final updatedUser = UserModel(
                               id: user?.id ?? 1,
                               username: user?.username ?? '',
@@ -779,13 +523,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               role: user?.role ?? 'user',
                             );
                             await provider.saveAuth(provider.token!, updatedUser);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Profil berhasil diperbarui!'), backgroundColor: AppColors.success),
-                            );
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Profil berhasil diperbarui!'), backgroundColor: AppColors.success),
+                              );
+                            }
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(res['error'] ?? 'Gagal memperbarui profil'), backgroundColor: AppColors.danger),
-                            );
+                            setModalState(() => modalErrorMsg = res['error'] ?? 'Gagal memperbarui profil');
                           }
                         },
                         child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -799,6 +543,314 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showManageWalletsModal() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final accounts = provider.accounts;
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Kelola Dompet & Rekening', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textMain)),
+                        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                      ],
+                    ),
+                    Text('Ubah nama atau hapus dompet pencatatan Anda', style: TextStyle(fontSize: 11, color: textMuted)),
+                    const SizedBox(height: 16),
+
+                    if (accounts.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Center(child: Text('Belum ada dompet terdaftar.', style: TextStyle(color: textMuted))),
+                      )
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: accounts.length,
+                        separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
+                        itemBuilder: (context, index) {
+                          final acc = accounts[index];
+                          return Row(
+                            children: [
+                              BankBadge(accountName: acc.name, accountType: acc.type, size: 34),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(acc.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain)),
+                                    Text('${acc.type.toUpperCase()} • ${acc.balanceStr}', style: TextStyle(fontSize: 11, color: textMuted)),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 18),
+                                color: AppColors.primary,
+                                onPressed: () {
+                                  _showEditAccountDialog(acc, () {
+                                    setModalState(() {});
+                                  });
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                color: AppColors.danger,
+                                onPressed: () {
+                                  _confirmDeleteAccount(acc, () {
+                                    setModalState(() {});
+                                  });
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Tambah Dompet Baru', style: TextStyle(fontWeight: FontWeight.w700)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          _showAddAccountDialog(() {
+                            setModalState(() {});
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditAccountDialog(AccountModel acc, VoidCallback onDone) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+
+    final nameController = TextEditingController(text: acc.name);
+    String selectedType = acc.type;
+    String? modalErrorMsg;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          return AlertDialog(
+            backgroundColor: cardBg,
+            title: Text('Ubah Dompet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (modalErrorMsg != null) ...[
+                  Text(modalErrorMsg!, style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                ],
+                Text('Nama / Label Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: nameController,
+                  style: TextStyle(fontSize: 13, color: textMain),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: inputBg,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderCol)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text('Jenis Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: borderCol)),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedType,
+                      isExpanded: true,
+                      dropdownColor: cardBg,
+                      items: const [
+                        DropdownMenuItem(value: 'bank', child: Text('🏦 Rekening Bank')),
+                        DropdownMenuItem(value: 'ewallet', child: Text('📱 E-Wallet')),
+                        DropdownMenuItem(value: 'cash', child: Text('💵 Tunai / Kas')),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setDlgState(() => selectedType = v);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                onPressed: () async {
+                  final name = nameController.text.trim();
+                  if (name.isEmpty) {
+                    setDlgState(() => modalErrorMsg = 'Nama dompet tidak boleh kosong!');
+                    return;
+                  }
+
+                  final ok = await ApiService.updateAccount(provider.token!, acc.id, name, selectedType);
+                  if (ok) {
+                    Navigator.pop(ctx);
+                    await provider.fetchAccounts();
+                    await provider.fetchDashboard();
+                    onDone();
+                  } else {
+                    setDlgState(() => modalErrorMsg = 'Gagal menyimpan perubahan');
+                  }
+                },
+                child: const Text('Simpan'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showAddAccountDialog(VoidCallback onDone) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+
+    final nameController = TextEditingController();
+    String selectedType = 'bank';
+    String? modalErrorMsg;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          return AlertDialog(
+            backgroundColor: cardBg,
+            title: Text('Tambah Dompet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (modalErrorMsg != null) ...[
+                  Text(modalErrorMsg!, style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                ],
+                Text('Nama / Label Dompet (misal: BCA, GoPay)', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: nameController,
+                  style: TextStyle(fontSize: 13, color: textMain),
+                  decoration: InputDecoration(
+                    hintText: 'Contoh: SeaBank, Blu',
+                    filled: true,
+                    fillColor: inputBg,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderCol)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text('Jenis Dompet', style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(color: inputBg, borderRadius: BorderRadius.circular(8), border: Border.all(color: borderCol)),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedType,
+                      isExpanded: true,
+                      dropdownColor: cardBg,
+                      items: const [
+                        DropdownMenuItem(value: 'bank', child: Text('🏦 Rekening Bank')),
+                        DropdownMenuItem(value: 'ewallet', child: Text('📱 E-Wallet')),
+                        DropdownMenuItem(value: 'cash', child: Text('💵 Tunai / Kas')),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setDlgState(() => selectedType = v);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                onPressed: () async {
+                  final name = nameController.text.trim();
+                  if (name.isEmpty) {
+                    setDlgState(() => modalErrorMsg = 'Nama dompet tidak boleh kosong!');
+                    return;
+                  }
+
+                  final ok = await ApiService.createAccount(provider.token!, name, selectedType);
+                  if (ok) {
+                    Navigator.pop(ctx);
+                    await provider.fetchAccounts();
+                    await provider.fetchDashboard();
+                    onDone();
+                  } else {
+                    setDlgState(() => modalErrorMsg = 'Gagal menambah dompet baru');
+                  }
+                },
+                child: const Text('Tambah'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -865,7 +917,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
     final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final primary = AppColors.primary;
     final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
 
     // Filter ONLY truly installed apps on the phone
@@ -919,16 +971,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withOpacity(0.12),
+                          color: AppColors.primary.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 14, color: AppColors.primaryLight),
+                            Icon(Icons.edit_outlined, size: 14, color: AppColors.primary),
                             const SizedBox(width: 4),
                             Text(
                               'Edit Profil',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryLight),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
                             ),
                           ],
                         ),
@@ -1012,7 +1064,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: (_telegramData?['is_linked'] == true ? AppColors.success : AppColors.primaryLight).withOpacity(0.15),
+                        color: (_telegramData?['is_linked'] == true ? AppColors.success : AppColors.primary).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -1285,11 +1337,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 base64Decode(app.iconBase64),
                                 width: 34,
                                 height: 34,
-                                errorBuilder: (_, __, ___) => BankBadge(accountName: app.id, accountType: 'bank', size: 34),
+                                errorBuilder: (_, __, ___) => BankBadge(accountName: app.id, size: 34),
                               ),
                             )
                           else
-                            BankBadge(accountName: app.id, accountType: 'bank', size: 34),
+                            BankBadge(accountName: app.id, size: 34),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -1369,7 +1421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         statusColor = Colors.grey;
                         statusText = 'Dobel';
                       } else if (status == 'ignored') {
-                        statusColor = AppColors.primaryLight;
+                        statusColor = AppColors.primary;
                         statusText = 'Dilewati';
                       } else if (status.startsWith('failed')) {
                         statusColor = AppColors.danger;

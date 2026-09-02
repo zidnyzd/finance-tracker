@@ -34,6 +34,10 @@ jobs:
         working-directory: flutter_app
         run: flutter pub get
 
+      - name: Run Flutter Unit Tests
+        working-directory: flutter_app
+        run: flutter test --no-pub
+
       - name: Build Split APK Release
         working-directory: flutter_app
         run: flutter build apk --release --split-per-abi --no-tree-shake-icons
