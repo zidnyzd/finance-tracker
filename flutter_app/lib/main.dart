@@ -172,7 +172,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       const ReportScreen(),
       AddTransactionScreen(
-        onSaved: () {
+        onFinish: () {
           _onTabTapped(0);
           provider.fetchDashboard();
         },
