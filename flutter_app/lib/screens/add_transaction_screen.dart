@@ -373,7 +373,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
     final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final inputBg = isDark ? AppColors.inputDark : AppColors.inputLight;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
 
     final expenseCategories = ['Makan & Minum', 'Belanja', 'Transportasi', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Lainnya'];
