@@ -22,6 +22,36 @@ ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *r
 
 ---
 
+## 🛠️ Tech Stack & Teknologi
+
+### 🌐 1. Web & Backend Server Engine
+* **Core Language & Server:** **Go (Golang 1.24+)** — High performance standard library `net/http` dengan arsitektur zero external framework overhead.
+* **Frontend Web UI:** **HTML5**, **Bootstrap 5.3**, **Tabler Icons (Webfont/SVG)**, dan font resmi **Poppins**.
+* **Visualisasi Grafik & Chart:** **ApexCharts JS** (Interaktif Cashflow Area Chart & Donut Chart Distribusi Aset).
+* **Database & Storage:** **SQLite 3** dengan konfigurasi **Write-Ahead Logging (WAL Mode)** & `busy_timeout = 5000ms`.
+* **AI Vision & NLP Engine:** **Google Gemini AI** (`gemini-flash-lite-latest` & `gemini-3.5-flash-lite`) via REST API dengan HTTP client timeout 15s.
+* **Keamanan & Autentikasi:**
+  * **Google OAuth 2.0:** Dual-Token verification (`id_token` / `access_token` fallback).
+  * **Password Hashing:** `bcrypt` (`golang.org/x/crypto/bcrypt`).
+  * **Session Security:** 16-byte Kriptografis, `HttpOnly`, `SameSite=Lax`, Auto-prune max 3 active devices.
+  * **CSRF Protection:** Double-token hash validation & per-IP Sliding Window Rate Limiter.
+  * **Network Infrastructure:** Cloudflare Tunnel & WAF dengan SSL/TLS HSTS Preload.
+
+### 📱 2. Android Mobile Application (Flutter Native)
+* **Mobile Framework:** **Flutter 3.27+** (Dart 3.6+) — Single-Activity reactive UI dengan performa 60 FPS mulus.
+* **Target OS & Arsitektur:** **Android 16 (Target SDK 36)** / Min SDK 24 (Android 7.0+ Nougat) — Arsitektur **ARM64-v8a**, ARMv7, x86_64.
+* **State Management:** **Provider (`provider: ^6.1.2`)** dengan arsitektur reaktif terisolasi.
+* **Native Android Bridge (Kotlin):**
+  * **Background Listener:** Kotlin Native `NotificationListenerService` dengan 3s Safe WakeLock & event-driven processing (0% battery drain saat idle).
+  * **Always-Alive Mechanism:** Lifecycle hook `onListenerDisconnected()` + `requestRebind()` untuk pemulihan otomatis saat deep sleep.
+  * **Offline Sync Queue:** **Android Jetpack WorkManager (`androidx.work:work-runtime-ktx`)** dengan Exponential Backoff Retry.
+  * **App Icon Extractor:** Native Android `PackageManager` + `Canvas` bitmap rendering to Base64 data URI.
+* **AI Camera & Media Picker:** **`image_picker: ^1.1.2`** (Android 13+ System Photo Picker Sandbox tanpa izin storage berbahaya).
+* **Deep Linking & Auth:** **`app_links: ^6.3.2`** (OAuth callback receiver `zira://auth`).
+* **CI/CD & Release Pipeline:** **GitHub Actions CI/CD** (`ubuntu-latest`, JDK 17, Node 24 compliant) — Otomatisasi build AAB bertanda tangan release keystore dengan **R8 Obfuscation & Native Debug Symbols (`--split-debug-info`)**.
+
+---
+
 ## 🌟 Fitur Unggulan Aplikasi Mobile (Flutter Edition)
 
 * **🎨 100% Desain & Fitur Identik Web (Full Parity):**
