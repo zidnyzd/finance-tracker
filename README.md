@@ -4,7 +4,7 @@ Aplikasi manajemen keuangan pribadi modern, cepat, dan terpadu — didukung oleh
 
 ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-3.27+-02569B?logo=flutter&logoColor=white)
-![Android](https://img.shields.io/badge/Android-API_24+_--_Target_SDK_35-3DDC84?logo=android&logoColor=white)
+![Android](https://img.shields.io/badge/Android-API_24+_--_Target_SDK_36-3DDC84?logo=android&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-WAL_Mode-003B57?logo=sqlite&logoColor=white)
 ![Google Play](https://img.shields.io/badge/Google_Play-Ready_(AAB)-34A853?logo=googleplay&logoColor=white)
 ![Telegram Bot](https://img.shields.io/badge/Telegram_Bot-Gemini_AI-2CA5E0?logo=telegram&logoColor=white)
@@ -47,17 +47,15 @@ ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *r
   * Hanya menampilkan aplikasi perbankan yang benar-benar terpasang di HP pengguna, lengkap dengan icon aplikasi asli resolusi tinggi (*Real Native App Icon*).
   * Sakelar On/Off mandiri per-rekening yang tersimpan permanen.
 
-* **🔐 Kepatuhan Penuh Google Play Store (Ready to Publish):**
-  * **Target SDK 35 (Android 15)** & Min SDK 24 (Android 7.0+).
-  * **Scoped Queries Compliant:** Menggunakan tag `<queries>` eksplisit tanpa izin berisiko tinggi `QUERY_ALL_PACKAGES` (Bebas formulir video YouTube di Play Console).
-  * **Native 1-Tap Google Sign-In:** Dialog pemilih akun resmi Google Play Services langsung di HP tanpa browser redirect.
+* **🔐 Kepatuhan Penuh Google Play Store 2026 (Zero-Friction Approval):**
+  * **Target SDK 36 (Android 16)** & Min SDK 24 (Android 7.0+).
+  * **Bebas Izin Sensitif:** Menghapus izin berisiko tinggi `REQUEST_INSTALL_PACKAGES` & `QUERY_ALL_PACKAGES` sehingga tidak memerlukan deklarasi video YouTube di Play Console.
+  * **Scoped Queries Compliant:** Menggunakan tag `<queries>` eksplisit terdaftar untuk deteksi bank.
+  * **Native Debug Symbols & Obfuscation Mapping:** Dilengkapi file mapping deobfuscation (`app.android-arm64.symbols`, dll) untuk pelacakan crash Google Play Vitals.
+  * **Native 1-Tap Google Sign-In:** Dialog pemilih akun resmi Google Play Services langsung di HP.
   * Halaman Resmi:
     * 📜 **Privacy Policy:** `https://zira.web.id/privacy` (Kontak: `zidzdev@gmail.com`)
     * 🗑️ **Account & Data Deletion:** `https://zira.web.id/delete-account`
-
-* **🔄 Seamless In-App Auto-Updater:**
-  * Deteksi pembaruan otomatis dari endpoint `/api/v1/app/version`.
-  * Unduh langsung di aplikasi dengan live progress bar dan instalasi otomatis via `FileProvider`.
 
 ---
 
@@ -65,8 +63,9 @@ ZiRa Finance hadir dalam 3 platform terintegrasi yang saling terhubung secara *r
 
 | Format Berkas | Versi Target | Keterangan & Tujuan | Tautan Unduh |
 |---|:---:|---|:---:|
-| **APK (Direct Install)** | **v1.9.9** | File installer langsung untuk HP Android (ARM64-v8a) | [⬇️ Download ZiRa-Finance-v1.9.9.apk](https://zira.web.id/static/ZiRa-Finance-v1.9.9.apk) |
-| **AAB (Play Store Bundle)** | **v1.9.9** | Format bundle resmi siap upload ke Google Play Console | [⬇️ Download ZiRa-Finance-v1.9.9-release.aab](https://github.com/zidnyzd/finance-tracker/releases/tag/v1.9.9) |
+| **APK (Direct Install)** | **v2.0.1** | File installer langsung untuk HP Android (ARM64-v8a) | [⬇️ Download ZiRa-Finance-v2.0.1.apk](https://zira.web.id/static/ZiRa-Finance-v2.0.1.apk) |
+| **AAB (Play Store Bundle)** | **v2.0.1** | Format bundle resmi siap upload ke Google Play Console (Target SDK 36) | [⬇️ Download ZiRa-Finance-v2.0.1-release.aab](https://github.com/zidnyzd/finance-tracker/releases/tag/v2.0.1) |
+| **Symbols (Debug Mapping)** | **v2.0.1** | Berkas simbol debug native C++/Dart & R8 deobfuscation | [⬇️ Download ZiRa-Finance-v2.0.1-symbols.zip](https://github.com/zidnyzd/finance-tracker/releases/tag/v2.0.1) |
 | **GitHub Releases** | **Semua Versi** | Arsip rilis resmi lengkap beserta changelog | [🚀 Kunjungi GitHub Releases](https://github.com/zidnyzd/finance-tracker/releases) |
 
 ---
@@ -135,4 +134,4 @@ Setiap perubahan kode wajib melalui automated unit testing sebelum rilis:
 
 ## 📄 Riwayat Versi Lengkap
 
-Catatan rilis lengkap dari versi v1.0.0 hingga v1.9.9 didokumentasikan pada file **[CHANGELOG.md](CHANGELOG.md)**.
+Catatan rilis lengkap dari versi v1.0.0 hingga v2.0.1 didokumentasikan pada file **[CHANGELOG.md](CHANGELOG.md)**.
