@@ -192,6 +192,26 @@ class ApiService {
     }
   }
 
+  // Scan Receipt / Transfer Screenshot with AI Vision
+  static Future<Map<String, dynamic>> scanReceipt(String token, List<int> imageBytes, {String notes = '', String mimeType = 'image/jpeg'}) async {
+    try {
+      final base64Image = base64Encode(imageBytes);
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/scan-receipt'),
+        headers: _headers(token),
+        body: jsonEncode({
+          'image_base64': base64Image,
+          'mime_type': mimeType,
+          'notes': notes,
+        }),
+      ).timeout(const Duration(seconds: 45));
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': 'Gagal memindai struk: $e'};
+    }
+  }
+
   // Delete Transaction
   static Future<bool> deleteTransaction(String token, int id) async {
     try {
