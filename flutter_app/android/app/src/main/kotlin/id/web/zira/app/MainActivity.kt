@@ -20,22 +20,48 @@ class MainActivity: FlutterActivity() {
     private val CHANNEL = "id.web.zira.app/settings"
 
     private val KNOWN_FINANCIAL_APPS = listOf(
+        // E-Wallet & Payment
         mapOf("id" to "gopay", "name" to "GoPay", "packages" to listOf("com.gojek.gopay")),
         mapOf("id" to "gojek", "name" to "Gojek", "packages" to listOf("com.gojek.app")),
-        mapOf("id" to "shopeepay", "name" to "ShopeePay", "packages" to listOf("com.shopee.id", "com.shopeepay.id", "com.shopeepay.merchant.id")),
-        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
-        mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
-        mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "packages" to listOf("id.bmri.livin", "com.bankmandiri.mandirimai", "tl.bmdl.livin")),
-        mapOf("id" to "bca", "name" to "BCA / myBCA", "packages" to listOf("com.bca", "com.bca.mybca", "com.bca.mybca.omni.android")),
-        mapOf("id" to "brimo", "name" to "BRImo (Bank BRI)", "packages" to listOf("id.co.bri.brimo")),
-        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "packages" to listOf("id.bni.wondr", "src.com.bni", "id.co.bni.wondr")),
-        mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking")),
+        mapOf("id" to "shopeepay", "name" to "ShopeePay", "packages" to listOf("com.shopeepay.id", "com.shopeepay.merchant.id", "com.shopee.id")),
         mapOf("id" to "dana", "name" to "DANA Indonesia", "packages" to listOf("id.dana")),
         mapOf("id" to "ovo", "name" to "OVO Payment", "packages" to listOf("ovo.id")),
-        mapOf("id" to "bsi", "name" to "BSI Mobile / SuperApp", "packages" to listOf("co.id.bankbsi.superapp")),
+        mapOf("id" to "linkaja", "name" to "LinkAja", "packages" to listOf("com.telkom.tcash")),
+        mapOf("id" to "astrapay", "name" to "AstraPay", "packages" to listOf("com.astrapay.app")),
+        mapOf("id" to "isaku", "name" to "i.saku", "packages" to listOf("com.indomaret.isaku")),
+        mapOf("id" to "sakuku", "name" to "Sakuku (BCA)", "packages" to listOf("com.bca.sakuku")),
+        mapOf("id" to "flip", "name" to "Flip", "packages" to listOf("id.flip")),
+        mapOf("id" to "doku", "name" to "DOKU Wallet", "packages" to listOf("com.dokuwallet.android")),
+
+        // Bank Digital
+        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
+        mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
+        mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking", "com.jago.digitalBanking.syariah")),
         mapOf("id" to "neobank", "name" to "Neobank (BNC)", "packages" to listOf("com.bnc.finance")),
         mapOf("id" to "jenius", "name" to "Jenius BTPN", "packages" to listOf("com.btpn.dc")),
-        mapOf("id" to "cimb", "name" to "OCTO Mobile CIMB", "packages" to listOf("com.cimbniaga.octomobile"))
+        mapOf("id" to "allobank", "name" to "Allo Bank", "packages" to listOf("com.allobank.allomobile")),
+        mapOf("id" to "linebank", "name" to "LINE Bank (KEB Hana)", "packages" to listOf("id.co.kebhana.linebank")),
+        mapOf("id" to "superbank", "name" to "Superbank", "packages" to listOf("id.superbank.app")),
+        mapOf("id" to "banksaqu", "name" to "Bank Saqu", "packages" to listOf("id.banksaqu.app")),
+        mapOf("id" to "aladin", "name" to "Bank Aladin Syariah", "packages" to listOf("id.aladinbank.app")),
+        mapOf("id" to "krom", "name" to "Krom Bank", "packages" to listOf("com.krom.bank")),
+
+        // Bank Konvensional & BUMN
+        mapOf("id" to "bca", "name" to "BCA / myBCA", "packages" to listOf("com.bca", "com.bca.mybca", "com.bca.mybca.omni.android", "com.bca.halobca.android")),
+        mapOf("id" to "mandiri", "name" to "Livin' by Mandiri", "packages" to listOf("id.bmri.livin", "com.bankmandiri.mandirimai", "tl.bmdl.livin")),
+        mapOf("id" to "brimo", "name" to "BRImo (Bank BRI)", "packages" to listOf("id.co.bri.brimo", "id.co.bri.brilinkmobile")),
+        mapOf("id" to "bni", "name" to "BNI Mobile / Wondr", "packages" to listOf("id.bni.wondr", "src.com.bni", "id.co.bni.wondr")),
+        mapOf("id" to "bsi", "name" to "BSI Mobile / SuperApp", "packages" to listOf("co.id.bankbsi.superapp", "com.bsi.mobile")),
+        mapOf("id" to "cimb", "name" to "OCTO Mobile CIMB", "packages" to listOf("com.cimbniaga.octomobile")),
+        mapOf("id" to "danamon", "name" to "D-Bank PRO Danamon", "packages" to listOf("com.danamon.dbank.reg")),
+        mapOf("id" to "permata", "name" to "PermataMobile X", "packages" to listOf("net.myinfosys.permata")),
+        mapOf("id" to "btn", "name" to "BTN Mobile", "packages" to listOf("com.btn.mobile")),
+        mapOf("id" to "mega", "name" to "M-Smile (Bank Mega)", "packages" to listOf("com.bankmega.msmile")),
+        mapOf("id" to "ocbc", "name" to "OCBC Mobile", "packages" to listOf("com.ocbc.mobile.id")),
+        mapOf("id" to "maybank", "name" to "M2U Maybank", "packages" to listOf("id.co.maybank.m2u")),
+        mapOf("id" to "sinarmas", "name" to "SimobiPlus Sinarmas", "packages" to listOf("com.simas.mobile.Simobi")),
+        mapOf("id" to "panin", "name" to "Panin Mobile", "packages" to listOf("id.co.panin.mobile")),
+        mapOf("id" to "dbs", "name" to "digibank by DBS", "packages" to listOf("com.dbs.id.dbsmbanking"))
     )
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -103,15 +129,15 @@ class MainActivity: FlutterActivity() {
                                 } catch (_: Exception) {}
                             }
 
-                            if (foundPkg != null) {
+                            if (foundPkg != null && !foundPackages.contains(foundPkg)) {
                                 foundPackages.add(foundPkg)
-                                
-                                // Explicitly display ShopeePay if package is com.shopee.id (financial wallet feature)
-                                val finalName = if (foundPkg == "com.shopee.id") "ShopeePay" else (item["name"] ?: foundPkg)
+
+                                // Display clean name: ShopeePay for Shopee/ShopeePay packages
+                                val displayName = if (foundPkg.contains("shopee")) "ShopeePay" else (item["name"] ?: foundPkg)
 
                                 list.add(mapOf(
                                     "id" to (item["id"] ?: "bank"),
-                                    "name" to finalName,
+                                    "name" to displayName,
                                     "package_name" to foundPkg,
                                     "icon_base64" to iconBase64,
                                     "is_installed" to true
@@ -119,7 +145,7 @@ class MainActivity: FlutterActivity() {
                             }
                         }
 
-                        // Smart fallback: scan all installed applications for financial keywords if missed
+                        // Smart fallback scanner: Scan any other installed financial apps
                         try {
                             val allInstalled = pm.getInstalledApplications(PackageManager.GET_META_DATA)
                             for (appInfo in allInstalled) {
@@ -132,10 +158,10 @@ class MainActivity: FlutterActivity() {
                                 var matchedId: String? = null
                                 var customName: String? = null
 
-                                if (pkgLower.contains("shopee") || label.contains("shopee")) {
+                                if (pkgLower == "com.shopeepay.id" || pkgLower.contains("shopeepay")) {
                                     matchedId = "shopeepay"
                                     customName = "ShopeePay"
-                                } else if (pkgLower.contains("gopay") || label.contains("gopay")) {
+                                } else if (pkgLower == "com.gojek.gopay" || label.contains("gopay")) {
                                     matchedId = "gopay"
                                     customName = "GoPay"
                                 } else if (pkgLower.contains("seabank") || label.contains("seabank")) {
@@ -150,6 +176,12 @@ class MainActivity: FlutterActivity() {
                                     matchedId = "bni"
                                 } else if (pkgLower.contains("brimo") || label.contains("brimo")) {
                                     matchedId = "brimo"
+                                } else if (pkgLower.contains("superbank") || label.contains("superbank")) {
+                                    matchedId = "superbank"
+                                    customName = "Superbank"
+                                } else if (pkgLower.contains("banksaqu") || label.contains("saqu")) {
+                                    matchedId = "banksaqu"
+                                    customName = "Bank Saqu"
                                 }
 
                                 if (matchedId != null) {

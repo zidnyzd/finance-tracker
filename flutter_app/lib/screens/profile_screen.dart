@@ -7,7 +7,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/bank_app_config.dart';
 import '../models/models.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
@@ -24,14 +23,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _appVersion = '1.7.4';
-  int _buildNumber = 32;
+  String _appVersion = '1.7.5';
+  int _buildNumber = 33;
   List<InstalledBankApp> _installedApps = [];
   bool _isLoadingApps = true;
 
-  // Search filter for bank selection
-  final TextEditingController _bankSearchController = TextEditingController();
-  String _bankSearchQuery = '';
+  // Search filter for installed apps
+  final TextEditingController _installedSearchController = TextEditingController();
+  String _installedSearchQuery = '';
 
   // Additional feature states
   Map<String, dynamic>? _telegramData;
@@ -54,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadVersion() async {
     try {
       final pInfo = await PackageInfo.fromPlatform();
-      final rawBuild = int.tryParse(pInfo.buildNumber) ?? 32;
+      final rawBuild = int.tryParse(pInfo.buildNumber) ?? 33;
       final cleanBuild = rawBuild > 1000 ? (rawBuild % 1000) : rawBuild;
 
       setState(() {
@@ -651,13 +650,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
     final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
 
-    // Filtered apps based on search input
-    final filteredApps = BankAppConfig.allApps.where((app) {
-      if (_bankSearchQuery.isEmpty) return true;
-      final q = _bankSearchQuery.toLowerCase();
+    // Filter ONLY truly installed apps on the phone
+    final displayedApps = _installedApps.where((app) {
+      if (_installedSearchQuery.isEmpty) return true;
+      final q = _installedSearchQuery.toLowerCase();
       return app.name.toLowerCase().contains(q) ||
           app.id.toLowerCase().contains(q) ||
-          app.primaryPackage.toLowerCase().contains(q);
+          app.packageName.toLowerCase().contains(q);
     }).toList();
 
     return SingleChildScrollView(
@@ -918,7 +917,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 5. All Supported Financial Apps with Live Search Bar & Installed Status Badges
+          // 5. TRULY INSTALLED FINANCIAL APPS ONLY (With Search & Instant Toggle)
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -933,7 +932,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Pilih Aplikasi yang Di-Sync',
+                      'Aplikasi Finansial di HP',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain),
                     ),
                     InkWell(
@@ -946,125 +945,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 Text(
-                  'Cari dan aktifkan aplikasi perbankan atau e-wallet yang ingin direkam mutasinya.',
+                  'Hanya menampilkan m-banking & e-wallet yang terdeteksi terpasang di HP ini.',
                   style: TextStyle(fontSize: 11, color: textMuted),
                 ),
                 const SizedBox(height: 12),
 
-                // Search Bar for Banks
-                Container(
-                  height: 38,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: inputBg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: borderCol),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, size: 16, color: textMuted),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _bankSearchController,
-                          onChanged: (val) {
-                            setState(() => _bankSearchQuery = val.trim());
-                          },
-                          style: TextStyle(fontSize: 12, color: textMain),
-                          decoration: InputDecoration(
-                            hintText: 'Cari bank, ShopeePay, GoPay, SeaBank...',
-                            hintStyle: TextStyle(fontSize: 11, color: textMuted),
-                            border: InputBorder.none,
-                            isDense: true,
+                // Search Bar for Installed Apps
+                if (_installedApps.length > 5) ...[
+                  Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: inputBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: borderCol),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, size: 16, color: textMuted),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _installedSearchController,
+                            onChanged: (val) {
+                              setState(() => _installedSearchQuery = val.trim());
+                            },
+                            style: TextStyle(fontSize: 12, color: textMain),
+                            decoration: InputDecoration(
+                              hintText: 'Cari aplikasi terpasang...',
+                              hintStyle: TextStyle(fontSize: 11, color: textMuted),
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
                           ),
                         ),
-                      ),
-                      if (_bankSearchQuery.isNotEmpty)
-                        InkWell(
-                          onTap: () {
-                            _bankSearchController.clear();
-                            setState(() => _bankSearchQuery = '');
-                          },
-                          child: Icon(Icons.close, size: 16, color: textMuted),
-                        ),
-                    ],
+                        if (_installedSearchQuery.isNotEmpty)
+                          InkWell(
+                            onTap: () {
+                              _installedSearchController.clear();
+                              setState(() => _installedSearchQuery = '');
+                            },
+                            child: Icon(Icons.close, size: 16, color: textMuted),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 14),
+                  const SizedBox(height: 14),
+                ],
 
-                if (filteredApps.isEmpty)
+                if (_isLoadingApps)
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                else if (_installedApps.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Center(
-                      child: Text('Aplikasi "$_bankSearchQuery" tidak ditemukan.', style: TextStyle(fontSize: 12, color: textMuted)),
+                      child: Column(
+                        children: [
+                          Icon(Icons.account_balance_outlined, size: 36, color: textMuted),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Belum ada m-banking / e-wallet yang terdeteksi di HP ini.',
+                            style: TextStyle(fontSize: 12, color: textMuted),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else if (displayedApps.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Center(
+                      child: Text('Tidak ada aplikasi cocok dengan "$_installedSearchQuery".', style: TextStyle(fontSize: 12, color: textMuted)),
                     ),
                   )
                 else
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filteredApps.length,
+                    itemCount: displayedApps.length,
                     separatorBuilder: (_, __) => Divider(color: borderCol, height: 16),
                     itemBuilder: (context, index) {
-                      final app = filteredApps[index];
-                      
-                      // Check if installed on device
-                      InstalledBankApp? matchingInstalled;
-                      for (final inst in _installedApps) {
-                        if (app.packageAliases.contains(inst.packageName) || inst.id == app.id) {
-                          matchingInstalled = inst;
-                          break;
-                        }
-                      }
-
-                      final isInstalledOnPhone = matchingInstalled != null;
-                      final isEnabled = provider.isAppNotifEnabled(app.primaryPackage);
+                      final app = displayedApps[index];
+                      final isEnabled = provider.isAppNotifEnabled(app.packageName);
 
                       return Row(
                         children: [
-                          if (matchingInstalled != null && matchingInstalled.iconBase64.isNotEmpty)
+                          if (app.iconBase64.isNotEmpty)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.memory(
-                                base64Decode(matchingInstalled.iconBase64),
+                                base64Decode(app.iconBase64),
                                 width: 34,
                                 height: 34,
-                                errorBuilder: (_, __, ___) => BankBadge(accountName: app.id, accountType: app.category, size: 34),
+                                errorBuilder: (_, __, ___) => BankBadge(accountName: app.id, accountType: 'bank', size: 34),
                               ),
                             )
                           else
-                            BankBadge(accountName: app.id, accountType: app.category, size: 34),
+                            BankBadge(accountName: app.id, accountType: 'bank', size: 34),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      app.name,
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                      decoration: BoxDecoration(
-                                        color: isInstalledOnPhone ? AppColors.success.withOpacity(0.15) : borderCol.withOpacity(0.4),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        isInstalledOnPhone ? 'Terpasang ✓' : 'Tersedia',
-                                        style: TextStyle(
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.w700,
-                                          color: isInstalledOnPhone ? AppColors.success : textMuted,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  app.name,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
                                 ),
                                 Text(
-                                  app.primaryPackage,
+                                  app.packageName,
                                   style: TextStyle(fontSize: 10, color: textMuted),
                                 ),
                               ],
@@ -1074,10 +1066,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             value: isEnabled,
                             activeColor: primary,
                             onChanged: (val) {
-                              provider.toggleAppNotif(app.primaryPackage, val);
-                              for (final alias in app.packageAliases) {
-                                provider.toggleAppNotif(alias, val);
-                              }
+                              provider.toggleAppNotif(app.packageName, val);
                             },
                           ),
                         ],

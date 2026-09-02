@@ -11,51 +11,80 @@
     <!-- Membaca seluruh aplikasi m-banking terpasang tanpa terhalang sandbox Android 11+ -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
-    <!-- Queries explicit fallback for all Indonesian banks & e-wallets -->
+    <!-- Queries explicit fallback for all Indonesian banks, digital banks, & e-wallets -->
     <queries>
-        <!-- SeaBank -->
-        <package android:name="ph.seabank.seabank" />
-        <package android:name="com.btpn.seabank" />
-        <package android:name="com.shopee.seabank" />
-
-        <!-- Blu BCA Digital -->
-        <package android:name="com.bcadigital.blu" />
-        <package android:name="id.co.bcadigital.blu" />
-
-        <!-- BCA & myBCA -->
+        <!-- Bank Konvensional & BUMN -->
         <package android:name="com.bca" />
         <package android:name="com.bca.mybca" />
         <package android:name="com.bca.mybca.omni.android" />
-
-        <!-- Mandiri / Livin -->
+        <package android:name="com.bca.halobca.android" />
         <package android:name="id.bmri.livin" />
         <package android:name="com.bankmandiri.mandirimai" />
         <package android:name="tl.bmdl.livin" />
-
-        <!-- BRI & BRImo -->
         <package android:name="id.co.bri.brimo" />
-
-        <!-- BNI & Wondr -->
+        <package android:name="id.co.bri.brilinkmobile" />
         <package android:name="src.com.bni" />
         <package android:name="id.bni.wondr" />
         <package android:name="id.co.bni.wondr" />
-
-        <!-- Bank Jago -->
-        <package android:name="com.jago.digitalBanking" />
-
-        <!-- E-Wallets & Fintech -->
-        <package android:name="id.dana" />
-        <package android:name="com.gojek.app" />
-        <package android:name="com.gojek.gopay" />
-        <package android:name="ovo.id" />
-        <package android:name="com.shopee.id" />
         <package android:name="co.id.bankbsi.superapp" />
+        <package android:name="com.bsi.mobile" />
+        <package android:name="com.cimbniaga.octomobile" />
+        <package android:name="net.myinfosys.permata" />
+        <package android:name="com.danamon.dbank.reg" />
+        <package android:name="com.btn.mobile" />
+        <package android:name="com.bankmega.msmile" />
+        <package android:name="com.simas.mobile.Simobi" />
+        <package android:name="id.co.panin.mobile" />
+        <package android:name="com.ocbc.mobile.id" />
+        <package android:name="id.co.maybank.m2u" />
+        <package android:name="com.muamalat.din" />
+        <package android:name="com.bankjatim.mobilebanking" />
+        <package android:name="com.bankdki.jakone" />
+        <package android:name="id.co.bankbjb.digi" />
+        <package android:name="com.nobubank.nobumobile" />
+        <package android:name="id.co.kbbukopin.wokee" />
+        <package android:name="com.dbs.id.dbsmbanking" />
+        <package android:name="com.uob.id.tmrw" />
+
+        <!-- Bank Digital -->
+        <package android:name="com.jago.digitalBanking" />
+        <package android:name="com.jago.digitalBanking.syariah" />
+        <package android:name="com.bcadigital.blu" />
+        <package android:name="id.co.bcadigital.blu" />
+        <package android:name="ph.seabank.seabank" />
+        <package android:name="com.btpn.seabank" />
+        <package android:name="com.shopee.seabank" />
         <package android:name="com.bnc.finance" />
         <package android:name="com.btpn.dc" />
-        <package android:name="com.danamon.dbank.reg" />
-        <package android:name="com.cimbniaga.octomobile" />
+        <package android:name="com.allobank.allomobile" />
+        <package android:name="id.co.kebhana.linebank" />
+        <package android:name="id.superbank.app" />
+        <package android:name="com.krom.bank" />
+        <package android:name="id.aladinbank.app" />
+        <package android:name="id.banksaqu.app" />
+        <package android:name="id.co.hijrabank.mobile" />
+
+        <!-- E-Wallet & Fintech -->
+        <package android:name="id.dana" />
+        <package android:name="com.gojek.gopay" />
+        <package android:name="com.gojek.app" />
+        <package android:name="ovo.id" />
+        <package android:name="com.shopeepay.id" />
+        <package android:name="com.shopeepay.merchant.id" />
+        <package android:name="com.shopee.id" />
+        <package android:name="com.telkom.tcash" />
+        <package android:name="com.astrapay.app" />
+        <package android:name="com.indomaret.isaku" />
+        <package android:name="com.bca.sakuku" />
+        <package android:name="com.dokuwallet.android" />
+        <package android:name="com.bm.cl.speedcash" />
+        <package android:name="id.mncpay.motionpay" />
+        <package android:name="id.flip" />
+        <package android:name="id.co.oyindonesia.oy" />
         <package android:name="com.tokopedia.tkpd" />
         <package android:name="com.grabtaxi.passenger" />
+        <package android:name="com.lazada.android" />
+        <package android:name="com.blibli.android" />
     </queries>
 
     <application
