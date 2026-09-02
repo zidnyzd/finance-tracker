@@ -1,5 +1,6 @@
 package id.web.zira.app
 
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -7,7 +8,9 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import android.util.Base64
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -105,7 +108,7 @@ class MainActivity: FlutterActivity() {
                         // If granted, ensure service is actively connected/rebound
                         if (isGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             try {
-                                NotificationListener.requestRebind(ComponentName(this, NotificationListener::class.java))
+                                NotificationListenerService.requestRebind(ComponentName(this, NotificationListener::class.java))
                             } catch (_: Exception) {}
                         }
                         
