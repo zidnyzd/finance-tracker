@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -89,12 +91,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     });
   }
 
-  // Scan Receipt via Camera or Gallery
+  // Scan Receipt via Camera or Gallery with human-friendly error messages
   Future<void> _scanReceipt(ImageSource source) async {
     final token = Provider.of<AppProvider>(context, listen: false).token;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login terlebih dahulu.'), backgroundColor: AppColors.danger),
+        const SnackBar(content: Text('Silakan login ke akun Anda terlebih dahulu.'), backgroundColor: AppColors.danger),
       );
       return;
     }
@@ -102,12 +104,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     try {
       final XFile? photo = await _picker.pickImage(
         source: source,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 85,
+        maxWidth: 1280,
+        maxHeight: 1280,
+        imageQuality: 80,
       );
 
-      if (photo == null) return;
+      if (photo == null) return; // User cancelled picker
 
       setState(() {
         _isScanningReceipt = true;
@@ -204,13 +206,54 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ),
         );
       }
-    } catch (e) {
+    } on PlatformException catch (pe) {
+      if (mounted) {
+        setState(() => _isScanningReceipt = false);
+        String humanMsg = 'Izin akses belum diberikan.';
+        if (pe.code.contains('camera_access_denied') || pe.code.contains('permission')) {
+          humanMsg = 'Izin kamera belum diberikan. Mohon izinkan akses kamera di Pengaturan HP Anda.';
+        } else if (pe.code.contains('photo_access_denied')) {
+          humanMsg = 'Izin akses galeri foto belum diberikan.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(TablerIcons.alert_triangle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(humanMsg)),
+              ],
+            ),
+            backgroundColor: AppColors.danger,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } on TimeoutException {
       if (mounted) {
         setState(() => _isScanningReceipt = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Kendala pemindaian: $e'),
+          const SnackBar(
+            content: Text('Waktu pemindaian habis (Timeout). Mohon periksa koneksi internet Anda dan coba lagi.'),
             backgroundColor: AppColors.danger,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isScanningReceipt = false);
+        String userFriendlyError = 'Gagal memindai gambar: Pastikan foto struk memiliki pencahayaan yang cukup dan teks terlihat jelas.';
+        if (e.toString().toLowerCase().contains('timeout')) {
+          userFriendlyError = 'Koneksi internet lambat (Timeout). Silakan coba lagi.';
+        } else if (e.toString().toLowerCase().contains('socket') || e.toString().toLowerCase().contains('network')) {
+          userFriendlyError = 'Koneksi internet terputus. Mohon periksa jaringan Anda.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(userFriendlyError),
+            backgroundColor: AppColors.danger,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -448,7 +491,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           color: primary.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(TablerIcons.camera, color: primary, size: 20),
+                        child: Icon(TablerIcons.camera, color: primary, size: 22),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -499,32 +542,44 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(TablerIcons.camera, size: 16),
-                            label: const Text('Ambil Foto', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primary,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               elevation: 0,
                             ),
                             onPressed: () => _scanReceipt(ImageSource.camera),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.photo_camera_rounded, size: 18, color: Colors.white),
+                                SizedBox(width: 6),
+                                Text('Ambil Foto', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: OutlinedButton.icon(
-                            icon: const Icon(TablerIcons.photo, size: 16),
-                            label: const Text('Dari Galeri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: primary,
                               side: BorderSide(color: isDark ? const Color(0xFF2C4A75) : const Color(0xFFB8D5FC)),
                               backgroundColor: cardBg.withOpacity(0.6),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                             onPressed: () => _scanReceipt(ImageSource.gallery),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.photo_library_rounded, size: 18, color: primary),
+                                const SizedBox(width: 6),
+                                Text('Dari Galeri', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: primary)),
+                              ],
+                            ),
                           ),
                         ),
                       ],
