@@ -25,11 +25,7 @@
             --radius-sm: 8px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -40,10 +36,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .wrapper {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .wrapper { max-width: 800px; margin: 0 auto; }
 
         .top-navbar {
             display: flex;
@@ -88,9 +81,7 @@
             background: var(--primary-light);
         }
 
-        .hero-section {
-            margin-bottom: 24px;
-        }
+        .hero-section { margin-bottom: 24px; }
 
         .badge-pill {
             display: inline-flex;
@@ -221,13 +212,8 @@
             font-weight: 600;
         }
 
-        .table-custom td {
-            color: var(--text-body);
-        }
-
-        .table-custom td strong {
-            color: var(--text-main);
-        }
+        .table-custom td { color: var(--text-body); }
+        .table-custom td strong { color: var(--text-main); }
 
         .contact-action-box {
             background: var(--card-sub);
@@ -289,32 +275,37 @@
             <div class="badge-pill">
                 <span>🗑️</span> Kebijakan Penghapusan Akun & Data
             </div>
-            <h1>Permintaan Penghapusan Akun Pengguna</h1>
+            <h1>Permintaan Penghapusan Akun & Data Pengguna</h1>
             <div class="last-updated">Aplikasi: ZiRa Finance • Pengembang: ZidStore (zidzdev@gmail.com)</div>
         </div>
 
-        <!-- 1. Langkah-Langkah Penghapusan -->
+        <!-- 1. Langkah-Langkah Penghapusan Akun / Data Tertentu -->
         <div class="section-card">
             <div class="section-title">
                 <div class="icon-box">📋</div>
-                <span>Cara Meminta Penghapusan Akun & Data</span>
+                <span>Cara Meminta Penghapusan Data atau Akun Lengkap</span>
             </div>
-            <p>Pengguna aplikasi <strong>ZiRa Finance</strong> memiliki hak penuh untuk meminta penghapusan akun serta seluruh data terkait kapan saja. Anda dapat memilih salah satu dari 2 cara mudah berikut:</p>
+            <p>Pengguna aplikasi <strong>ZiRa Finance</strong> memiliki hak penuh untuk meminta penghapusan akun secara menyeluruh ATAU meminta penghapusan data tertentu (seperti riwayat mutasi transaksi tertentu, daftar dompet tertentu, atau log notifikasi) tanpa harus menghapus akun pengguna:</p>
             
             <div class="step-box">
                 <div class="step-item">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <strong>Metode 1: Kirim Permintaan via Email Resmi (Rekomendasi)</strong>
-                        Kirimkan email permohonan ke <a href="mailto:zidzdev@gmail.com" style="color:var(--primary);text-decoration:none;font-weight:600">zidzdev@gmail.com</a> menggunakan alamat email yang terdaftar di akun Anda dengan subjek <em>"Permintaan Hapus Akun ZiRa Finance"</em>.
+                        <strong>Metode 1: Hapus Data Mandiri Langsung dari Aplikasi (Instan)</strong>
+                        Anda dapat menghapus data tertentu secara mandiri kapan saja:
+                        <ul style="margin: 6px 0 0 16px; padding: 0;">
+                            <li>• <em>Hapus Transaksi:</em> Buka tab <strong>Riwayat</strong> ➔ Tap transaksi ➔ Pilih <strong>Hapus Transaksi</strong>.</li>
+                            <li>• <em>Hapus Dompet:</em> Buka menu <strong>Pengaturan</strong> ➔ <strong>Kelola Dompet</strong> ➔ Pilih <strong>Hapus Dompet</strong>.</li>
+                            <li>• <em>Cabut Sesi:</em> Buka menu <strong>Pengaturan</strong> ➔ <strong>Sesi Perangkat Aktif</strong> ➔ Pilih <strong>Hapus Sesi</strong>.</li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="step-item">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <strong>Metode 2: Melalui Pengaturan Aplikasi Mobile / Web</strong>
-                        Buka aplikasi <strong>ZiRa Finance</strong> ➔ Masuk ke menu <strong>Pengaturan Akun</strong> ➔ Hubungi layanan dukungan pengembang atau klik tombol kontak bantuan yang tersedia.
+                        <strong>Metode 2: Kirim Permintaan Penghapusan via Email Pengembang</strong>
+                        Kirimkan email permohonan ke <a href="mailto:zidzdev@gmail.com" style="color:var(--primary);text-decoration:none;font-weight:600">zidzdev@gmail.com</a> dengan subjek <em>"Permintaan Hapus Data / Akun ZiRa Finance"</em>. Tuliskan data apa saja yang ingin dihapus (misal: seluruh mutasi bulan tertentu atau hapus total akun).
                     </div>
                 </div>
             </div>
@@ -326,7 +317,7 @@
                 <div class="icon-box">📊</div>
                 <span>Jenis Data yang Dihapus & Disimpan</span>
             </div>
-            <p>Berikut adalah rincian perlakuan data saat permohonan penghapusan akun Anda diproses:</p>
+            <p>Berikut adalah rincian perlakuan data saat permohonan penghapusan Anda diproses:</p>
 
             <table class="table-custom">
                 <thead>
@@ -360,7 +351,7 @@
                     <tr>
                         <td><strong>Data yang Disimpan Tambahan</strong></td>
                         <td><span style="color:var(--text-muted);font-weight:600">Tidak Ada (0%)</span></td>
-                        <td>Kami tidak menyimpan cadangan data apa pun setelah akun dihapus.</td>
+                        <td>Kami tidak menyimpan cadangan data apa pun setelah akun/data dihapus.</td>
                     </tr>
                 </tbody>
             </table>
@@ -372,14 +363,14 @@
                 <div class="icon-box">⏳</div>
                 <span>Periode Retensi Data</span>
             </div>
-            <p>Setelah permohonan penghapusan akun diverifikasi oleh tim pengembang:</p>
-            <p>• <strong>Waktu Proses:</strong> Akun dan seluruh data transaksi keuangan akan dihapus secara permanen dari server aktif dalam kurun waktu <strong>maksimal 24–48 jam</strong>.</p>
-            <p>• <strong>Pemulihan:</strong> Proses penghapusan bersifat permanen dan tidak dapat dibatalkan atau dipulihkan kembali.</p>
+            <p>Setelah permohonan penghapusan akun/data diverifikasi oleh tim pengembang:</p>
+            <p>• <strong>Waktu Proses:</strong> Seluruh data yang diminta akan dihapus secara permanen dari server aktif dalam kurun waktu <strong>maksimal 24–48 jam</strong>.</p>
+            <p>• <strong>Sifat Penghapusan:</strong> Proses penghapusan bersifat permanen dan tidak dapat dibatalkan atau dipulihkan kembali.</p>
 
             <div class="contact-action-box">
-                <div style="font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:4px">Kirim Permintaan Hapus Akun Sekarang</div>
+                <div style="font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:4px">Kirim Permintaan Hapus Akun / Data</div>
                 <div style="font-size:12px;color:var(--text-muted)">Tim pengembang kami siap memproses permohonan Anda dengan cepat.</div>
-                <a href="mailto:zidzdev@gmail.com?subject=Permintaan%20Hapus%20Akun%20ZiRa%20Finance&body=Halo%20Pengembang%20ZiRa%20Finance,%0A%0ASaya%20ingin%20meminta%20penghapusan%20akun%20dan%20seluruh%20data%20saya.%0AUsername%20/%20Email:%20" class="btn-email-request">
+                <a href="mailto:zidzdev@gmail.com?subject=Permintaan%20Hapus%20Akun%20dan%20Data%20ZiRa%20Finance&body=Halo%20Pengembang%20ZiRa%20Finance,%0A%0ASaya%20ingin%20meminta%20penghapusan%20akun%20dan/atau%20data%20saya.%0AUsername%20/%20Email:%20%0ARincian%20Data%20yang%20Ingin%20Dihapus:%20" class="btn-email-request">
                     <span>📧</span> Ajukan via Email: zidzdev@gmail.com
                 </a>
             </div>
