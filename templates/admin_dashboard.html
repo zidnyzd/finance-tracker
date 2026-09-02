@@ -51,15 +51,15 @@
             </div>
             <div class="card-body pt-0">
                 <p class="text-muted small mb-3">
-                    Uji coba parsing regex mutasi, penyimpanan transaksi otomatis ke database, dan pengiriman notifikasi ke Telegram / HP target.
+                    Uji coba parsing regex mutasi, auto-catat transaksi ke database, dan pengiriman notifikasi instan ke HP / Telegram target.
                 </p>
-                <form action="/admin/test-notification" method="POST" id="formSimulasiNotif">
+                <form action="/admin/test-notification" method="POST" id="formSimulasiNotif" onsubmit="handleSimulasiSubmit(event)">
                     <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold">Target Pengguna</label>
-                            <select name="user_id" class="form-select form-select-sm" required>
+                            <select name="user_id" id="notifUserId" class="form-select form-select-sm" required>
                                 {{range .Users}}
                                 <option value="{{.ID}}">#{{.ID}} - {{.Username}} ({{.Role}})</option>
                                 {{end}}
@@ -80,7 +80,7 @@
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold">Package Name Android</label>
-                            <input type="text" name="package_name" id="notifPackage" class="form-control form-control-sm" placeholder="ph.seabank.seabank" required>
+                            <input type="text" name="package_name" id="notifPackage" class="form-control form-control-sm" placeholder="id.co.bankbkemobile.digitalbank" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Judul Notifikasi (*Title*)</label>
@@ -91,8 +91,9 @@
                             <input type="text" name="text" id="notifText" class="form-control form-control-sm" placeholder="Transfer Rp 500.000 diterima dari rekening lain" required>
                         </div>
                     </div>
-                    <div class="mt-3 text-end">
-                        <button type="submit" class="btn btn-sm btn-primary px-4 fw-medium">
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <span id="simulasiStatus" class="small text-muted"></span>
+                        <button type="submit" id="btnSubmitSimulasi" class="btn btn-sm btn-primary px-4 fw-medium">
                             <i class="ti ti-send me-1"></i> Uji Coba Kirim Notifikasi
                         </button>
                     </div>
@@ -170,8 +171,7 @@
 {{end}}
 
 {{define "pagescripts"}}
-<script>
-const presets = {
+var presets = {
     seabank_in: {
         pkg: "id.co.bankbkemobile.digitalbank",
         title: "SeaBank",
@@ -210,7 +210,9 @@ const presets = {
 };
 
 function applyPreset() {
-    const val = document.getElementById('presetSelect').value;
+    var selectEl = document.getElementById('presetSelect');
+    if (!selectEl) return;
+    var val = selectEl.value;
     if (presets[val]) {
         document.getElementById('notifPackage').value = presets[val].pkg;
         document.getElementById('notifTitle').value = presets[val].title;
@@ -218,12 +220,71 @@ function applyPreset() {
     }
 }
 
+async function handleSimulasiSubmit(e) {
+    e.preventDefault();
+    var form = document.getElementById('formSimulasiNotif');
+    var btn = document.getElementById('btnSubmitSimulasi');
+    var status = document.getElementById('simulasiStatus');
+    var container = document.getElementById('adminAlertContainer');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...';
+    status.innerText = "Mengirim simulasi...";
+
+    try {
+        var formData = new FormData(form);
+        var response = await fetch('/admin/test-notification', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        var res = await response.json();
+        if (response.ok && res.success) {
+            container.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3" role="alert">
+                    <i class="ti ti-circle-check me-2 fs-5 align-middle"></i> 
+                    <strong>Berhasil!</strong> ${res.message}
+                    <div class="small mt-1 text-muted">Tercatat di Akun <b>${res.data.account_name}</b> | Kategori: <b>${res.data.category}</b> | Telegram Alert: <b>${res.data.telegram_sent ? 'Terkirim ✓' : 'Tidak aktif'}</b></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            status.innerText = "Tercatat sukses!";
+        } else {
+            container.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3" role="alert">
+                    <i class="ti ti-alert-triangle me-2 fs-5 align-middle"></i> 
+                    <strong>Gagal:</strong> ${res.error || 'Terjadi kesalahan saat memproses notifikasi'}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            status.innerText = "Gagal memproses.";
+        }
+    } catch (err) {
+        container.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3" role="alert">
+                <i class="ti ti-alert-triangle me-2 fs-5 align-middle"></i> 
+                <strong>Koneksi Error:</strong> ${err.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        status.innerText = "Koneksi gagal.";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-send me-1"></i> Uji Coba Kirim Notifikasi';
+    }
+}
+
 // Display URL Feedback alert params if present
 (function checkUrlAlerts() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const successMsg = urlParams.get('success');
-    const errorMsg = urlParams.get('error');
-    const container = document.getElementById('adminAlertContainer');
+    var urlParams = new URLSearchParams(window.location.search);
+    var successMsg = urlParams.get('success');
+    var errorMsg = urlParams.get('error');
+    var container = document.getElementById('adminAlertContainer');
+    if (!container) return;
 
     if (successMsg) {
         container.innerHTML = `
@@ -241,5 +302,4 @@ function applyPreset() {
         `;
     }
 })();
-</script>
 {{end}}
