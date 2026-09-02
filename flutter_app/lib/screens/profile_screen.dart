@@ -14,6 +14,7 @@ import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -895,9 +896,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger, foregroundColor: Colors.white),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              Provider.of<AppProvider>(context, listen: false).logout();
+              await Provider.of<AppProvider>(context, listen: false).logout();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const LoginScreen(),
+                    transitionsBuilder: (_, animation, __, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                    transitionDuration: const Duration(milliseconds: 300),
+                  ),
+                  (route) => false,
+                );
+              }
             },
             child: const Text('Keluar'),
           ),
