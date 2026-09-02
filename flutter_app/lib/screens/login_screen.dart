@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         final err = res['error'] ?? "Gagal autentikasi Google dengan server.";
         setState(() => _errorMessage = err);
-        ApiService.reportAppError(token: '', errorType: 'GoogleAuthError', message: 'Google Native Login Server Error: $err', stackTrace: jsonEncode(res));
+        ApiService.reportError(errorType: 'GoogleAuthError', message: 'Google Native Login Server Error: $err', stackTrace: jsonEncode(res));
       }
     } catch (e, stack) {
       if (!mounted) return;
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _errorMessage = errStr;
       });
       // Always capture and send error log to server
-      ApiService.reportAppError(token: '', errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
+      ApiService.reportError(errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
     }
   }
 

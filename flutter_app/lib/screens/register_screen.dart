@@ -120,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else {
         final err = res['error'] ?? "Gagal mendaftar via Google.";
         setState(() => _errorMessage = err);
-        ApiService.reportAppError(token: '', errorType: 'GoogleAuthError', message: 'Google Register Error: $err', stackTrace: jsonEncode(res));
+        ApiService.reportError(errorType: 'GoogleAuthError', message: 'Google Register Error: $err', stackTrace: jsonEncode(res));
       }
     } catch (e, stack) {
       if (!mounted) return;
@@ -129,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isGoogleLoading = false;
         _errorMessage = errStr;
       });
-      ApiService.reportAppError(token: '', errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
+      ApiService.reportError(errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
     }
   }
 
@@ -292,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: _obscurePassword,
                         decoration: const InputDecoration(
                           hintText: 'Ulangi kata sandi di atas',
-                          prefixIcon: Icon(TablerIcons.lock_check, size: 20),
+                          prefixIcon: Icon(TablerIcons.lock, size: 20),
                         ),
                       ),
                       const SizedBox(height: 24),

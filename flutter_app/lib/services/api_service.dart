@@ -35,6 +35,26 @@ class ApiService {
     }
   }
 
+  // Auth Register
+  static Future<Map<String, dynamic>> register(String username, String password, {String? displayName}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/auth/register'),
+        headers: _headers(null),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'display_name': displayName ?? username,
+        }),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {'success': false, 'error': 'Koneksi gagal: $e'};
+    }
+  }
+
   // Login with Google ID Token (Native One-Tap)
   static Future<Map<String, dynamic>> loginWithGoogleIdToken(String idToken) async {
     try {
