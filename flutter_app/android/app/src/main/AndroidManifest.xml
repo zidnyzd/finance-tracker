@@ -52,6 +52,8 @@
         <package android:name="ph.seabank.seabank" />
         <package android:name="com.btpn.seabank" />
         <package android:name="com.shopee.seabank" />
+        <package android:name="com.shopee.seabank.id" />
+        <package android:name="id.co.seabank.mobile" />
         <package android:name="com.bnc.finance" />
         <package android:name="com.btpn.dc" />
         <package android:name="com.allobank.allomobile" />

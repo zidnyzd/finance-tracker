@@ -34,7 +34,7 @@ class MainActivity: FlutterActivity() {
         mapOf("id" to "doku", "name" to "DOKU Wallet", "packages" to listOf("com.dokuwallet.android")),
 
         // Bank Digital
-        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank")),
+        mapOf("id" to "seabank", "name" to "SeaBank Indonesia", "packages" to listOf("ph.seabank.seabank", "com.btpn.seabank", "com.shopee.seabank", "com.shopee.seabank.id", "id.co.seabank.mobile")),
         mapOf("id" to "blu", "name" to "blu by BCA Digital", "packages" to listOf("com.bcadigital.blu", "id.co.bcadigital.blu")),
         mapOf("id" to "jago", "name" to "Bank Jago", "packages" to listOf("com.jago.digitalBanking", "com.jago.digitalBanking.syariah")),
         mapOf("id" to "neobank", "name" to "Neobank (BNC)", "packages" to listOf("com.bnc.finance")),
@@ -126,7 +126,18 @@ class MainActivity: FlutterActivity() {
                                     val drawable = pm.getApplicationIcon(info)
                                     iconBase64 = drawableToBase64(drawable)
                                     break
-                                } catch (_: Exception) {}
+                                } catch (_: Exception) {
+                                    try {
+                                        val pkgInfo = pm.getPackageInfo(pkg, 0)
+                                        if (pkgInfo.applicationInfo != null) {
+                                            foundPkg = pkg
+                                            appLabel = pm.getApplicationLabel(pkgInfo.applicationInfo!).toString()
+                                            val drawable = pm.getApplicationIcon(pkgInfo.applicationInfo!)
+                                            iconBase64 = drawableToBase64(drawable)
+                                            break
+                                        }
+                                    } catch (_: Exception) {}
+                                }
                             }
 
                             if (foundPkg != null && !foundPackages.contains(foundPkg)) {
