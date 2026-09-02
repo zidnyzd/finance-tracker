@@ -31,8 +31,8 @@ android {
         applicationId = "id.web.zira.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 30
-        versionName = "1.7.2"
+        versionCode = 31
+        versionName = "1.7.3"
         signingConfig = signingConfigs.getByName("release")
     }
 
