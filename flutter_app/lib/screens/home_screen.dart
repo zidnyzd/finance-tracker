@@ -40,51 +40,132 @@ class HomeScreen extends StatelessWidget {
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Page Header (Title + Privacy Eye Toggle)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Beranda',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: textMain,
-                        letterSpacing: -0.02,
+            // Top App Bar / Brand Header (Persis Topbar Web)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Brand Title with Gradient Badge
+                  Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2C7BE5), Color(0xFF1A58B0)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Z',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Ringkasan keuangan Anda',
-                      style: TextStyle(fontSize: 12, color: textMuted),
-                    ),
-                  ],
-                ),
-                InkWell(
-                  onTap: () => provider.toggleBalanceVisibility(),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: borderCol, width: 1),
-                    ),
-                    child: Icon(
-                      isHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      size: 18,
-                      color: textMuted,
-                    ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'ZiRa ',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: textMain,
+                                  letterSpacing: -0.02,
+                                ),
+                              ),
+                              Text(
+                                'Finance',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: primary,
+                                  letterSpacing: -0.02,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            'Halo, ${provider.currentUser?.displayName ?? "Zidstore"} 👋',
+                            style: TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ],
+
+                  // Top Action Buttons: Toggle Theme 🌓 + Eye Privacy 👁️
+                  Row(
+                    children: [
+                      // Theme Toggle (Dark / Light)
+                      InkWell(
+                        onTap: () => provider.toggleTheme(),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: borderCol, width: 1),
+                          ),
+                          child: Center(
+                            child: Text(
+                              provider.isDarkMode ? '🌙' : '☀️',
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Privacy Eye Toggle
+                      InkWell(
+                        onTap: () => provider.toggleBalanceVisibility(),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: borderCol, width: 1),
+                          ),
+                          child: Icon(
+                            isHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            size: 18,
+                            color: textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -102,311 +183,411 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Total Saldo Bersih',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMuted),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    isHidden ? 'Rp ••••••' : (data?.balanceStr ?? 'Rp 0'),
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    isHidden ? 'Rp ••••••••' : (data?.totalBalanceStr ?? 'Rp 0'),
+                    style: TextStyle(
+                      fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: primary,
+                      color: textMain,
                       letterSpacing: -0.02,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(color: borderCol, height: 1),
+                  const SizedBox(height: 14),
+
+                  // Income & Expense Row
+                  Row(
+                    children: [
+                      // Masuk
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_downward_rounded,
+                                size: 16,
+                                color: AppColors.success,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Masuk',
+                                    style: TextStyle(fontSize: 10, color: textMuted),
+                                  ),
+                                  Text(
+                                    isHidden ? 'Rp ••••••' : (data?.totalIncomeStr ?? 'Rp 0'),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.success,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(width: 1, height: 28, color: borderCol),
+                      const SizedBox(width: 12),
+
+                      // Keluar
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: AppColors.danger.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_upward_rounded,
+                                size: 16,
+                                color: AppColors.danger,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Keluar',
+                                    style: TextStyle(fontSize: 10, color: textMuted),
+                                  ),
+                                  Text(
+                                    isHidden ? 'Rp ••••••' : (data?.totalExpenseStr ?? 'Rp 0'),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.danger,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 2. Notification Sync Status Banner
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF132238) : const Color(0xFFEBF3FE),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1B3D6B) : const Color(0xFFCCE0FD),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: AppColors.success,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auto-Catat Notifikasi Aktif',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.primaryDark : AppColors.primaryLight,
+                          ),
+                        ),
+                        Text(
+                          'BCA, Mandiri, BRI, GoPay, Dana, & m-banking lainnya',
+                          style: TextStyle(fontSize: 10, color: textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      await PlatformService.openNotificationSettings();
+                      Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
+                    },
+                    child: Text(
+                      'Izin HP ➔',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.primaryDark : AppColors.primaryLight,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
-            // 2. Income & Expense Split Grid
-            Row(
-              children: [
-                // Masuk
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderCol, width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Masuk', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMuted)),
-                        const SizedBox(height: 4),
-                        Text(
-                          isHidden ? 'Rp ••••••' : (data?.totalIncomeStr ?? 'Rp 0'),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.success),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Keluar
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderCol, width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Keluar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMuted)),
-                        const SizedBox(height: 4),
-                        Text(
-                          isHidden ? 'Rp ••••••' : (data?.totalExpenseStr ?? 'Rp 0'),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.danger),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-
-            // 3. Auto-Catat Notifikasi Active Card
-            InkWell(
-              onTap: () async {
-                await PlatformService.openNotificationSettings();
-                Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderCol, width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: (provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger).withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        provider.isNotifPermissionGranted ? Icons.bolt : Icons.notifications_off_outlined,
-                        color: provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            provider.isNotifPermissionGranted ? 'Auto-Catat Notifikasi Aktif' : 'Auto-Catat Belum Diizinkan',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
-                          ),
-                          Text(
-                            provider.isNotifPermissionGranted
-                                ? 'Membaca mutasi BCA, Mandiri, BRI, GoPay, Dana, dll.'
-                                : 'Tap di sini untuk mengaktifkan izin notifikasi HP.',
-                            style: TextStyle(fontSize: 10, color: textMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      provider.isNotifPermissionGranted ? 'Aktif ✓' : 'Beri Izin ⚙️',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: provider.isNotifPermissionGranted ? AppColors.success : AppColors.danger,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // 4. Saldo per Akun Carousel Section
+            // 3. Saldo per Akun Header & Carousel
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Saldo per Akun',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: textMain,
+                  ),
                 ),
                 InkWell(
                   onTap: onNavigateToReport,
                   child: Text(
-                    'Rincian →',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: primary),
+                    'Lihat Laporan ➔',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Horizontal Accounts List
-            SizedBox(
-              height: 84,
-              child: (data?.accounts.isEmpty ?? true)
-                  ? Center(child: Text('Belum ada akun dompet', style: TextStyle(fontSize: 12, color: textMuted)))
-                  : ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: data!.accounts.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        final acc = data.accounts[index];
-                        final color = ReportScreen.getDynamicAccountColor(acc.name, acc.type, acc.color);
-
-                        return Container(
-                          width: 136,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: borderCol, width: 1),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
+            // Account Horizontal Carousel
+            if (provider.accounts.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Center(
+                  child: Text('Belum ada akun dompet.', style: TextStyle(color: textMuted, fontSize: 12)),
+                ),
+              )
+            else
+              SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: provider.accounts.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final acc = provider.accounts[index];
+                    return Container(
+                      width: 160,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: borderCol, width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  BankBadge(accountName: acc.name, accountType: acc.type, size: 24),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      acc.name,
-                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                isHidden ? 'Rp ••••••' : acc.balanceStr,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain),
-                              ),
-                              Text(
-                                acc.type.toUpperCase(),
-                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: textMuted),
+                              BankBadge(accountName: acc.name, accountType: acc.type, size: 28),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: borderCol.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  acc.type.toUpperCase(),
+                                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: textMuted),
+                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-            ),
-            const SizedBox(height: 18),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                acc.name,
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                isHidden ? 'Rp ••••••' : acc.balanceStr,
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 24),
 
-            // 5. Transaksi Terbaru Section
+            // 4. Transaksi Terbaru Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Transaksi Terbaru',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: textMain,
+                  ),
                 ),
                 InkWell(
                   onTap: onNavigateToHistory,
                   child: Text(
-                    'Lihat Semua',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: primary),
+                    'Lihat Riwayat ➔',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Recent Txns Card List
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol, width: 1),
-              ),
-              child: (data?.recentTxns.isEmpty ?? true)
-                  ? Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Center(
-                        child: Text('Belum ada transaksi bulan ini.', style: TextStyle(fontSize: 12, color: textMuted)),
-                      ),
-                    )
-                  : Column(
-                      children: data!.recentTxns.map((tx) {
-                        final isExpense = tx.type == 'expense';
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
+            // Recent Transactions List
+            if (data == null || data.recentTxns.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.receipt_outlined, size: 36, color: textMuted),
+                      const SizedBox(height: 8),
+                      Text('Belum ada transaksi bulan ini.', style: TextStyle(color: textMuted, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Container(
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderCol),
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: data.recentTxns.length,
+                  separatorBuilder: (_, __) => Divider(color: borderCol, height: 1),
+                  itemBuilder: (context, index) {
+                    final tx = data.recentTxns[index];
+                    final isExpense = tx.type.toLowerCase() == 'expense';
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      child: Row(
+                        children: [
+                          BankBadge(accountName: tx.accountName, size: 34),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tx.category.isNotEmpty ? tx.category : 'Lainnya',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: textMain,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${tx.accountName} • ${DateUtil.formatShort(tx.date)}',
+                                  style: TextStyle(fontSize: 10, color: textMuted),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: isExpense ? AppColors.danger.withOpacity(0.12) : AppColors.success.withOpacity(0.12),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isExpense ? Icons.arrow_downward : Icons.arrow_upward,
+                              Text(
+                                isHidden
+                                    ? 'Rp ••••••'
+                                    : '${isExpense ? "- " : "+ "}${tx.amountStr}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
                                   color: isExpense ? AppColors.danger : AppColors.success,
-                                  size: 18,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      tx.category,
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '${tx.description.isNotEmpty ? "${tx.description} • " : ""}${tx.accountName}',
-                                      style: TextStyle(fontSize: 11, color: textMuted),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    isHidden
-                                        ? 'Rp ••••••'
-                                        : '${isExpense ? "- " : "+ "}${tx.amountStr}',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: isExpense ? AppColors.danger : AppColors.success,
-                                    ),
-                                  ),
-                                  Text(
-                                    DateUtil.formatShort(tx.date),
+                              if (tx.description.isNotEmpty)
+                                SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    tx.description,
                                     style: TextStyle(fontSize: 9, color: textMuted),
+                                    textAlign: TextAlign.end,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
-                              ),
+                                ),
                             ],
                           ),
-                        );
-                      }).toList(),
-                    ),
-            ),
-            const SizedBox(height: 20),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
