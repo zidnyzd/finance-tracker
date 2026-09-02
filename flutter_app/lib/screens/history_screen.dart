@@ -35,18 +35,16 @@ class HistoryScreenState extends State<HistoryScreen> {
 
     setState(() => _isLoading = true);
 
-    final res = await ApiService.getTransactions(
+    final items = await ApiService.getTransactions(
       token,
       type: _selectedFilter,
-      search: _searchController.text.trim(),
-      limit: 100,
-      offset: 0,
+      query: _searchController.text.trim(),
     );
 
     if (mounted) {
       setState(() {
-        _transactions = res.items;
-        _totalCount = res.total;
+        _transactions = items;
+        _totalCount = items.length;
         _isLoading = false;
       });
     }
