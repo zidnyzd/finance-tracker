@@ -54,6 +54,7 @@
                     Uji coba parsing regex mutasi, penyimpanan transaksi otomatis ke database, dan pengiriman notifikasi ke Telegram / HP target.
                 </p>
                 <form action="/admin/test-notification" method="POST" id="formSimulasiNotif">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
