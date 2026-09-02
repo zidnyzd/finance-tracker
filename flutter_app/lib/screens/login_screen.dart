@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: '1007555443632-vvn7k1vj21t1npimv70oau29mioc1nkr.apps.googleusercontent.com',
+    serverClientId: '460896282100-f2jk9h4s7pan39suni4r3cihnu1fkmso.apps.googleusercontent.com',
     scopes: ['email', 'profile', 'openid'],
   );
 
