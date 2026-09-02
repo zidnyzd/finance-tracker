@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "id.web.zira.app"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -30,9 +30,9 @@ android {
     defaultConfig {
         applicationId = "id.web.zira.app"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 59
-        versionName = "1.9.9"
+        targetSdk = 36
+        versionCode = 60
+        versionName = "2.0.0"
         signingConfig = signingConfigs.getByName("release")
     }
 
