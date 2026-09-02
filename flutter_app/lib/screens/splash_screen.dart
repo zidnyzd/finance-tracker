@@ -98,46 +98,28 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // App Logo Badge
+                // Official App Logo
                 Container(
-                  width: 90,
-                  height: 90,
+                  width: 84,
+                  height: 84,
                   decoration: BoxDecoration(
-                    color: AppColors.cardDark,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.borderDark, width: 2),
+                    borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: primary.withOpacity(0.25),
-                        blurRadius: 30,
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 24,
                         spreadRadius: 2,
                         offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF2C7BE5), Color(0xFF1A58B0)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Z',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Image.asset(
+                      'assets/logo.png',
+                      width: 84,
+                      height: 84,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
