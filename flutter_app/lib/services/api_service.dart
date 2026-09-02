@@ -180,6 +180,126 @@ class ApiService {
     }
   }
 
+  // Update Account
+  static Future<bool> updateAccount(String token, int id, String name, String type) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/accounts/update'),
+        headers: _headers(token),
+        body: jsonEncode({'id': id, 'name': name, 'type': type}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Delete Account
+  static Future<bool> deleteAccount(String token, int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/accounts/delete'),
+        headers: _headers(token),
+        body: jsonEncode({'id': id}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Telegram Link Data
+  static Future<Map<String, dynamic>?> getTelegramLink(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/telegram/link'),
+        headers: _headers(token),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Generate / Unlink Telegram
+  static Future<Map<String, dynamic>?> manageTelegram(String token, String action) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/telegram/link'),
+        headers: _headers(token),
+        body: jsonEncode({'action': action}),
+      ).timeout(const Duration(seconds: 15));
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Sessions
+  static Future<List<Map<String, dynamic>>> getSessions(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/sessions'),
+        headers: _headers(token),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['sessions'] != null) {
+          return List<Map<String, dynamic>>.from(data['sessions']);
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Revoke Session
+  static Future<bool> revokeSession(String token, int sessionId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/sessions'),
+        headers: _headers(token),
+        body: jsonEncode({'session_id': sessionId}),
+      ).timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Notification Logs
+  static Future<List<Map<String, dynamic>>> getNotificationLogs(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/notification-logs'),
+        headers: _headers(token),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['logs'] != null) {
+          return List<Map<String, dynamic>>.from(data['logs']);
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Report App Error to Backend Server
   static Future<void> reportError({
     required String errorType,
@@ -189,7 +309,7 @@ class ApiService {
   }) async {
     try {
       final payload = {
-        'app_version': '1.6.7',
+        'app_version': '1.7.1',
         'device_model': 'Android Mobile',
         'os_version': 'Android',
         'error_type': errorType,
