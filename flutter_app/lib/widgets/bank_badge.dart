@@ -11,7 +11,7 @@ class BankBadge extends StatelessWidget {
   const BankBadge({
     super.key,
     required this.accountName,
-    required this.accountType,
+    this.accountType = 'bank',
     this.size = 28,
   });
 

@@ -191,7 +191,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    isHidden ? 'Rp ••••••••' : (data?.totalBalanceStr ?? 'Rp 0'),
+                    isHidden ? 'Rp ••••••••' : (data?.balanceStr ?? 'Rp 0'),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
