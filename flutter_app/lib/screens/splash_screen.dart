@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -44,23 +44,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Future<void> _checkInitialAuth() async {
     // Wait minimum splash duration for smooth aesthetic transition
-    await Future.delayed(const Duration(milliseconds: 1600));
+    await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
 
     final provider = Provider.of<AppProvider>(context, listen: false);
-    await provider.initAuth();
 
-    if (!mounted) return;
-
-    if (provider.isAuthenticated) {
-      // User already logged in, navigate smoothly to home
+    if (provider.isLoggedIn) {
+      // User already logged in, navigate smoothly to main navigation
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const MainNavigationScreen(),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(opacity: animation, child: child);
           },
-          transitionDuration: const Duration(milliseconds: 400),
+          transitionDuration: const Duration(milliseconds: 350),
         ),
       );
     } else {
@@ -71,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(opacity: animation, child: child);
           },
-          transitionDuration: const Duration(milliseconds: 400),
+          transitionDuration: const Duration(milliseconds: 350),
         ),
       );
     }
@@ -175,8 +172,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
                 // Smooth Loading Indicator
                 SizedBox(
-                  width: 28,
-                  height: 28,
+                  width: 26,
+                  height: 26,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     valueColor: AlwaysStoppedAnimation<Color>(primary),

@@ -7,6 +7,7 @@ import 'models/models.dart';
 import 'providers/app_provider.dart';
 import 'screens/add_transaction_screen.dart';
 import 'screens/history_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
@@ -79,19 +80,21 @@ class _ZiRaAppState extends State<ZiRaApp> with WidgetsBindingObserver {
       }
     } catch (_) {}
 
-    // Listen to incoming deep links while app is open / foreground
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    });
+    // Listen to incoming deep links while app is running / in foreground
+    _linkSubscription = _appLinks.uriLinkStream.listen(
+      (uri) => _handleDeepLink(uri),
+      onError: (_) {},
+    );
   }
 
-  Future<void> _handleDeepLink(Uri uri) async {
-    // Expected: zira://auth?token=xxx&name=xxx
+  void _handleDeepLink(Uri uri) async {
+    // Expected format: zira://auth?token=...&name=...
     if (uri.scheme == 'zira' && uri.host == 'auth') {
       final token = uri.queryParameters['token'];
-      final name = uri.queryParameters['name'] ?? 'Pengguna';
+      final name = uri.queryParameters['name'] ?? 'User';
 
       if (token != null && token.isNotEmpty) {
+        // Fetch full profile info with token
         final profile = await ApiService.getProfile(token);
         final user = profile ?? UserModel(id: 1, username: name, displayName: name, role: 'user');
         
@@ -142,9 +145,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _onTabTapped(int index) {
     setState(() => _currentIndex = index);
     final provider = Provider.of<AppProvider>(context, listen: false);
-
     if (index == 0) {
       provider.fetchDashboard();
+    } else if (index == 1) {
+      provider.fetchAccounts();
     } else if (index == 3) {
       _historyKey.currentState?.loadHistory();
     }
@@ -152,152 +156,92 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = Provider.of<AppProvider>(context);
-    final user = provider.currentUser;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final navBg = isDark ? AppColors.bottomnavDark : AppColors.bottomnavLight;
+    final navBorder = isDark ? AppColors.borderDark : AppColors.borderLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
-    final bottomNavBg = isDark ? AppColors.bottomnavDark : AppColors.bottomnavLight;
-    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final avatarBg = isDark ? AppColors.avatarBgDark : AppColors.avatarBgLight;
-    final avatarText = isDark ? AppColors.avatarTextDark : AppColors.avatarTextLight;
+    final unselected = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
 
-    final displayName = user?.displayName.isNotEmpty == true ? user!.displayName : (user?.username ?? 'Z');
-    final initial = displayName.trim().isNotEmpty ? displayName.trim()[0].toUpperCase() : 'Z';
-
-    final screens = [
+    final screens = <Widget>[
       HomeScreen(
         onNavigateToAdd: () => _onTabTapped(2),
         onNavigateToHistory: () => _onTabTapped(3),
         onNavigateToReport: () => _onTabTapped(1),
       ),
       const ReportScreen(),
-      AddTransactionScreen(onFinish: () => _onTabTapped(0)),
+      AddTransactionScreen(
+        onSaved: () {
+          _onTabTapped(0);
+          provider.fetchDashboard();
+        },
+      ),
       HistoryScreen(key: _historyKey),
       const ProfileScreen(),
     ];
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.topbarDark : AppColors.topbarLight,
-            border: Border(bottom: BorderSide(color: borderCol, width: 1)),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Image.asset('assets/logo.png', width: 28, height: 28),
-                      const SizedBox(width: 10),
-                      Text(
-                        'ZiRa',
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
-                          color: primary,
-                          letterSpacing: -0.02,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => provider.toggleTheme(),
-                        icon: Icon(
-                          provider.isDarkMode ? Icons.nightlight_round : Icons.wb_sunny_outlined,
-                          size: 20,
-                          color: textMuted,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      InkWell(
-                        onTap: () => _onTabTapped(4),
-                        borderRadius: BorderRadius.circular(17),
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: avatarBg,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              initial,
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: avatarText),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
       ),
       bottomNavigationBar: Container(
-        height: 62,
         decoration: BoxDecoration(
-          color: bottomNavBg,
-          border: Border(top: BorderSide(color: borderCol, width: 1)),
+          color: navBg,
+          border: Border(
+            top: BorderSide(color: navBorder, width: 1),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            _buildNavItem(0, Icons.home_outlined, 'Beranda'),
-            _buildNavItem(1, Icons.bar_chart_outlined, 'Laporan'),
-            _buildCenterFabItem(),
-            _buildNavItem(3, Icons.format_list_bulleted, 'Riwayat'),
-            _buildNavItem(4, Icons.person_outline, 'Profil'),
-          ],
+        child: SafeArea(
+          child: Container(
+            height: 64,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.home_filled, 'Beranda', primary, unselected),
+                _buildNavItem(1, Icons.pie_chart_outline_rounded, 'Laporan', primary, unselected),
+                _buildCenterAddButton(primary),
+                _buildNavItem(3, Icons.receipt_long_rounded, 'Riwayat', primary, unselected),
+                _buildNavItem(4, Icons.person_outline_rounded, 'Profil', primary, unselected),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, IconData icon, String label, Color activeColor, Color inactiveColor) {
     final isSelected = _currentIndex == index;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
 
     return Expanded(
       child: InkWell(
         onTap: () => _onTabTapped(index),
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
               size: 22,
-              color: isSelected ? primary : textMuted,
+              color: isSelected ? activeColor : inactiveColor,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? primary : textMuted,
+                color: isSelected ? activeColor : inactiveColor,
               ),
             ),
           ],
@@ -306,34 +250,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildCenterFabItem() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    final bgCol = isDark ? AppColors.bgDark : AppColors.bgLight;
+  Widget _buildCenterAddButton(Color primaryColor) {
+    final isSelected = _currentIndex == 2;
 
-    return Expanded(
-      child: InkWell(
-        onTap: () => _onTabTapped(2),
-        child: Transform.translate(
-          offset: const Offset(0, -12),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: bgCol, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.add, color: Colors.white, size: 24),
+    return Container(
+      width: 52,
+      height: 52,
+      margin: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFF1B64CE) : primaryColor,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
+        ],
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.add, color: Colors.white, size: 28),
+        onPressed: () => _onTabTapped(2),
       ),
     );
   }
