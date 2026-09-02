@@ -38,6 +38,7 @@ class NotificationListener : NotificationListenerService() {
             "com.dokuwallet.android",
 
             // Bank Digital
+            "id.co.bankbkemobile.digitalbank",
             "ph.seabank.seabank",
             "com.btpn.seabank",
             "com.shopee.seabank",

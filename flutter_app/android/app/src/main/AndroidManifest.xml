@@ -45,6 +45,7 @@
         <package android:name="com.uob.id.tmrw" />
 
         <!-- Bank Digital -->
+        <package android:name="id.co.bankbkemobile.digitalbank" />
         <package android:name="com.jago.digitalBanking" />
         <package android:name="com.jago.digitalBanking.syariah" />
         <package android:name="com.bcadigital.blu" />
