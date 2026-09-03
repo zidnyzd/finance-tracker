@@ -408,7 +408,7 @@ class _QuickStartCardState extends State<QuickStartCard> {
                     if (installedApps.isNotEmpty) ...[
                       Row(
                         children: [
-                          Icon(TablerIcons.device_mobile_check, size: 16, color: AppColors.success),
+                          Icon(Icons.check_circle_outline_rounded, size: 16, color: AppColors.success),
                           const SizedBox(width: 6),
                           Text(
                             'Aplikasi Terdeteksi di HP Kamu:',
