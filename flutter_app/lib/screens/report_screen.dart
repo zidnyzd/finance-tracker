@@ -26,8 +26,20 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _loadReport({String month = ''}) async {
-    final token = Provider.of<AppProvider>(context, listen: false).token;
-    if (token == null) return;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    final token = provider.token;
+
+    // Mode Tamu: Tampilkan data laporan demo estetik
+    if (token == null || !provider.isLoggedIn) {
+      if (mounted) {
+        setState(() {
+          _reportData = _guestReportData;
+          _currentMonth = _guestReportData.month;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
 
     setState(() => _isLoading = true);
     final data = await ApiService.getReport(token, month: month);
@@ -42,6 +54,28 @@ class _ReportScreenState extends State<ReportScreen> {
       });
     }
   }
+
+  static final MonthlyReportData _guestReportData = MonthlyReportData(
+    month: '2026-09',
+    monthLabel: 'September 2026',
+    prevMonth: '2026-08',
+    nextMonth: '2026-10',
+    nextDisabled: true,
+    income: 5000000.0,
+    incomeStr: 'Rp 5.000.000',
+    expense: 2550000.0,
+    expenseStr: 'Rp 2.550.000',
+    balance: 2450000.0,
+    balanceStr: 'Rp 2.450.000',
+    expenseCategories: [
+      CategoryReportItem(name: 'Makanan & Minuman', amount: 1200000.0, amountStr: 'Rp 1.200.000', pct: 47.0),
+      CategoryReportItem(name: 'Belanja', amount: 850000.0, amountStr: 'Rp 850.000', pct: 33.0),
+      CategoryReportItem(name: 'Transportasi', amount: 500000.0, amountStr: 'Rp 500.000', pct: 20.0),
+    ],
+    incomeCategories: [
+      CategoryReportItem(name: 'Gaji & Upah', amount: 5000000.0, amountStr: 'Rp 5.000.000', pct: 100.0),
+    ],
+  );
 
   static Color getDynamicAccountColor(String name, String type, String? rawColor) {
     final lowerName = name.toLowerCase();

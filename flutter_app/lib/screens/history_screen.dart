@@ -31,8 +31,20 @@ class HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> loadHistory() async {
-    final token = Provider.of<AppProvider>(context, listen: false).token;
-    if (token == null) return;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    final token = provider.token;
+
+    // Mode Tamu: Tampilkan data demo estetik saat belum login / setelah logout
+    if (token == null || !provider.isLoggedIn) {
+      if (mounted) {
+        setState(() {
+          _transactions = List.from(AppProvider.guestDashboardData.recentTxns);
+          _totalCount = _transactions.length;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -658,9 +670,18 @@ class HistoryScreenState extends State<HistoryScreen> {
                   itemBuilder: (context, index) {
                     final tx = _transactions[index];
                     final isExpense = tx.type.toLowerCase() == 'expense';
+                    final provider = Provider.of<AppProvider>(context, listen: false);
 
                     return InkWell(
-                      onTap: () => _showTransactionOptions(tx),
+                      onTap: () {
+                        if (!provider.isLoggedIn) {
+                          AuthBottomSheet.show(context, onSuccess: () {
+                            loadHistory();
+                          });
+                          return;
+                        }
+                        _showTransactionOptions(tx);
+                      },
                       borderRadius: index == 0
                           ? const BorderRadius.vertical(top: Radius.circular(16))
                           : index == _transactions.length - 1

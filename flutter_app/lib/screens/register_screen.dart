@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
   String? _errorMessage;
@@ -286,6 +287,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: const InputDecoration(
                           hintText: 'Pilih username unik',
                           prefixIcon: Icon(TablerIcons.user, size: 20),
+                          suffixIcon: SizedBox(width: 48), // Symmetrical spacer
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -301,6 +303,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: const InputDecoration(
                           hintText: 'Nama panggilan Anda',
                           prefixIcon: Icon(TablerIcons.id, size: 20),
+                          suffixIcon: SizedBox(width: 48), // Symmetrical spacer
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -340,10 +343,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _confirmPasswordController,
-                        obscureText: _obscurePassword,
-                        decoration: const InputDecoration(
+                        obscureText: _obscureConfirmPassword,
+                        decoration: InputDecoration(
                           hintText: 'Ulangi kata sandi di atas',
-                          prefixIcon: Icon(TablerIcons.lock, size: 20),
+                          prefixIcon: const Icon(TablerIcons.lock, size: 20),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword ? TablerIcons.eye_off : TablerIcons.eye,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                              });
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

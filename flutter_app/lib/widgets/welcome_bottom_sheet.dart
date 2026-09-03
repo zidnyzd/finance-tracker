@@ -269,28 +269,43 @@ class _WelcomeBottomSheetState extends State<WelcomeBottomSheet> {
                 }),
               ),
 
-              // Action Button
-              ElevatedButton(
-                onPressed: _nextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _currentPage == _slides.length - 1 ? 'Mulai Sekarang 🚀' : 'Lanjut',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              // Action Button with High Contrast & Shadow
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isDark ? const Color(0xFF388BFD) : const Color(0xFF0284C7)).withOpacity(0.45),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
                     ),
-                    if (_currentPage < _slides.length - 1) ...[
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_rounded, size: 16),
-                    ],
                   ],
+                ),
+                child: ElevatedButton(
+                  onPressed: _nextPage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? const Color(0xFF388BFD) : const Color(0xFF0284C7),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(color: Colors.white.withOpacity(0.25), width: 1),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _currentPage == _slides.length - 1 ? 'Mulai Sekarang 🚀' : 'Lanjut',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.2),
+                      ),
+                      if (_currentPage < _slides.length - 1) ...[
+                        const SizedBox(width: 6),
+                        const Icon(Icons.arrow_forward_rounded, size: 16),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ],

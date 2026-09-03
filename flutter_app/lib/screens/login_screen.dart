@@ -268,9 +268,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'Masukkan username',
-                          prefixIcon: const Icon(TablerIcons.user, size: 20),
+                          prefixIcon: Icon(TablerIcons.user, size: 20),
+                          suffixIcon: SizedBox(width: 48), // Symmetrical spacer to balance password eye icon
                         ),
                       ),
                       const SizedBox(height: 18),

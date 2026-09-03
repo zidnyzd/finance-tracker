@@ -36,6 +36,9 @@ class AppProvider extends ChangeNotifier {
     AccountModel(id: 3, name: 'Kas Tunai', type: 'cash', balance: 200000.0, balanceStr: 'Rp 200.000', color: '#00d97e'),
   ];
 
+  static List<AccountModel> get guestAccounts => _guestAccounts;
+  static DashboardData get guestDashboardData => _guestDashboardData;
+
   static final DashboardData _guestDashboardData = DashboardData(
     balance: 2450000.0,
     balanceStr: 'Rp 2.450.000',

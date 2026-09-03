@@ -85,10 +85,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 66,
-		"version_name": "2.0.6",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.6.apk",
-		"changelog":    "Official Release v2.0.6 - Seamless Guest Exploration Mode, Interactive Onboarding, and Contextual Auth",
+		"version_code": 67,
+		"version_name": "2.0.7",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.7.apk",
+		"changelog":    "Official Release v2.0.7 - Symmetrical Form Fields, Masked Confirm Password, Guest Report Demo, and High-Contrast Guide Button",
 	})
 }
 

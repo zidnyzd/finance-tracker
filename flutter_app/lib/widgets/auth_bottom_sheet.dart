@@ -42,6 +42,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     serverClientId: '460896282100-f2jk9h4s7pan39suni4r3cihnu1fkmso.apps.googleusercontent.com',
@@ -382,15 +383,24 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: borderCol),
               ),
-              child: TextField(
-                controller: _usernameController,
-                style: TextStyle(fontSize: 13, color: textMain),
-                decoration: InputDecoration(
-                  hintText: 'Username akun',
-                  hintStyle: TextStyle(fontSize: 12, color: textMuted),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _usernameController,
+                      style: TextStyle(fontSize: 13, color: textMain),
+                      decoration: InputDecoration(
+                        hintText: 'Username akun',
+                        hintStyle: TextStyle(fontSize: 12, color: textMuted),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  // Symmetrical spacer matching the 18px eye icon of password field
+                  const SizedBox(width: 18),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -418,6 +428,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                         hintStyle: TextStyle(fontSize: 12, color: textMuted),
                         border: InputBorder.none,
                         isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -446,16 +457,31 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: borderCol),
                 ),
-                child: TextField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscurePassword,
-                  style: TextStyle(fontSize: 13, color: textMain),
-                  decoration: InputDecoration(
-                    hintText: 'Ulangi kata sandi',
-                    hintStyle: TextStyle(fontSize: 12, color: textMuted),
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        style: TextStyle(fontSize: 13, color: textMain),
+                        decoration: InputDecoration(
+                          hintText: 'Ulangi kata sandi',
+                          hintStyle: TextStyle(fontSize: 12, color: textMuted),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      child: Icon(
+                        _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        size: 18,
+                        color: textMuted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
