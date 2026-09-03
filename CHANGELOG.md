@@ -4,6 +4,16 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.0] - 2026-09-03
+### 🚀 Added & Improved
+- **Redesign Menu Profil (Grouped Modern Settings):** Menghilangkan baris teknis 'Nama Pengguna' yang kaku. Mengganti kartu profil menjadi avatar horizontal minimalis dengan nama tampilan dan email Google. Menata ulang seluruh kartu pengaturan tebal menjadi Grouped Settings List yang bersih, lapang, dan bernafas lega (`REKENING & OTOMATISASI` dan `PREFERENSI NOTIFIKASI`).
+- **Footer Minimalis Profil:** Menghapus kartu redundan 'Informasi Versi' dan menyederhanakan footer di bagian bawah menjadi format ringkas: `ZiRa Finance v2.1.0`.
+- **Auto-Sync Waktu Realtime Tambah Transaksi:** Menghilangkan masalah waktu transaksi 'nyangkut' pada jam saat aplikasi pertama kali dibuka (efek samping IndexedStack). Layar `AddTransactionScreen` kini diikat dengan `_addKey` di `main.dart` sehingga setiap kali tab `(+)` diketuk, waktu otomatis diperbarui ke detik/menit SEKARANG secara realtime, serta dilengkapi tombol cepat `[ ⏱️ Sekarang ]` di samping picker tanggal.
+- **Penyelarasan Header Konsisten Seluruh Layar (Unified In-Page Header):** Menghapus widget `AppBar` kaku pada `AddTransactionScreen` dan menggantinya dengan gaya In-Page Header standar ZiRa Finance (`22px` bold + subtitle deskriptif) sehingga seluruh 5 tab utama (Beranda, Laporan, Tambah, Riwayat, Profil) memiliki bahasa desain yang 100% harmonis dan kembar.
+- **Stabilitas Sakelar Notifikasi Konfirmasi Mutasi:** Memisahkan logika izin pop-up `POST_NOTIFICATIONS` dari listener perbankan, sehingga sakelar beroperasi stabil (tidak pernah berbalik/mental ke OFF sendiri).
+
+---
+
 ## [v2.0.9] - 2026-09-03
 ### 🚀 Added & Improved
 - **Sinkronisasi Otomatis Laporan Keuangan & Riwayat (Zero-Reload):** Mengikat `_reportKey` dan `_historyKey` dengan lifecycle hook `didChangeDependencies()` sehingga data beralih instan dari mode tamu ke data akun riil seketika saat login/logout tanpa perlu pull-to-refresh manual.

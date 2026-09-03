@@ -941,6 +941,214 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _showTelegramModal(AppProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final primary = AppColors.primary;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white24 : Colors.black12,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(TablerIcons.brand_telegram, size: 24, color: const Color(0xFF229ED9)),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Integrasi Bot Telegram AI',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 20, color: textMuted),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Kirim teks mutasi atau foto struk kasir ke @zirafinancebot via Telegram, otomatis tercatat di akun Anda.',
+                    style: TextStyle(fontSize: 12, color: textMuted, height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (_telegramData?['is_linked'] == true) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(TablerIcons.circle_check, color: AppColors.success, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Akun Terhubung ✓', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textMain)),
+                                Text('ID Telegram: ${_telegramData?['telegram_id']}', style: TextStyle(fontSize: 11, color: textMuted)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.danger),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () async {
+                          final token = provider.token;
+                          if (token == null) return;
+                          await ApiService.manageTelegram(token, 'unlink');
+                          Navigator.pop(ctx);
+                          _loadTelegramStatus();
+                        },
+                        child: const Text('Putuskan Tautan Bot', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.danger)),
+                      ),
+                    ),
+                  ] else ...[
+                    if (_telegramData?['link_token'] != null && (_telegramData?['link_token'] as String).isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: inputBg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: borderCol),
+                        ),
+                        child: Column(
+                          children: [
+                            Text('Perintah Pairing Tautan:', style: TextStyle(fontSize: 11, color: textMuted)),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SelectableText(
+                                  '/link ${_telegramData?['link_token']}',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: primary, fontFamily: 'monospace'),
+                                ),
+                                const SizedBox(width: 10),
+                                InkWell(
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: '/link ${_telegramData?['link_token']}'));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Perintah /link berhasil disalin! 📋'), duration: Duration(seconds: 2)),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: primary.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(Icons.copy_rounded, size: 18, color: primary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text('Kirim perintah di atas ke bot @zirafinancebot di Telegram', style: TextStyle(fontSize: 11, color: textMuted)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.link, size: 18),
+                        label: Text(
+                          _isLoadingTelegram
+                              ? 'Memproses...'
+                              : _telegramCooldownSeconds > 0
+                                  ? 'Tunggu ${_telegramCooldownSeconds}s...'
+                                  : (_telegramData?['link_token'] != null ? 'Perbarui Kode Tautan' : 'Buat Kode Tautan Bot'),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _telegramCooldownSeconds > 0 ? textMuted : primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                        onPressed: (_isLoadingTelegram || _telegramCooldownSeconds > 0)
+                            ? null
+                            : () async {
+                                final token = provider.token;
+                                if (token == null) return;
+                                setModalState(() => _isLoadingTelegram = true);
+                                final res = await ApiService.manageTelegram(token, 'generate');
+                                if (mounted) {
+                                  setModalState(() {
+                                    _isLoadingTelegram = false;
+                                    if (res != null && res['error'] != null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(res['error']), backgroundColor: AppColors.danger),
+                                      );
+                                    } else {
+                                      _telegramCooldownSeconds = 20;
+                                    }
+                                  });
+                                  _loadTelegramStatus();
+                                }
+                              },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1024,41 +1232,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Version Card (Guest Mode)
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Informasi Versi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                      const SizedBox(height: 2),
-                      Text('ZiRa Finance v$_appVersion', style: TextStyle(fontSize: 12, color: textMuted)),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Google Play Official',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.success),
-                    ),
-                  ),
-                ],
+            Center(
+              child: Text(
+                'ZiRa Finance v$_appVersion',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textMuted),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       );
@@ -1085,397 +1267,375 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 1. User Profile Card
+          // 1. Modern Clean User Profile Card (Horizontal Avatar Layout)
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: borderCol),
+            ),
+            child: Row(
+              children: [
+                // Avatar Circle with Initials
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: primary.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: primary.withOpacity(0.3), width: 1.5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (user?.displayName.isNotEmpty == true
+                              ? user!.displayName[0]
+                              : (user?.username.isNotEmpty == true ? user!.username[0] : 'Z'))
+                          .toUpperCase(),
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: primary),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+
+                // Name & Email
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.displayName.isNotEmpty == true ? user!.displayName : (user?.username ?? 'Pengguna ZiRa'),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          if (user?.email != null && user!.email!.isNotEmpty) ...[
+                            const Icon(TablerIcons.brand_google, size: 12, color: Color(0xFF4285F4)),
+                            const SizedBox(width: 4),
+                          ],
+                          Expanded(
+                            child: Text(
+                              (user?.email != null && user!.email!.isNotEmpty) ? user!.email! : 'Akun Tamu',
+                              style: TextStyle(fontSize: 12, color: textMuted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Edit Profile Icon Button
+                IconButton(
+                  onPressed: _showEditProfileDialog,
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: primary.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.edit_outlined, size: 16, color: primary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // SECTION: REKENING & OTOMATISASI (Modern Grouped Settings)
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'REKENING & OTOMATISASI',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: textMuted,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(color: borderCol),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Informasi Pengguna', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textMain)),
-                    InkWell(
-                      onTap: _showEditProfileDialog,
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
+                // 1. Dompet & Rekening Row
+                InkWell(
+                  onTap: _showManageWalletsModal,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF005BAA).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(TablerIcons.wallet, size: 20, color: Color(0xFF00A3FF)),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_outlined, size: 14, color: AppColors.primary),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Edit Profil',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Dompet & Rekening', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
+                              const SizedBox(height: 2),
+                              Text('Kelola nama & akun saldo pencatatan', style: TextStyle(fontSize: 11, color: textMuted)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${provider.accounts.length} Akun',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primary),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(Icons.chevron_right, size: 18, color: textMuted),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(height: 1, indent: 54, color: borderCol),
+
+                // 2. Bot Telegram AI Row
+                InkWell(
+                  onTap: () => _showTelegramModal(provider),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF229ED9).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(TablerIcons.brand_telegram, size: 20, color: Color(0xFF229ED9)),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Bot Telegram AI', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
+                              const SizedBox(height: 2),
+                              Text('Catat via chat & foto @zirafinancebot', style: TextStyle(fontSize: 11, color: textMuted)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: (_telegramData?['is_linked'] == true ? AppColors.success : primary).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _telegramData?['is_linked'] == true ? 'Terhubung ✓' : 'Setup Link',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: _telegramData?['is_linked'] == true ? AppColors.success : primary,
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(Icons.chevron_right, size: 18, color: textMuted),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(height: 1, indent: 54, color: borderCol),
+
+                // 3. Auto-Catat Notifikasi Bank Row
+                InkWell(
+                  onTap: () async {
+                    await PlatformService.requestPostNotificationPermission();
+                    await PlatformService.openNotificationSettings();
+                    Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
+                  },
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: (isNotifGranted ? AppColors.success : AppColors.danger).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(TablerIcons.bell, size: 20, color: isNotifGranted ? AppColors.success : AppColors.danger),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Auto-Catat Bank 24/7', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
+                              const SizedBox(height: 2),
+                              Text('Otomatis rekam mutasi di latar belakang', style: TextStyle(fontSize: 11, color: textMuted)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: (isNotifGranted ? AppColors.success : AppColors.danger).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isNotifGranted ? 'Aktif ✓' : 'Belum Izin',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: isNotifGranted ? AppColors.success : AppColors.danger,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(Icons.chevron_right, size: 18, color: textMuted),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // SECTION: PREFERENSI NOTIFIKASI POP-UP
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              'PREFERENSI NOTIFIKASI',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: textMuted,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: borderCol),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(TablerIcons.message_check, size: 20, color: primary),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Konfirmasi Mutasi Pop-up', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
+                            const SizedBox(height: 2),
+                            Text('Notifikasi instan saat transaksi tercatat', style: TextStyle(fontSize: 11, color: textMuted)),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                Text('Nama Pengguna', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(user?.username.isNotEmpty == true ? user!.username : '-', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                const SizedBox(height: 10),
-
-                Text('Nama Tampilan', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(user?.displayName.isNotEmpty == true ? user!.displayName : (user?.username ?? '-'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                const SizedBox(height: 10),
-
-                Text('Email Terhubung', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(
-                  (user?.email != null && user!.email!.isNotEmpty)
-                      ? user!.email!
-                      : 'Belum ditautkan (Daftar via Username)',
-                  style: TextStyle(
-                    fontSize: (user?.email != null && user!.email!.isNotEmpty) ? 14 : 12,
-                    fontWeight: (user?.email != null && user!.email!.isNotEmpty) ? FontWeight.w700 : FontWeight.w500,
-                    color: (user?.email != null && user!.email!.isNotEmpty) ? textMain : textMuted,
+                      Switch(
+                        value: provider.isConfirmNotificationEnabled,
+                        activeColor: primary,
+                        onChanged: (val) {
+                          provider.toggleConfirmNotification(val);
+                        },
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // 2. Manage Wallets Shortcut Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderCol),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Dompet & Rekening', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                    Text('${provider.accounts.length} Akun', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary)),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text('Kelola, ubah nama (rename), atau hapus dompet pencatatan Anda.', style: TextStyle(fontSize: 11, color: textMuted)),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: ElevatedButton.icon(
-                    onPressed: _showManageWalletsModal,
-                    icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
-                    label: const Text('Kelola Dompet', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // 3. Telegram AI Bot Integration Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderCol),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Bot Telegram AI', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: (_telegramData?['is_linked'] == true ? AppColors.success : AppColors.primary).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _telegramData?['is_linked'] == true ? 'Terhubung ✓' : 'Belum Terhubung',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: _telegramData?['is_linked'] == true ? AppColors.success : primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Kirim teks pengeluaran atau foto struk kasir ke @zirafinancebot via Telegram, otomatis tercatat di akun Anda.',
-                  style: TextStyle(fontSize: 11, color: textMuted),
-                ),
-                const SizedBox(height: 12),
-
-                if (_telegramData?['is_linked'] == true) ...[
-                  Text('ID Telegram: ${_telegramData?['telegram_id']}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain)),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 38,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.danger),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () async {
-                        final token = provider.token;
-                        if (token == null) return;
-                        await ApiService.manageTelegram(token, 'unlink');
-                        _loadTelegramStatus();
-                      },
-                      child: const Text('Putuskan Tautan Bot', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.danger)),
-                    ),
-                  ),
-                ] else ...[
-                  if (_telegramData?['link_token'] != null && (_telegramData?['link_token'] as String).isNotEmpty) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: inputBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: borderCol),
-                      ),
-                      child: Column(
+                Divider(height: 1, indent: 54, color: borderCol),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
                         children: [
-                          Text('Kode Pairing Tautan:', style: TextStyle(fontSize: 11, color: textMuted)),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(TablerIcons.bell_ringing, size: 20, color: AppColors.success),
+                          ),
+                          const SizedBox(width: 14),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SelectableText(
-                                '/link ${_telegramData?['link_token']}',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: primary, fontFamily: 'monospace'),
-                              ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: () {
-                                  Clipboard.setData(ClipboardData(text: '/link ${_telegramData?['link_token']}'));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Perintah /link berhasil disalin ke clipboard! 📋'), duration: Duration(seconds: 2)),
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: primary.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Icon(Icons.copy_rounded, size: 16, color: primary),
-                                ),
-                              ),
+                              Text('Uji Notifikasi di HP Ini', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
+                              const SizedBox(height: 2),
+                              Text('Tes kirim notifikasi contoh', style: TextStyle(fontSize: 11, color: textMuted)),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          Text('Kirim perintah di atas ke bot @zirafinancebot', style: TextStyle(fontSize: 10, color: textMuted)),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  SizedBox(
-                    width: double.infinity,
-                    height: 38,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.link, size: 16),
-                      label: Text(
-                        _isLoadingTelegram
-                            ? 'Memproses...'
-                            : _telegramCooldownSeconds > 0
-                                ? 'Tunggu ${_telegramCooldownSeconds}s...'
-                                : (_telegramData?['link_token'] != null ? 'Perbarui Kode Tautan' : 'Buat Kode Tautan Bot'),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _telegramCooldownSeconds > 0 ? textMuted : primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: (_isLoadingTelegram || _telegramCooldownSeconds > 0)
-                          ? null
-                          : () async {
-                              final token = provider.token;
-                              if (token == null) return;
-                              setState(() => _isLoadingTelegram = true);
-                              final res = await ApiService.manageTelegram(token, 'generate');
-                              if (mounted) {
-                                setState(() {
-                                  _isLoadingTelegram = false;
-                                  if (res != null && res['error'] != null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(res['error']), backgroundColor: AppColors.danger),
-                                    );
-                                  } else {
-                                    _telegramCooldownSeconds = 20; // 20s anti-spam cooldown
-                                  }
-                                });
-                                _loadTelegramStatus();
-
-                                // Cooldown countdown loop
-                                if (_telegramCooldownSeconds > 0) {
-                                  Future.doWhile(() async {
-                                    await Future.delayed(const Duration(seconds: 1));
-                                    if (!mounted) return false;
-                                    setState(() {
-                                      _telegramCooldownSeconds--;
-                                    });
-                                    return _telegramCooldownSeconds > 0;
-                                  });
-                                }
-                              }
-                            },
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // 4. Auto-Catat Notifikasi Main Permission Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderCol),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Auto-Catat Notifikasi Bank', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isNotifGranted ? AppColors.success.withOpacity(0.15) : AppColors.danger.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isNotifGranted ? 'Aktif ✓' : 'Belum Izin',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: isNotifGranted ? AppColors.success : AppColors.danger,
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: primary,
+                          side: BorderSide(color: primary.withOpacity(0.4)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
+                        onPressed: () async {
+                          final ok = await PlatformService.testInstantNotification(
+                            amount: 35899.0,
+                            type: 'expense',
+                            account: 'Blu BCA',
+                            category: 'Makanan & Minuman',
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(ok ? 'Notifikasi konfirmasi dikirim ke status bar HP! ✓' : 'Gagal memicu notifikasi.'),
+                                backgroundColor: ok ? AppColors.success : AppColors.danger,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('Tes 🔔', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Otomatis merekam mutasi transaksi dari aplikasi perbankan & e-wallet yang terpasang di HP Anda secara background 24/7.',
-                  style: TextStyle(fontSize: 11, color: textMuted),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await PlatformService.requestPostNotificationPermission();
-                      await PlatformService.openNotificationSettings();
-                      Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: borderCol),
-                      backgroundColor: inputBg,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: Text('Buka Pengaturan Izin HP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain)),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Divider(height: 1, color: borderCol),
-                const SizedBox(height: 14),
-
-                // Switch: Beritahu Saya Saat Mutasi Tercatat
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Notifikasi Konfirmasi Mutasi',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Munculkan notifikasi pop-up di HP saat mutasi bank/e-wallet berhasil dicatat otomatis',
-                            style: TextStyle(fontSize: 10, color: textMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Switch(
-                      value: provider.isConfirmNotificationEnabled,
-                      activeColor: primary,
-                      onChanged: (val) {
-                        provider.toggleConfirmNotification(val);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 38,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(TablerIcons.bell_ringing, size: 16),
-                    label: const Text('Uji Notifikasi Pop-up di HP Ini 🔔', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: primary,
-                      side: BorderSide(color: primary.withOpacity(0.4)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () async {
-                      final ok = await PlatformService.testInstantNotification(
-                        amount: 35899.0,
-                        type: 'expense',
-                        account: 'Blu BCA',
-                        category: 'Makanan & Minuman',
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(ok ? 'Notifikasi konfirmasi dikirim ke bar atas HP! ✓' : 'Gagal memicu notifikasi.'),
-                            backgroundColor: ok ? AppColors.success : AppColors.danger,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 20),
 
           // 5. TRULY INSTALLED FINANCIAL APPS ONLY (With Search & Instant Toggle)
           Container(
@@ -1805,41 +1965,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 8. Version Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderCol),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Informasi Versi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                    const SizedBox(height: 2),
-                    Text('ZiRa Finance v$_appVersion', style: TextStyle(fontSize: 12, color: textMuted)),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Google Play Official',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.success),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
           // 9. Logout Button
           SizedBox(
             width: double.infinity,
@@ -1860,8 +1985,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           Center(
             child: Text(
-              'ZiRa Finance v$_appVersion • Hak Cipta ZidStore',
-              style: TextStyle(fontSize: 11, color: textMuted),
+              'ZiRa Finance v$_appVersion',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textMuted),
             ),
           ),
           const SizedBox(height: 30),

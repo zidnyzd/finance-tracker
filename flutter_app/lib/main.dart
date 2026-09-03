@@ -191,6 +191,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   final GlobalKey<HistoryScreenState> _historyKey = GlobalKey<HistoryScreenState>();
   final GlobalKey<ReportScreenState> _reportKey = GlobalKey<ReportScreenState>();
+  final GlobalKey<AddTransactionScreenState> _addKey = GlobalKey<AddTransactionScreenState>();
 
   @override
   void initState() {
@@ -203,6 +204,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _onTabTapped(int index) {
     final provider = Provider.of<AppProvider>(context, listen: false);
 
+    // Reset waktu ke detik & menit SEKARANG saat membuka form (+)
+    if (index == 2) {
+      _addKey.currentState?.resetToNow();
+    }
+
     // Contextual Auth Interceptor for Add Transaction (+)
     if (index == 2 && !provider.isLoggedIn) {
       AuthBottomSheet.show(context, onSuccess: () {
@@ -210,6 +216,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         provider.fetchAccounts();
         _reportKey.currentState?.loadReport();
         _historyKey.currentState?.loadHistory();
+        _addKey.currentState?.resetToNow();
         setState(() => _currentIndex = 2);
       });
       return;
@@ -251,6 +258,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       ReportScreen(key: _reportKey),
       AddTransactionScreen(
+        key: _addKey,
         onFinish: () {
           _onTabTapped(0);
           provider.fetchDashboard();

@@ -18,10 +18,10 @@ class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key, required this.onFinish});
 
   @override
-  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  State<AddTransactionScreen> createState() => AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
+class AddTransactionScreenState extends State<AddTransactionScreen> {
   String _txnType = 'expense'; // 'expense', 'income', 'transfer'
   final _amountController = TextEditingController();
   final _categoryController = TextEditingController(text: 'Makan & Minum');
@@ -45,6 +45,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (accounts.length > 1) {
         _selectedTargetAccountId = accounts[1].id;
       }
+    }
+  }
+
+  /// Reset waktu transaksi ke waktu saat ini (detik & menit terkini)
+  void resetToNow() {
+    if (mounted) {
+      setState(() {
+        _selectedDateTime = DateTime.now();
+      });
     }
   }
 
@@ -437,25 +446,45 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final incomeCategories = ['Gaji', 'Bonus', 'Investasi', 'Hasil Usaha', 'Pemasukan Lain'];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Catat Transaksi',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textMain),
-        ),
-        backgroundColor: cardBg,
-        elevation: 0,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.close, color: textMain),
-            onPressed: widget.onFinish,
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Title (Konsisten 100% dengan Home, Report, History, Profile)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Catat Transaksi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: textMain,
+                        letterSpacing: -0.02,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Rekam pengeluaran, pemasukan, atau pindah saldo',
+                      style: TextStyle(fontSize: 12, color: textMuted),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: textMuted, size: 22),
+                  onPressed: widget.onFinish,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             // 0. AI RECEIPT & TRANSFER SCREENSHOT SCANNER CARD
             Container(
               padding: const EdgeInsets.all(16),
@@ -800,12 +829,39 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 8. Tanggal & Waktu
-                  Text(
-                    'Tanggal & Waktu',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMain),
+                  // 8. Tanggal & Waktu Transaksi
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Tanggal & Waktu',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain),
+                      ),
+                      InkWell(
+                        onTap: resetToNow,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.history_rounded, size: 12, color: primary),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Sekarang',
+                                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   InkWell(
                     onTap: _pickDateTime,
                     borderRadius: BorderRadius.circular(10),

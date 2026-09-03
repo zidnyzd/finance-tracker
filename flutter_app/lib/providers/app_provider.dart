@@ -129,10 +129,9 @@ class AppProvider extends ChangeNotifier {
       final granted = await PlatformService.isNotificationPermissionGranted();
       _isNotifPermissionGranted = granted;
 
-      // Sinkronkan sakelar konfirmasi mutasi: jika izin sistem belum aktif, sakelar otomatis OFF
+      // Sakelar konfirmasi pop-up adalah preferensi pengguna yang independen dari listener bank
       final prefs = await SharedPreferences.getInstance();
-      final userPref = prefs.getBool('confirm_notification_enabled') ?? false;
-      _isConfirmNotificationEnabled = userPref && granted;
+      _isConfirmNotificationEnabled = prefs.getBool('confirm_notification_enabled') ?? true;
 
       notifyListeners();
     } catch (_) {}
@@ -154,7 +153,10 @@ class AppProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('confirm_notification_enabled', enabled);
     if (enabled) {
-      await PlatformService.requestPostNotificationPermission();
+      final isGranted = await PlatformService.isPostNotificationPermissionGranted();
+      if (!isGranted) {
+        await PlatformService.requestPostNotificationPermission();
+      }
     }
     notifyListeners();
   }
