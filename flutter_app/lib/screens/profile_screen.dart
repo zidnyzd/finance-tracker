@@ -1010,25 +1010,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: borderCol),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Versi & Pembaruan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                  const SizedBox(height: 4),
-                  Text('ZiRa Finance Flutter v$_appVersion (Build $_buildNumber)', style: TextStyle(fontSize: 12, color: textMuted)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 42,
-                    child: ElevatedButton(
-                      onPressed: _checkUpdate,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Periksa Pembaruan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Informasi Versi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                      const SizedBox(height: 2),
+                      Text('ZiRa Finance v$_appVersion', style: TextStyle(fontSize: 12, color: textMuted)),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Google Play Official',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.success),
                     ),
                   ),
                 ],
@@ -1715,7 +1716,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 8. Version & Update Card
+          // 8. Version Card
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -1723,25 +1724,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: borderCol),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Versi & Pembaruan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
-                const SizedBox(height: 4),
-                Text('ZiRa Finance Flutter v$_appVersion (Build $_buildNumber)', style: TextStyle(fontSize: 12, color: textMuted)),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: ElevatedButton(
-                    onPressed: _checkUpdate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: const Text('Periksa Pembaruan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Informasi Versi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                    const SizedBox(height: 2),
+                    Text('ZiRa Finance v$_appVersion', style: TextStyle(fontSize: 12, color: textMuted)),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Google Play Official',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.success),
                   ),
                 ),
               ],
