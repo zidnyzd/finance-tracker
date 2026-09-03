@@ -8,7 +8,7 @@ class AppProvider extends ChangeNotifier {
   bool _isDarkMode = true;
   bool _isBalanceHidden = false;
   bool _isNotifPermissionGranted = false;
-  bool _isConfirmNotificationEnabled = true;
+  bool _isConfirmNotificationEnabled = false;
   String? _token;
   UserModel? _currentUser;
   DashboardData? _dashboardData;
@@ -128,6 +128,12 @@ class AppProvider extends ChangeNotifier {
     try {
       final granted = await PlatformService.isNotificationPermissionGranted();
       _isNotifPermissionGranted = granted;
+
+      // Sinkronkan sakelar konfirmasi mutasi: jika izin sistem belum aktif, sakelar otomatis OFF
+      final prefs = await SharedPreferences.getInstance();
+      final userPref = prefs.getBool('confirm_notification_enabled') ?? false;
+      _isConfirmNotificationEnabled = userPref && granted;
+
       notifyListeners();
     } catch (_) {}
   }
@@ -157,7 +163,7 @@ class AppProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('is_dark_mode') ?? true;
     _isBalanceHidden = prefs.getBool('is_balance_hidden') ?? false;
-    _isConfirmNotificationEnabled = prefs.getBool('confirm_notification_enabled') ?? true;
+    _isConfirmNotificationEnabled = prefs.getBool('confirm_notification_enabled') ?? false;
     _token = prefs.getString('auth_token');
 
     // Dynamically load ALL stored preferences that match notif_app_enabled_

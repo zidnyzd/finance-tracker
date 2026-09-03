@@ -25,10 +25,22 @@ class HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = false;
   int _totalCount = 0;
 
+  String? _lastToken;
+
   @override
   void initState() {
     super.initState();
     loadHistory();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentToken = Provider.of<AppProvider>(context).token;
+    if (_lastToken != currentToken) {
+      _lastToken = currentToken;
+      loadHistory();
+    }
   }
 
   Future<void> loadHistory() async {

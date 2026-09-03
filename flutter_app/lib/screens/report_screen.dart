@@ -11,21 +11,33 @@ class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
 
   @override
-  State<ReportScreen> createState() => _ReportScreenState();
+  State<ReportScreen> createState() => ReportScreenState();
 }
 
-class _ReportScreenState extends State<ReportScreen> {
+class ReportScreenState extends State<ReportScreen> {
   String _currentMonth = '';
   MonthlyReportData? _reportData;
   bool _isLoading = false;
 
+  String? _lastToken;
+
   @override
   void initState() {
     super.initState();
-    _loadReport();
+    loadReport();
   }
 
-  Future<void> _loadReport({String month = ''}) async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentToken = Provider.of<AppProvider>(context).token;
+    if (_lastToken != currentToken) {
+      _lastToken = currentToken;
+      loadReport();
+    }
+  }
+
+  Future<void> loadReport({String month = ''}) async {
     final provider = Provider.of<AppProvider>(context, listen: false);
     final token = provider.token;
 

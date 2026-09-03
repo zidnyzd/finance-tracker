@@ -4,6 +4,15 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.0.9] - 2026-09-03
+### 🚀 Added & Improved
+- **Sinkronisasi Otomatis Laporan Keuangan & Riwayat (Zero-Reload):** Mengikat `_reportKey` dan `_historyKey` dengan lifecycle hook `didChangeDependencies()` sehingga data beralih instan dari mode tamu ke data akun riil seketika saat login/logout tanpa perlu pull-to-refresh manual.
+- **Penyelarasan Izin Sistem Sakelar Notifikasi:** Sakelar konfirmasi mutasi kini selalu mencerminkan status nyata izin sistem Android `POST_NOTIFICATIONS`. Sakelar tidak lagi aktif sendiri saat pertama kali login jika izin belum diberikan.
+- **Perbaikan Kontras Teks Chip Bank:** Teks chip pilihan bank terpilih (seperti GoPay, BCA, Mandiri, dll) di modal setup kini 100% menggunakan warna putih terang solid di Dark Mode, tidak akan lagi berubah menjadi hitam pekat.
+- **Audit Logging Aktivitas Pengguna Menyeluruh:** Seluruh aksi kritis pengguna (tambah transaksi, edit, hapus, rename dompet, pairing Telegram, dan OAuth) dicatat secara persisten di tabel `audit_logs` lengkap dengan timestamp WIB dan IP address untuk kemudahan investigasi bug.
+
+---
+
 ## [v2.0.8] - 2026-09-03
 ### 🚀 Added & Improved
 - **Unified Google-Only Authentication (Mobile & Web):** Beralih 100% ke Single Sign-On Google Identity resmi (1-Tap Native di Mobile & Google OAuth 2.0 di Web). Menghapus seluruh form manual username & password, mengeliminasi risiko brute-force, password mismatch, serta memastikan setiap pengguna terverifikasi membawa email resmi sendiri tanpa risiko kebocoran data.

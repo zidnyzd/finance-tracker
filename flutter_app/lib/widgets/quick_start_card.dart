@@ -424,9 +424,16 @@ class _QuickStartCardState extends State<QuickStartCard> {
                           final isSelected = !isCustomName && selectedBankName == app.name;
                           return ChoiceChip(
                             avatar: BankBadge(accountName: app.name, size: 20),
-                            label: Text(app.name, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                            label: Text(
+                              app.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isDark ? Colors.white : (isSelected ? primary : textMain),
+                              ),
+                            ),
                             selected: isSelected,
-                            selectedColor: primary.withOpacity(0.18),
+                            selectedColor: primary.withOpacity(0.22),
                             backgroundColor: inputBg,
                             side: BorderSide(color: isSelected ? primary : borderCol, width: isSelected ? 1.5 : 1),
                             onSelected: (val) {
@@ -459,9 +466,16 @@ class _QuickStartCardState extends State<QuickStartCard> {
                           final isSelected = !isCustomName && selectedBankName == pop['name'];
                           return ChoiceChip(
                             avatar: BankBadge(accountName: pop['name']!, size: 20),
-                            label: Text(pop['name']!, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                            label: Text(
+                              pop['name']!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isDark ? Colors.white : (isSelected ? primary : textMain),
+                              ),
+                            ),
                             selected: isSelected,
-                            selectedColor: primary.withOpacity(0.18),
+                            selectedColor: primary.withOpacity(0.22),
                             backgroundColor: inputBg,
                             side: BorderSide(color: isSelected ? primary : borderCol, width: isSelected ? 1.5 : 1),
                             onSelected: (val) {
@@ -479,7 +493,14 @@ class _QuickStartCardState extends State<QuickStartCard> {
                         // Chip Kustom / Lainnya
                         ActionChip(
                           avatar: Icon(TablerIcons.edit, size: 16, color: primary),
-                          label: Text(isCustomName ? 'Nama Kustom' : 'Lainnya...', style: TextStyle(fontSize: 12, fontWeight: isCustomName ? FontWeight.w700 : FontWeight.w500)),
+                          label: Text(
+                            isCustomName ? 'Nama Kustom' : 'Lainnya...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isCustomName ? FontWeight.w700 : FontWeight.w500,
+                              color: isDark ? Colors.white : (isCustomName ? primary : textMain),
+                            ),
+                          ),
                           backgroundColor: isCustomName ? primary.withOpacity(0.18) : inputBg,
                           side: BorderSide(color: isCustomName ? primary : borderCol),
                           onPressed: () {

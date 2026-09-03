@@ -190,6 +190,7 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   final GlobalKey<HistoryScreenState> _historyKey = GlobalKey<HistoryScreenState>();
+  final GlobalKey<ReportScreenState> _reportKey = GlobalKey<ReportScreenState>();
 
   @override
   void initState() {
@@ -207,6 +208,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       AuthBottomSheet.show(context, onSuccess: () {
         provider.fetchDashboard();
         provider.fetchAccounts();
+        _reportKey.currentState?.loadReport();
+        _historyKey.currentState?.loadHistory();
         setState(() => _currentIndex = 2);
       });
       return;
@@ -216,7 +219,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (index == 0) {
       provider.fetchDashboard();
     } else if (index == 1) {
-      provider.fetchAccounts();
+      _reportKey.currentState?.loadReport();
     } else if (index == 3) {
       _historyKey.currentState?.loadHistory();
     }
@@ -241,14 +244,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           AuthBottomSheet.show(context, onSuccess: () {
             provider.fetchDashboard();
             provider.fetchAccounts();
+            _reportKey.currentState?.loadReport();
+            _historyKey.currentState?.loadHistory();
           });
         },
       ),
-      const ReportScreen(),
+      ReportScreen(key: _reportKey),
       AddTransactionScreen(
         onFinish: () {
           _onTabTapped(0);
           provider.fetchDashboard();
+          _reportKey.currentState?.loadReport();
+          _historyKey.currentState?.loadHistory();
         },
       ),
       HistoryScreen(key: _historyKey),

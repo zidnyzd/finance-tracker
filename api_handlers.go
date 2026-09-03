@@ -92,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 68,
-		"version_name": "2.0.8",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.8.apk",
-		"changelog":    "Official Release v2.0.8 - Unified Google-Only Auth, Smart Auto-Detect Bank Setup, Anti-Spam Protections, and UI/UX Enhancements",
+		"version_code": 69,
+		"version_name": "2.0.9",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.9.apk",
+		"changelog":    "Official Release v2.0.9 - Realtime Report & History Sync, System Permission Alignment for Confirm Notifications, White Chip Text Contrast, and Comprehensive Activity Audit",
 	})
 }
 
@@ -746,6 +746,8 @@ func handleApiTransactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		newID, _ := res.LastInsertId()
+		uidInt, _ := strconv.Atoi(uid)
+		logAudit(uidInt, "TXN_CREATE", clientIP(r), fmt.Sprintf("Added %s: Rp %.0f (%s) - %s", req.Type, req.Amount, req.Category, req.Description))
 
 		jsonResponse(w, http.StatusOK, map[string]interface{}{
 			"success":        true,
@@ -816,6 +818,9 @@ func handleApiUpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uidInt, _ := strconv.Atoi(uid)
+	logAudit(uidInt, "TXN_UPDATE", clientIP(r), fmt.Sprintf("Updated Txn #%d: %s Rp %.0f (%s)", req.ID, req.Type, req.Amount, req.Category))
+
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "Transaksi berhasil diperbarui",
@@ -853,6 +858,9 @@ func handleApiDeleteTransaction(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusNotFound, "Transaksi tidak ditemukan atau bukan milik Anda")
 		return
 	}
+
+	uidInt, _ := strconv.Atoi(uid)
+	logAudit(uidInt, "TXN_DELETE", clientIP(r), fmt.Sprintf("Deleted Txn #%s", txnID))
 
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -980,6 +988,9 @@ func handleApiUpdateAccount(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusNotFound, "Dompet tidak ditemukan atau bukan milik Anda")
 		return
 	}
+
+	uidInt, _ := strconv.Atoi(uid)
+	logAudit(uidInt, "ACCOUNT_UPDATE", clientIP(r), fmt.Sprintf("Updated Account #%d: %s (%s)", req.ID, req.Name, req.Type))
 
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
 		"success": true,
