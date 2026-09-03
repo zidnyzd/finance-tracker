@@ -302,7 +302,7 @@ class _WelcomeBottomSheetState extends State<WelcomeBottomSheet> {
                       ),
                       if (_currentPage < _slides.length - 1) ...[
                         const SizedBox(width: 6),
-                        const Icon(Icons.arrow_forward_rounded, size: 16),
+                        const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
                       ],
                     ],
                   ),

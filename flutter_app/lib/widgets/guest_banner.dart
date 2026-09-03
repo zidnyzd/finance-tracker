@@ -105,8 +105,8 @@ class GuestBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: const [
                 Text('Masuk', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                SizedBox(width: 3),
-                Icon(Icons.arrow_forward_rounded, size: 13),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.white),
               ],
             ),
           ),

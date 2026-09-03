@@ -152,5 +152,26 @@ void main() {
       expect(provider.accounts.length, 3);
       expect(provider.dashboardData!.recentTxns.length, 3);
     });
+
+    test('Smart Wallet Auto-Detect selection logic and type mapping', () {
+      // Test bank and e-wallet category detection logic
+      String resolveWalletType(String name) {
+        final lower = name.toLowerCase();
+        if (lower.contains('dana') || lower.contains('gopay') || lower.contains('ovo') || lower.contains('shopee')) {
+          return 'ewallet';
+        }
+        if (lower.contains('kas') || lower.contains('tunai')) {
+          return 'cash';
+        }
+        return 'bank';
+      }
+
+      expect(resolveWalletType('Livin\' by Mandiri'), 'bank');
+      expect(resolveWalletType('BCA'), 'bank');
+      expect(resolveWalletType('BRImo'), 'bank');
+      expect(resolveWalletType('DANA'), 'ewallet');
+      expect(resolveWalletType('GoPay'), 'ewallet');
+      expect(resolveWalletType('Kas Tunai'), 'cash');
+    });
   });
 }

@@ -4,6 +4,20 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.0.8] - 2026-09-03
+### 🚀 Added & Improved
+- **Unified Google-Only Authentication (Mobile & Web):** Beralih 100% ke Single Sign-On Google Identity resmi (1-Tap Native di Mobile & Google OAuth 2.0 di Web). Menghapus seluruh form manual username & password, mengeliminasi risiko brute-force, password mismatch, serta memastikan setiap pengguna terverifikasi membawa email resmi sendiri tanpa risiko kebocoran data.
+- **Smart Auto-Detect Rekening & Saldo Awal (Onboarding):** Modal setup saldo awal di Beranda (`QuickStartCard`) otomatis memindai aplikasi m-banking dan e-wallet yang terpasang di HP (Mandiri, BCA, BRI, DANA, dll). Eksekusi 2-in-1 otomatis mengubah nama dompet generic sekaligus mencatat saldo awal ke database.
+- **Proteksi Anti-Spam & DoS Rate Limiting:**
+  - Pembuatan kode tautan Telegram (`telegram_links`) dibatasi maksimal 3x/menit per user di backend, dilengkapi Cooldown Timer 20 detik dan tombol salin 1-tap clipboard di aplikasi mobile.
+  - Rate limiting AI Receipt Scanner (maks 15x/menit) dan Crash Telemetry (maks 30x/menit).
+- **Perbaikan UI/UX & Kontras Visual:**
+  - Ikon panah tombol "Lanjut" (Welcome Sheet) dan tombol "Masuk" (Guest Banner) kini menggunakan warna putih solid (`color: Colors.white`) dengan ukuran tebal dan kontras tinggi.
+  - Mode Tamu Laporan Keuangan (`ReportScreen`) kini menyajikan data simulasi estetik September 2026 saat pengguna belum login.
+  - Dialog profil otomatis menampilkan badge resmi Google jika akun terhubung ke Google tanpa menampilkan opsi ubah kata sandi manual yang membingungkan.
+
+---
+
 ## [v2.0.7] - 2026-09-03
 ### 🚀 Added & Improved
 - **Pembersihan State Riwayat saat Logout & Guest Demo:** Transaksi riwayat akun lama langsung di-reset seketika saat logout, dan menampilkan 3 transaksi demo estetik saat mode tamu tanpa harus restart aplikasi.

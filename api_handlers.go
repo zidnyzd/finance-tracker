@@ -17,6 +17,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Rate limiters for API endpoints
+var (
+	telegramLinkLimiter = &rateLimit{limit: map[string][]time.Time{}}
+	scanReceiptLimiter  = &rateLimit{limit: map[string][]time.Time{}}
+	appErrorLogLimiter  = &rateLimit{limit: map[string][]time.Time{}}
+)
+
 // Helper standard JSON response
 func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -85,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 67,
-		"version_name": "2.0.7",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.7.apk",
-		"changelog":    "Official Release v2.0.7 - Symmetrical Form Fields, Masked Confirm Password, Guest Report Demo, and High-Contrast Guide Button",
+		"version_code": 68,
+		"version_name": "2.0.8",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.0.8.apk",
+		"changelog":    "Official Release v2.0.8 - Unified Google-Only Auth, Smart Auto-Detect Bank Setup, Anti-Spam Protections, and UI/UX Enhancements",
 	})
 }
 
@@ -185,6 +192,13 @@ func handleApiAppLogError(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&req)
 	if strings.TrimSpace(req.Message) == "" {
 		jsonError(w, http.StatusBadRequest, "Pesan error tidak boleh kosong")
+		return
+	}
+
+	// Rate limit telemetry: max 30 error logs per minute per IP to prevent DB flooding
+	ip := clientIP(r)
+	if !appErrorLogLimiter.check(ip, 30, time.Minute) {
+		jsonError(w, http.StatusTooManyRequests, "Too many error reports")
 		return
 	}
 
@@ -1047,6 +1061,12 @@ func handleApiTelegramLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Security Rate Limit: Max 3 requests per minute per user to prevent DB spam & token thrashing
+		if !telegramLinkLimiter.check(uid, 3, time.Minute) {
+			jsonError(w, http.StatusTooManyRequests, "Terlalu banyak permintaan pembuatan kode tautan. Harap tunggu 1 menit.")
+			return
+		}
+
 		// Generate link token (6 digit hex)
 		tokenBytes := make([]byte, 3)
 		rand.Read(tokenBytes)
@@ -1323,6 +1343,12 @@ func handleApiScanReceipt(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(uidStr)
 	if err != nil || userID == 0 {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	// Rate limit: max 15 AI receipt scans per minute per user to prevent API quota exhaustion
+	if !scanReceiptLimiter.check(uidStr, 15, time.Minute) {
+		jsonError(w, http.StatusTooManyRequests, "Terlalu banyak permintaan scan struk. Harap tunggu 1 menit.")
 		return
 	}
 

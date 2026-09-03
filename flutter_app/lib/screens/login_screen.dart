@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons/tabler_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import '../models/models.dart';
 import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,10 +17,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _isLoading = false;
   bool _isGoogleLoading = false;
   String? _errorMessage;
 
@@ -31,76 +25,21 @@ class _LoginScreenState extends State<LoginScreen> {
     scopes: ['email', 'profile', 'openid'],
   );
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleLogin() async {
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text;
-
-    if (username.isEmpty || password.isEmpty) {
-      setState(() {
-        _errorMessage = "Harap isi username dan kata sandi.";
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final res = await ApiService.login(username, password);
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (res['success'] == true && res['token'] != null && res['user'] != null) {
-      final token = res['token'] as String;
-      final user = UserModel.fromJson(res['user']);
-      await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
-      
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainNavigationScreen(),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
-          (route) => false,
-        );
-      }
-    } else {
-      setState(() {
-        _errorMessage = res['error'] ?? "Username atau kata sandi salah.";
-      });
-    }
-  }
-
-  Future<void> _handleNativeGoogleSignIn() async {
+  Future<void> _handleGoogleSignIn() async {
     setState(() {
       _isGoogleLoading = true;
       _errorMessage = null;
     });
 
     try {
-      // 1. Sign out first to allow account selection
       await _googleSignIn.signOut();
-
-      // 2. Trigger native Android Google Account Picker
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
       if (googleUser == null) {
-        // User cancelled picker
         if (mounted) setState(() => _isGoogleLoading = false);
         return;
       }
 
-      // 3. Get Auth Tokens (idToken & accessToken)
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
       final accessToken = googleAuth.accessToken;
@@ -109,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
         throw Exception("Gagal mendapatkan Token autentikasi Google dari perangkat.");
       }
 
-      // 4. Send Tokens to ZiRa Backend API
       final res = await ApiService.loginWithGoogleTokens(idToken: idToken, accessToken: accessToken);
       if (!mounted) return;
       setState(() => _isGoogleLoading = false);
@@ -118,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = res['token'] as String;
         final user = UserModel.fromJson(res['user']);
         await Provider.of<AppProvider>(context, listen: false).saveAuth(token, user);
-        
+
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             PageRouteBuilder(
@@ -136,304 +74,255 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _errorMessage = err);
         ApiService.reportError(errorType: 'GoogleAuthError', message: 'Google Native Login Server Error: $err', stackTrace: jsonEncode(res));
       }
-    } catch (e, stack) {
-      if (!mounted) return;
-      final errStr = "Kendala Google Sign-In: $e";
-      setState(() {
-        _isGoogleLoading = false;
-        _errorMessage = errStr;
-      });
-      // Always capture and send error log to server
-      ApiService.reportError(errorType: 'GoogleAuthException', message: errStr, stackTrace: stack.toString());
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+          _errorMessage = "Kendala Google Sign-In: $e";
+        });
+        ApiService.reportError(errorType: 'GoogleAuthException', message: 'Kendala Google Sign-In: $e');
+      }
     }
+  }
+
+  void _continueAsGuest() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
-    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
     final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
     final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Official Logo
-                Container(
-                  width: 76,
-                  height: 76,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.25),
-                        blurRadius: 20,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Brand Logo & Icon
+                  Container(
+                    width: 72,
+                    height: 72,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: primary.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: primary.withOpacity(0.3), width: 1.5),
+                    ),
                     child: Image.asset(
                       'assets/logo.png',
-                      width: 76,
-                      height: 76,
-                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(TablerIcons.wallet, size: 36, color: primary),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: textMain,
-                      letterSpacing: -0.5,
-                    ),
-                    children: const [
-                      TextSpan(text: 'ZiRa ', style: TextStyle(color: AppColors.primary)),
-                      TextSpan(text: 'Finance'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Masuk ke akun Anda untuk mengelola keuangan',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 18),
 
-                // Card Form
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: borderCol),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                  // Brand Title
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'ZiRa ',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: primary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      Text(
+                        'Finance',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: textMain,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (_errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.danger.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.danger.withOpacity(0.3)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage!,
-                                  style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Kelola keuangan pribadi & auto-catat mutasi 24/7',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: textMuted),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Card Container
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: borderCol),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Masuk atau Buat Akun',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Cukup 1 ketukan dengan akun Google Anda.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: textMuted),
+                        ),
+                        const SizedBox(height: 22),
+
+                        // Error Banner (if any)
+                        if (_errorMessage != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppColors.danger.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.danger.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: const TextStyle(fontSize: 12, color: AppColors.danger, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                        ],
+
+                        // 1-Tap Google Sign-In Button
+                        SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark ? const Color(0xFF263345) : Colors.white,
+                              foregroundColor: textMain,
+                              elevation: 0,
+                              side: BorderSide(color: isDark ? const Color(0xFF384C66) : const Color(0xFFCBD5E1), width: 1.2),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: _isGoogleLoading
+                                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Center(
+                                          child: Text(
+                                            'G',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w900,
+                                              color: Color(0xFF4285F4),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Lanjutkan dengan Google',
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 16),
-                      ],
 
-                      // Username Input
-                      Text(
-                        'Username',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: textMain,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                          hintText: 'Masukkan username',
-                          prefixIcon: Icon(TablerIcons.user, size: 20),
-                          suffixIcon: SizedBox(width: 48), // Symmetrical spacer to balance password eye icon
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-
-                      // Password Input
-                      Text(
-                        'Kata Sandi',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: textMain,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan kata sandi',
-                          prefixIcon: const Icon(TablerIcons.lock, size: 20),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? TablerIcons.eye_off : TablerIcons.eye,
-                              size: 20,
+                        // Divider or Guest
+                        Row(
+                          children: [
+                            Expanded(child: Divider(color: borderCol)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text('atau', style: TextStyle(fontSize: 11, color: textMuted)),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
+                            Expanded(child: Divider(color: borderCol)),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 14),
 
-                      // Submit Button
-                      SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: _isLoading || _isGoogleLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text(
-                                  'Masuk ke Akun',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Divider
-                      Row(
-                        children: [
-                          Expanded(child: Divider(color: borderCol)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              'atau masuk dengan',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: textMuted,
-                              ),
-                            ),
-                          ),
-                          Expanded(child: Divider(color: borderCol)),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Native Google Sign-In Button (Direct on Phone)
-                      SizedBox(
-                        height: 48,
-                        child: OutlinedButton(
-                          onPressed: _isLoading || _isGoogleLoading ? null : _handleNativeGoogleSignIn,
+                        // Continue as Guest Option
+                        OutlinedButton(
+                          onPressed: _continueAsGuest,
                           style: OutlinedButton.styleFrom(
+                            foregroundColor: textMuted,
                             side: BorderSide(color: borderCol),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: _isGoogleLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(TablerIcons.brand_google, size: 20, color: Colors.redAccent),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      'Masuk dengan Google',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: textMain,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(TablerIcons.sparkles, size: 16),
+                              SizedBox(width: 8),
+                              Text('Coba Mode Eksplorasi Tamu', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Privacy & Security Footer
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(TablerIcons.shield_check, size: 16, color: AppColors.success),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Otentikasi resmi, aman, & terverifikasi oleh Google',
+                        style: TextStyle(fontSize: 11, color: textMuted, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Register Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Belum punya akun? ',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: textMuted,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                        );
-                      },
-                      child: const Text(
-                        'Daftar Sekarang',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    'ZiRa Finance v2.0 • Hak Cipta ZidStore',
+                    style: TextStyle(fontSize: 10.5, color: textMuted.withOpacity(0.7)),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -6,6 +6,7 @@ import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
+import 'bank_badge.dart';
 
 class QuickStartCard extends StatefulWidget {
   final VoidCallback onNavigateToAdd;
@@ -297,114 +298,312 @@ class _QuickStartCardState extends State<QuickStartCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final textMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
+    final borderCol = isDark ? AppColors.borderDark : AppColors.borderLight;
     final accounts = provider.accounts;
 
     if (accounts.isEmpty) return;
-    final firstAcc = accounts.first;
-    final amountController = TextEditingController(
-      text: firstAcc.balance > 0 ? firstAcc.balance.toInt().toString() : '',
+
+    // Cari akun default (misal "Rekening Bank" atau akun pertama)
+    final targetAcc = accounts.firstWhere(
+      (a) => a.name.toLowerCase().contains('rekening') || a.name.toLowerCase().contains('bank'),
+      orElse: () => accounts.first,
     );
+
+    // Kumpulkan aplikasi yang terpasang di HP pengguna dari provider
+    final installedApps = provider.installedApps.where((app) => app.isInstalled).toList();
+
+    // Pilihan bank populer default jika tidak ada m-banking terpasang
+    final popularDefaults = [
+      {'name': 'BCA', 'type': 'bank'},
+      {'name': 'Mandiri', 'type': 'bank'},
+      {'name': 'BRI', 'type': 'bank'},
+      {'name': 'DANA', 'type': 'ewallet'},
+      {'name': 'Kas Tunai', 'type': 'cash'},
+    ];
+
+    String selectedBankName = installedApps.isNotEmpty
+        ? installedApps.first.name
+        : (targetAcc.name != 'Rekening Bank' ? targetAcc.name : 'BCA');
+    String selectedType = 'bank';
+
+    final amountController = TextEditingController(
+      text: targetAcc.balance > 0 ? targetAcc.balance.toInt().toString() : '',
+    );
+    final customNameController = TextEditingController(text: selectedBankName);
+    bool isCustomName = false;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: cardBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Atur Saldo Awal Dompet',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Masukkan saldo saat ini pada dompet "${firstAcc.name}".',
-                style: TextStyle(fontSize: 12, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textMain),
-                decoration: InputDecoration(
-                  prefixText: 'Rp ',
-                  prefixStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: primary),
-                  hintText: '0',
-                  filled: true,
-                  fillColor: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  onPressed: () async {
-                    final cleanText = amountController.text.replaceAll('.', '').replaceAll(',', '').trim();
-                    final amt = double.tryParse(cleanText) ?? 0;
-                    if (amt > 0 && provider.token != null) {
-                      Navigator.pop(ctx);
-                      
-                      final dateStr = DateFormat('yyyy-MM-ddTHH:mm').format(DateTime.now());
-                      await ApiService.createTransaction(provider.token!, {
-                        'type': 'income',
-                        'amount': amt,
-                        'account_id': firstAcc.id,
-                        'category': 'Saldo Awal',
-                        'description': 'Saldo Awal ${firstAcc.name}',
-                        'date': dateStr,
-                      });
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Drag Handle Bar
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white24 : Colors.black12,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
-                      await provider.fetchDashboard();
-                      await provider.fetchAccounts();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Saldo awal dompet berhasil disimpan! ✓'),
-                            backgroundColor: AppColors.success,
+                    // Header Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primary.withOpacity(0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(TablerIcons.building_bank, size: 20, color: primary),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Atur Rekening & Saldo Awal',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, size: 20, color: textMuted),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Pilih m-banking / dompet yang kamu pakai, ZiRa otomatis menyesuaikan akun.',
+                      style: TextStyle(fontSize: 12, color: textMuted),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // SECTION 1: BANK TERPASANG DI HP (AUTO-DETECTED)
+                    if (installedApps.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(TablerIcons.device_mobile_check, size: 16, color: AppColors.success),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Aplikasi Terdeteksi di HP Kamu:',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
                           ),
-                        );
-                      }
-                    }
-                  },
-                  child: const Text('Simpan Saldo Awal', style: TextStyle(fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: installedApps.map((app) {
+                          final isSelected = !isCustomName && selectedBankName == app.name;
+                          return ChoiceChip(
+                            avatar: BankBadge(accountName: app.name, size: 20),
+                            label: Text(app.name, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                            selected: isSelected,
+                            selectedColor: primary.withOpacity(0.18),
+                            backgroundColor: inputBg,
+                            side: BorderSide(color: isSelected ? primary : borderCol, width: isSelected ? 1.5 : 1),
+                            onSelected: (val) {
+                              if (val) {
+                                setModalState(() {
+                                  selectedBankName = app.name;
+                                  selectedType = (app.name.toLowerCase().contains('dana') || app.name.toLowerCase().contains('gopay') || app.name.toLowerCase().contains('ovo') || app.name.toLowerCase().contains('shopee')) ? 'ewallet' : 'bank';
+                                  isCustomName = false;
+                                  customNameController.text = app.name;
+                                });
+                              }
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // SECTION 2: PILIHAN POPULER UMUM
+                    Text(
+                      installedApps.isNotEmpty ? 'Atau Pilihan Populer Lainnya:' : 'Pilih Rekening / Dompet:',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ...popularDefaults.map((pop) {
+                          final isSelected = !isCustomName && selectedBankName == pop['name'];
+                          return ChoiceChip(
+                            avatar: BankBadge(accountName: pop['name']!, size: 20),
+                            label: Text(pop['name']!, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                            selected: isSelected,
+                            selectedColor: primary.withOpacity(0.18),
+                            backgroundColor: inputBg,
+                            side: BorderSide(color: isSelected ? primary : borderCol, width: isSelected ? 1.5 : 1),
+                            onSelected: (val) {
+                              if (val) {
+                                setModalState(() {
+                                  selectedBankName = pop['name']!;
+                                  selectedType = pop['type']!;
+                                  isCustomName = false;
+                                  customNameController.text = pop['name']!;
+                                });
+                              }
+                            },
+                          );
+                        }),
+                        // Chip Kustom / Lainnya
+                        ActionChip(
+                          avatar: Icon(TablerIcons.edit, size: 16, color: primary),
+                          label: Text(isCustomName ? 'Nama Kustom' : 'Lainnya...', style: TextStyle(fontSize: 12, fontWeight: isCustomName ? FontWeight.w700 : FontWeight.w500)),
+                          backgroundColor: isCustomName ? primary.withOpacity(0.18) : inputBg,
+                          side: BorderSide(color: isCustomName ? primary : borderCol),
+                          onPressed: () {
+                            setModalState(() {
+                              isCustomName = true;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+
+                    // Custom Name Input (Jika klik Lainnya)
+                    if (isCustomName) ...[
+                      const SizedBox(height: 14),
+                      Text('Nama Rekening / Dompet', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: textMain)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: customNameController,
+                        style: TextStyle(fontSize: 13, color: textMain),
+                        decoration: InputDecoration(
+                          hintText: 'Contoh: Bank Jago, SeaBank, Jenius',
+                          hintStyle: TextStyle(fontSize: 12, color: textMuted),
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        ),
+                        onChanged: (val) => selectedBankName = val.trim(),
+                      ),
+                    ],
+
+                    const SizedBox(height: 18),
+
+                    // SECTION 3: INPUT SALDO AWAL
+                    Text('Saldo Saat Ini', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: textMain)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      autofocus: installedApps.isNotEmpty ? false : true,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textMain),
+                      decoration: InputDecoration(
+                        prefixText: 'Rp ',
+                        prefixStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: primary),
+                        hintText: '0',
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: borderCol),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+
+                    // SUBMIT ACTION BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () async {
+                          final cleanText = amountController.text.replaceAll('.', '').replaceAll(',', '').trim();
+                          final amt = double.tryParse(cleanText) ?? 0;
+                          final finalName = (isCustomName ? customNameController.text.trim() : selectedBankName);
+
+                          if (finalName.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Harap pilih atau masukkan nama rekening / dompet.'), backgroundColor: AppColors.danger),
+                            );
+                            return;
+                          }
+
+                          if (amt > 0 && provider.token != null) {
+                            Navigator.pop(ctx);
+
+                            // 1. Update nama akun di backend dari generic "Rekening Bank" -> nama bank pilihan
+                            await ApiService.updateAccount(provider.token!, targetAcc.id, finalName, selectedType);
+
+                            // 2. Buat transaksi Saldo Awal
+                            final dateStr = DateFormat('yyyy-MM-ddTHH:mm').format(DateTime.now());
+                            await ApiService.createTransaction(provider.token!, {
+                              'type': 'income',
+                              'amount': amt,
+                              'account_id': targetAcc.id,
+                              'category': 'Saldo Awal',
+                              'description': 'Saldo Awal $finalName',
+                              'date': dateStr,
+                            });
+
+                            // 3. Refresh realtime
+                            await provider.fetchDashboard();
+                            await provider.fetchAccounts();
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      const Icon(TablerIcons.circle_check, color: Colors.white, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text('Dompet "$finalName" siap digunakan! Saldo tersimpan. ✓'),
+                                    ],
+                                  ),
+                                  backgroundColor: AppColors.success,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Text('Simpan Rekening $selectedBankName', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

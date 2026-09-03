@@ -38,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Additional feature states
   Map<String, dynamic>? _telegramData;
   bool _isLoadingTelegram = false;
+  int _telegramCooldownSeconds = 0;
   List<Map<String, dynamic>> _sessions = [];
   bool _isLoadingSessions = false;
   List<Map<String, dynamic>> _notifLogs = [];
@@ -393,81 +394,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Password Accordion / Toggle
-                    InkWell(
-                      onTap: () => setModalState(() {
-                        isChangingPassword = !isChangingPassword;
-                        modalErrorMsg = null;
-                      }),
-                      child: Row(
-                        children: [
-                          Icon(isChangingPassword ? Icons.check_box : Icons.check_box_outline_blank, size: 20, color: AppColors.primary),
-                          const SizedBox(width: 8),
-                          Text('Ganti Kata Sandi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain)),
-                        ],
-                      ),
-                    ),
-
-                    if (isChangingPassword) ...[
-                      const SizedBox(height: 14),
-                      Text('Kata Sandi Lama', style: TextStyle(fontSize: 12, color: textMuted)),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: oldPwController,
-                        obscureText: obscureOld,
-                        style: TextStyle(fontSize: 13, color: textMain),
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan sandi saat ini',
-                          filled: true,
-                          fillColor: inputBg,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          suffixIcon: IconButton(
-                            icon: Icon(obscureOld ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
-                            onPressed: () => setModalState(() => obscureOld = !obscureOld),
-                          ),
+                    // Password Accordion or Google Linked Badge
+                    if (user?.email != null && user!.email!.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: primary.withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(TablerIcons.brand_google, size: 18, color: Color(0xFF4285F4)),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Akun ditautkan ke Google (${user.email}). Keamanan & otentikasi dikelola langsung oleh Google.',
+                                style: TextStyle(fontSize: 11, color: textMuted, height: 1.3),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      Text('Kata Sandi Baru (min 6 karakter)', style: TextStyle(fontSize: 12, color: textMuted)),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: newPwController,
-                        obscureText: obscureNew,
-                        style: TextStyle(fontSize: 13, color: textMain),
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan sandi baru',
-                          filled: true,
-                          fillColor: inputBg,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          suffixIcon: IconButton(
-                            icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
-                            onPressed: () => setModalState(() => obscureNew = !obscureNew),
-                          ),
+                    ] else ...[
+                      InkWell(
+                        onTap: () => setModalState(() {
+                          isChangingPassword = !isChangingPassword;
+                          modalErrorMsg = null;
+                        }),
+                        child: Row(
+                          children: [
+                            Icon(isChangingPassword ? Icons.check_box : Icons.check_box_outline_blank, size: 20, color: AppColors.primary),
+                            const SizedBox(width: 8),
+                            Text('Ganti Kata Sandi', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textMain)),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
 
-                      Text('Konfirmasi Kata Sandi Baru', style: TextStyle(fontSize: 12, color: textMuted)),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: confirmPwController,
-                        obscureText: obscureConfirm,
-                        style: TextStyle(fontSize: 13, color: textMain),
-                        decoration: InputDecoration(
-                          hintText: 'Ulangi sandi baru',
-                          filled: true,
-                          fillColor: inputBg,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          suffixIcon: IconButton(
-                            icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
-                            onPressed: () => setModalState(() => obscureConfirm = !obscureConfirm),
+                      if (isChangingPassword) ...[
+                        const SizedBox(height: 14),
+                        Text('Kata Sandi Lama', style: TextStyle(fontSize: 12, color: textMuted)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: oldPwController,
+                          obscureText: obscureOld,
+                          style: TextStyle(fontSize: 13, color: textMain),
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan sandi saat ini',
+                            filled: true,
+                            fillColor: inputBg,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            suffixIcon: IconButton(
+                              icon: Icon(obscureOld ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                              onPressed: () => setModalState(() => obscureOld = !obscureOld),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 12),
+
+                        Text('Kata Sandi Baru (min 6 karakter)', style: TextStyle(fontSize: 12, color: textMuted)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: newPwController,
+                          obscureText: obscureNew,
+                          style: TextStyle(fontSize: 13, color: textMain),
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan sandi baru',
+                            filled: true,
+                            fillColor: inputBg,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            suffixIcon: IconButton(
+                              icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                              onPressed: () => setModalState(() => obscureNew = !obscureNew),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        Text('Konfirmasi Kata Sandi Baru', style: TextStyle(fontSize: 12, color: textMuted)),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: confirmPwController,
+                          obscureText: obscureConfirm,
+                          style: TextStyle(fontSize: 13, color: textMain),
+                          decoration: InputDecoration(
+                            hintText: 'Ulangi sandi baru',
+                            filled: true,
+                            fillColor: inputBg,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: borderCol)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            suffixIcon: IconButton(
+                              icon: Icon(obscureConfirm ? Icons.visibility_off : Icons.visibility, size: 18, color: textMuted),
+                              onPressed: () => setModalState(() => obscureConfirm = !obscureConfirm),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
 
                     const SizedBox(height: 24),
@@ -1102,15 +1126,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 14),
 
                 Text('Nama Pengguna', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(user?.username ?? 'zidny', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                Text(user?.username.isNotEmpty == true ? user!.username : '-', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
                 const SizedBox(height: 10),
 
                 Text('Nama Tampilan', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(user?.displayName ?? 'Zidstore', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                Text(user?.displayName.isNotEmpty == true ? user!.displayName : (user?.username ?? '-'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
                 const SizedBox(height: 10),
 
                 Text('Email Terhubung', style: TextStyle(fontSize: 11, color: textMuted)),
-                Text(user?.email ?? 'zidny01@proton.me', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                Text(
+                  (user?.email != null && user!.email!.isNotEmpty)
+                      ? user!.email!
+                      : 'Belum ditautkan (Daftar via Username)',
+                  style: TextStyle(
+                    fontSize: (user?.email != null && user!.email!.isNotEmpty) ? 14 : 12,
+                    fontWeight: (user?.email != null && user!.email!.isNotEmpty) ? FontWeight.w700 : FontWeight.w500,
+                    color: (user?.email != null && user!.email!.isNotEmpty) ? textMain : textMuted,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1229,9 +1262,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text('Kode Pairing Tautan:', style: TextStyle(fontSize: 11, color: textMuted)),
                           const SizedBox(height: 4),
-                          SelectableText(
-                            '/link ${_telegramData?['link_token']}',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: primary, fontFamily: 'monospace'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SelectableText(
+                                '/link ${_telegramData?['link_token']}',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: primary, fontFamily: 'monospace'),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: '/link ${_telegramData?['link_token']}'));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Perintah /link berhasil disalin ke clipboard! 📋'), duration: Duration(seconds: 2)),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: primary.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Icon(Icons.copy_rounded, size: 16, color: primary),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 6),
                           Text('Kirim perintah di atas ke bot @zirafinancebot', style: TextStyle(fontSize: 10, color: textMuted)),
@@ -1245,18 +1300,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 38,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.link, size: 16),
-                      label: Text(_telegramData?['link_token'] != null ? 'Perbarui Kode Tautan' : 'Buat Kode Tautan Bot', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                      label: Text(
+                        _isLoadingTelegram
+                            ? 'Memproses...'
+                            : _telegramCooldownSeconds > 0
+                                ? 'Tunggu ${_telegramCooldownSeconds}s...'
+                                : (_telegramData?['link_token'] != null ? 'Perbarui Kode Tautan' : 'Buat Kode Tautan Bot'),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
+                        backgroundColor: _telegramCooldownSeconds > 0 ? textMuted : primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () async {
-                        final token = provider.token;
-                        if (token == null) return;
-                        await ApiService.manageTelegram(token, 'generate');
-                        _loadTelegramStatus();
-                      },
+                      onPressed: (_isLoadingTelegram || _telegramCooldownSeconds > 0)
+                          ? null
+                          : () async {
+                              final token = provider.token;
+                              if (token == null) return;
+                              setState(() => _isLoadingTelegram = true);
+                              final res = await ApiService.manageTelegram(token, 'generate');
+                              if (mounted) {
+                                setState(() {
+                                  _isLoadingTelegram = false;
+                                  if (res != null && res['error'] != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(res['error']), backgroundColor: AppColors.danger),
+                                    );
+                                  } else {
+                                    _telegramCooldownSeconds = 20; // 20s anti-spam cooldown
+                                  }
+                                });
+                                _loadTelegramStatus();
+
+                                // Cooldown countdown loop
+                                if (_telegramCooldownSeconds > 0) {
+                                  Future.doWhile(() async {
+                                    await Future.delayed(const Duration(seconds: 1));
+                                    if (!mounted) return false;
+                                    setState(() {
+                                      _telegramCooldownSeconds--;
+                                    });
+                                    return _telegramCooldownSeconds > 0;
+                                  });
+                                }
+                              }
+                            },
                     ),
                   ),
                 ],

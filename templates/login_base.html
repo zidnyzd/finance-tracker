@@ -29,30 +29,23 @@
             <div class="text-center mb-4">
                 <div class="brand-icon mb-2"><i class="ti ti-graph"></i></div>
                 <h4 class="fw-bold">ZiRa Finance</h4>
-                <p class="text-muted small">Masuk ke akun Anda</p>
+                <p class="text-muted small">Masuk atau Buat Akun Baru</p>
             </div>
             {{if .Error}}
             <div class="alert alert-danger py-2 small">{{.Error}}</div>
             {{end}}
-            <form method="POST" action="/login">
-                <div class="mb-3">
-                    <label class="form-label small fw-medium">Nama Pengguna</label>
-                    <input type="text" name="username" class="form-control" required autocomplete="username">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-medium">Kata Sandi</label>
-                    <div class="input-group">
-                        <input type="password" name="password" id="login-password" class="form-control" required autocomplete="current-password">
-                        <button type="button" class="btn btn-outline-secondary" onclick="togglePW('login-password',this)" tabindex="-1"><i class="ti ti-eye"></i></button>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100"><i class="ti ti-login"></i> Masuk</button>
-            </form>
-            <div class="mt-2 text-center">
-                <a href="/auth/google" class="btn btn-outline-danger w-100 py-2 fw-semibold"><i class="ti ti-brand-google me-2"></i>Masuk dengan Google</a>
+            
+            <div class="my-3 text-center">
+                <a href="/auth/google" class="btn btn-primary w-100 py-3 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="border-radius: 12px; font-size: 0.95rem;">
+                    <i class="ti ti-brand-google fs-4 me-2"></i>Lanjutkan dengan Google
+                </a>
             </div>
+
+            <div class="text-center text-muted mt-3 pt-2" style="font-size: 0.8rem;">
+                <i class="ti ti-shield-check text-success me-1"></i>Otentikasi resmi & aman via Google Identity
+            </div>
+
             <div class="text-center mt-3 d-flex justify-content-center gap-3">
-                <a href="/register" class="text-muted small text-decoration-none">Daftar</a>
                 <a href="#" onclick="toggleTheme();return false" class="text-muted small text-decoration-none"><i class="ti ti-moon"></i> Tema</a>
             </div>
         </div>
