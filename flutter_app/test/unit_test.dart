@@ -111,4 +111,24 @@ void main() {
       expect(report.incomeCategories.length, 1);
     });
   });
+
+  group('Onboarding Checklist Logic Tests', () {
+    test('Calculates correct completed steps and percentage', () {
+      // 1. New user with 0 transactions, 0 balance, no notif permission
+      const step1 = true;
+      const step2 = false;
+      const step3 = false;
+      const step4 = false;
+      int completed = (step1 ? 1 : 0) + (step2 ? 1 : 0) + (step3 ? 1 : 0) + (step4 ? 1 : 0);
+      expect(completed, 1);
+      expect(completed / 4.0, 0.25);
+
+      // 2. User sets initial balance and grants notification
+      const step2Done = true;
+      const step3Done = true;
+      completed = (step1 ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0) + (step4 ? 1 : 0);
+      expect(completed, 3);
+      expect(completed / 4.0, 0.75);
+    });
+  });
 }

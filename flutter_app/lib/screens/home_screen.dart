@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../services/platform_service.dart';
 import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
+import '../widgets/quick_start_card.dart';
 import 'report_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -263,6 +264,12 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+            // QUICK START ONBOARDING CHECKLIST (Khusus Akun Baru < 3 Transaksi)
+            QuickStartCard(
+              onNavigateToAdd: onNavigateToAdd,
+              onNavigateToReport: onNavigateToReport,
+            ),
 
             // 2. Notification Sync Status Banner (Dynamic Realtime Permission State)
             Container(
