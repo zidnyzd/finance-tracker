@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zira_finance/models/bank_app_config.dart';
 import 'package:zira_finance/models/models.dart';
+import 'package:zira_finance/providers/app_provider.dart';
 import 'package:zira_finance/utils/date_util.dart';
 
 void main() {
@@ -142,6 +144,7 @@ void main() {
 
     test('Guest mode fallback data validation', () {
       // When token is null, mock dashboard data must provide active accounts and transactions
+      SharedPreferences.setMockInitialValues({});
       final provider = AppProvider();
       expect(provider.isLoggedIn, false);
       expect(provider.dashboardData != null, true);
