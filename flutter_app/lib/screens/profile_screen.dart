@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -1135,6 +1136,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     }
                                   });
                                   _loadTelegramStatus();
+
+                                  // Timer hitung mundur 20s -> 0s
+                                  if (_telegramCooldownSeconds > 0) {
+                                    Timer.periodic(const Duration(seconds: 1), (timer) {
+                                      if (!mounted || _telegramCooldownSeconds <= 0) {
+                                        timer.cancel();
+                                      } else {
+                                        setModalState(() {
+                                          _telegramCooldownSeconds--;
+                                        });
+                                      }
+                                    });
+                                  }
                                 }
                               },
                       ),

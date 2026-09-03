@@ -92,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 70,
-		"version_name": "2.1.0",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.0.apk",
-		"changelog":    "Major Release v2.1.0 - Modern Grouped Profile Redesign, Realtime Add-Transaction Auto-Sync Clock, Unified In-Page Headers, and Confirmed Notification Switch Stability",
+		"version_code": 71,
+		"version_name": "2.1.1",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.1.apk",
+		"changelog":    "Official Release v2.1.1 - Active Countdown Timer for Telegram Pairing Modal and Live Button Refresh",
 	})
 }
 

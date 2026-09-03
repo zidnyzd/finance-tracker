@@ -4,6 +4,12 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.1] - 2026-09-03
+### 🚀 Added & Improved
+- **Timer Hitung Mundur Aktif Modal Bot Telegram:** Memperbaiki timer cooldown anti-spam pairing bot Telegram yang sebelumnya membeku di angka `20s`. Menggunakan `Timer.periodic(Duration(seconds: 1))` di dalam `StatefulBuilder` sehingga tombol menghitung mundur detik demi detik (`20s -> 19s -> ... -> 0s`) dan otomatis aktif kembali menjadi biru.
+
+---
+
 ## [v2.1.0] - 2026-09-03
 ### 🚀 Added & Improved
 - **Redesign Menu Profil (Grouped Modern Settings):** Menghilangkan baris teknis 'Nama Pengguna' yang kaku. Mengganti kartu profil menjadi avatar horizontal minimalis dengan nama tampilan dan email Google. Menata ulang seluruh kartu pengaturan tebal menjadi Grouped Settings List yang bersih, lapang, dan bernafas lega (`REKENING & OTOMATISASI` dan `PREFERENSI NOTIFIKASI`).
