@@ -149,11 +149,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
         throw Exception("Gagal mendapatkan token otentikasi Google.");
       }
 
-      final res = await ApiService.googleLogin(
+      final res = await ApiService.loginWithGoogleTokens(
         idToken: idToken,
         accessToken: accessToken,
-        email: googleUser.email,
-        displayName: googleUser.displayName,
       );
 
       if (!mounted) return;
