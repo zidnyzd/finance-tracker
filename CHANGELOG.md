@@ -4,6 +4,16 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.0.6] - 2026-09-03
+### 🚀 Added & Improved
+- **Mode Eksplorasi Tamu (*Guest Preview Mode*):** Pengguna baru atau setelah logout dapat langsung menjelajahi antarmuka Beranda, Laporan, dan Riwayat yang estetik tanpa terhalang Login Wall.
+- **Modal Otentikasi Kontekstual (`AuthBottomSheet`):** Muncul secara elegan saat tamu mengetuk tombol (+), scan struk AI, atau profil dengan opsi Google 1-Tap Sign-In dan Form Akun instan.
+- **Kartu Mulai Cepat Interaktif (`QuickStartCard`):** Panduan 4 langkah awal dengan Live Progress Bar khusus pengguna baru (< 3 transaksi) dan modal cepat isi saldo awal.
+- **Desain Empty State Modern (`EmptyStateWidget`):** Tampilan ramah dan memotivasi dengan tombol aksi langsung di seluruh tab.
+- **Pembersihan Menu Profil:** Menghapus tombol unduh APK manual demi kepatuhan 100% distribusi Google Play Store.
+
+---
+
 ## [v2.0.5] - 2026-09-03
 ### 🚀 Added & Improved
 - **Interactive Quick-Start Onboarding Checklist (UX Step 1):** Menyematkan kartu interaktif di Beranda khusus untuk akun baru (< 3 transaksi) yang memandu 4 langkah awal dengan Live Progress Bar:
