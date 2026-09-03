@@ -4,6 +4,17 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.0.7] - 2026-09-03
+### 🚀 Added & Improved
+- **Pembersihan State Riwayat saat Logout & Guest Demo:** Transaksi riwayat akun lama langsung di-reset seketika saat logout, dan menampilkan 3 transaksi demo estetik saat mode tamu tanpa harus restart aplikasi.
+- **Simetri Visual Form Login & Register:** Menambahkan spacer penyeimbang 48px dan padding vertikal seimbang sehingga TextField Username dan Password 100% rata tengah dan sejajar.
+- **Hide & Obscure Konfirmasi Kata Sandi:** Input Konfirmasi Kata Sandi kini ter-masking rapi dengan tombol toggle intip mata mandiri (`_obscureConfirmPassword`).
+- **Tombol Guide Kontras Tinggi:** Tombol 'Lanjut / Mulai Sekarang' pada onboarding welcome sheet kini menggunakan warna biru kontras tinggi (`#388BFD` / `#0284C7`) dengan border dan elevasi bayangan jelas sehingga tidak menyatu/tenggelam.
+- **Demo Laporan Keuangan di Mode Tamu:** Menghadirkan `_guestReportData` September 2026 dengan donat chart dan persentase kategori estetik saat pengguna belum login.
+- **Guard Interaksi Tamu:** Mengetuk transaksi demo di Riwayat otomatis memicu `AuthBottomSheet` tanpa memicu dialog edit yang gagal.
+
+---
+
 ## [v2.0.6] - 2026-09-03
 ### 🚀 Added & Improved
 - **Mode Eksplorasi Tamu (*Guest Preview Mode*):** Pengguna baru atau setelah logout dapat langsung menjelajahi antarmuka Beranda, Laporan, dan Riwayat yang estetik tanpa terhalang Login Wall.
