@@ -14,6 +14,7 @@ import '../services/api_service.dart';
 import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_util.dart';
+import '../widgets/auth_bottom_sheet.dart';
 import '../widgets/bank_badge.dart';
 import 'login_screen.dart';
 
@@ -901,15 +902,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(ctx);
               await Provider.of<AppProvider>(context, listen: false).logout();
               if (mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => const LoginScreen(),
-                    transitionsBuilder: (_, animation, __, child) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    transitionDuration: const Duration(milliseconds: 300),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Anda telah keluar dari akun (Mode Eksplorasi Tamu Aktif).'),
+                    backgroundColor: AppColors.primary,
                   ),
-                  (route) => false,
                 );
               }
             },
@@ -942,6 +939,105 @@ class _ProfileScreenState extends State<ProfileScreen> {
           app.id.toLowerCase().contains(q) ||
           app.packageName.toLowerCase().contains(q);
     }).toList();
+
+    if (!provider.isLoggedIn) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: borderCol),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: primary.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(TablerIcons.user_circle, size: 36, color: primary),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Anda Berada dalam Mode Tamu',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textMain),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Masuk atau daftar akun untuk menyinkronkan data dompet, mengaktifkan auto-catat notifikasi bank 24/7, dan menghubungkan Bot Telegram.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: textMuted, height: 1.4),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(TablerIcons.login, size: 18),
+                      label: const Text('Masuk / Daftar Akun', style: TextStyle(fontWeight: FontWeight.w700)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      onPressed: () => AuthBottomSheet.show(context, onSuccess: () {
+                        setState(() {
+                          _loadTelegramStatus();
+                          _loadSessions();
+                          _loadNotifLogs();
+                        });
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Version Card (Guest Mode)
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderCol),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Versi & Pembaruan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textMain)),
+                  const SizedBox(height: 4),
+                  Text('ZiRa Finance Flutter v$_appVersion (Build $_buildNumber)', style: TextStyle(fontSize: 12, color: textMuted)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 42,
+                    child: ElevatedButton(
+                      onPressed: _checkUpdate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('Periksa Pembaruan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

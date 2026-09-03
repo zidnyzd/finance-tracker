@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
+import '../widgets/empty_state_widget.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -628,31 +629,19 @@ class HistoryScreenState extends State<HistoryScreen> {
                 child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               )
             else if (_transactions.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: borderCol),
-                ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.receipt_long_outlined, size: 48, color: textMuted),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Tidak ada transaksi ditemukan',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMain),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Coba ubah kata kunci pencarian atau filter.',
-                        style: TextStyle(fontSize: 12, color: textMuted),
-                      ),
-                    ],
-                  ),
-                ),
+              EmptyStateWidget(
+                icon: Icons.receipt_long_rounded,
+                title: 'Belum Ada Riwayat Transaksi',
+                description: _searchController.text.isNotEmpty
+                    ? 'Tidak ada transaksi yang cocok dengan kata kunci "${_searchController.text}".'
+                    : 'Seluruh riwayat mutasi masuk, keluar, dan transfer Anda akan tercatat rapi di sini.',
+                actionLabel: _searchController.text.isNotEmpty ? 'Reset Pencarian' : null,
+                onAction: _searchController.text.isNotEmpty
+                    ? () {
+                        _searchController.clear();
+                        loadHistory();
+                      }
+                    : null,
               )
             else
               Container(

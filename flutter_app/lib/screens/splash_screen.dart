@@ -47,31 +47,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
 
-    final provider = Provider.of<AppProvider>(context, listen: false);
-
-    if (provider.isLoggedIn) {
-      // User already logged in, navigate smoothly to main navigation
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const MainNavigationScreen(),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 350),
-        ),
-      );
-    } else {
-      // User not logged in, navigate to login
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const LoginScreen(),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 350),
-        ),
-      );
-    }
+    // Direct Seamless Entry: Both logged-in users and new guests navigate directly
+    // to MainNavigationScreen (where guests enjoy Guest Exploration Mode and logged-in users get live sync)
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const MainNavigationScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 350),
+      ),
+    );
   }
 
   @override

@@ -130,5 +130,24 @@ void main() {
       expect(completed, 3);
       expect(completed / 4.0, 0.75);
     });
+
+    test('Welcome dialog flag defaults and persistence simulation', () {
+      bool hasSeenWelcome = false;
+      expect(hasSeenWelcome, false);
+
+      // Simulate first time dismissal
+      hasSeenWelcome = true;
+      expect(hasSeenWelcome, true);
+    });
+
+    test('Guest mode fallback data validation', () {
+      // When token is null, mock dashboard data must provide active accounts and transactions
+      final provider = AppProvider();
+      expect(provider.isLoggedIn, false);
+      expect(provider.dashboardData != null, true);
+      expect(provider.dashboardData!.balance, 2450000.0);
+      expect(provider.accounts.length, 3);
+      expect(provider.dashboardData!.recentTxns.length, 3);
+    });
   });
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 import '../providers/app_provider.dart';
+import '../services/api_service.dart';
 import '../services/platform_service.dart';
 import '../theme/app_theme.dart';
 
@@ -375,7 +377,17 @@ class _QuickStartCardState extends State<QuickStartCard> {
                     final amt = double.tryParse(cleanText) ?? 0;
                     if (amt > 0 && provider.token != null) {
                       Navigator.pop(ctx);
-                      // Record as initial balance transaction or update account
+                      
+                      final dateStr = DateFormat('yyyy-MM-ddTHH:mm').format(DateTime.now());
+                      await ApiService.createTransaction(provider.token!, {
+                        'type': 'income',
+                        'amount': amt,
+                        'account_id': firstAcc.id,
+                        'category': 'Saldo Awal',
+                        'description': 'Saldo Awal ${firstAcc.name}',
+                        'date': dateStr,
+                      });
+
                       await provider.fetchDashboard();
                       await provider.fetchAccounts();
                       if (context.mounted) {

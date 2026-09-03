@@ -261,8 +261,14 @@ class _ReportScreenState extends State<ReportScreen> {
                     const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
                   else if (_reportData == null || _reportData!.expenseCategories.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: Text('Belum ada pengeluaran di periode ini.', style: TextStyle(fontSize: 12, color: textMuted))),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Center(
+                        child: Text(
+                          'Belum ada transaksi pengeluaran di periode ini.\nCatat pengeluaran atau biarkan auto-sync mencatatnya.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 11, color: textMuted, height: 1.4),
+                        ),
+                      ),
                     )
                   else
                     ListView.separated(

@@ -17,6 +17,8 @@ import 'screens/profile_screen.dart';
 import 'screens/report_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
+import 'widgets/auth_bottom_sheet.dart';
+import 'widgets/welcome_bottom_sheet.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -189,9 +191,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   final GlobalKey<HistoryScreenState> _historyKey = GlobalKey<HistoryScreenState>();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WelcomeBottomSheet.showIfNeeded(context);
+    });
+  }
+
   void _onTabTapped(int index) {
-    setState(() => _currentIndex = index);
     final provider = Provider.of<AppProvider>(context, listen: false);
+
+    // Contextual Auth Interceptor for Add Transaction (+)
+    if (index == 2 && !provider.isLoggedIn) {
+      AuthBottomSheet.show(context, onSuccess: () {
+        provider.fetchDashboard();
+        provider.fetchAccounts();
+        setState(() => _currentIndex = 2);
+      });
+      return;
+    }
+
+    setState(() => _currentIndex = index);
     if (index == 0) {
       provider.fetchDashboard();
     } else if (index == 1) {
@@ -216,6 +237,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onNavigateToAdd: () => _onTabTapped(2),
         onNavigateToHistory: () => _onTabTapped(3),
         onNavigateToReport: () => _onTabTapped(1),
+        onTriggerAuth: () {
+          AuthBottomSheet.show(context, onSuccess: () {
+            provider.fetchDashboard();
+            provider.fetchAccounts();
+          });
+        },
       ),
       const ReportScreen(),
       AddTransactionScreen(

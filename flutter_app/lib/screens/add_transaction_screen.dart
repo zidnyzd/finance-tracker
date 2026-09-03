@@ -10,6 +10,7 @@ import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../widgets/auth_bottom_sheet.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final VoidCallback onFinish;
@@ -95,9 +96,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _scanReceipt(ImageSource source) async {
     final token = Provider.of<AppProvider>(context, listen: false).token;
     if (token == null || token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan login ke akun Anda terlebih dahulu.'), backgroundColor: AppColors.danger),
-      );
+      AuthBottomSheet.show(context, onSuccess: () {
+        _scanReceipt(source);
+      });
       return;
     }
 

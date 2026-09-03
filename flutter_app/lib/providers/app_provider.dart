@@ -23,12 +23,63 @@ class AppProvider extends ChangeNotifier {
   bool get isConfirmNotificationEnabled => _isConfirmNotificationEnabled;
   String? get token => _token;
   UserModel? get currentUser => _currentUser;
-  DashboardData? get dashboardData => _dashboardData;
-  List<AccountModel> get accounts => _accounts;
+  DashboardData? get dashboardData => isLoggedIn ? _dashboardData : _guestDashboardData;
+  List<AccountModel> get accounts => isLoggedIn ? _accounts : _guestAccounts;
   bool get isLoadingDashboard => _isLoadingDashboard;
   List<InstalledBankApp> get installedApps => _installedApps;
   bool get isLoggedIn => _token != null && _token!.isNotEmpty;
   Map<String, bool> get appNotifSwitches => _appNotifSwitches;
+
+  static final List<AccountModel> _guestAccounts = [
+    AccountModel(id: 1, name: 'BCA', type: 'bank', balance: 1450000.0, balanceStr: 'Rp 1.450.000', color: '#005baa'),
+    AccountModel(id: 2, name: 'Mandiri', type: 'bank', balance: 800000.0, balanceStr: 'Rp 800.000', color: '#002d62'),
+    AccountModel(id: 3, name: 'Kas Tunai', type: 'cash', balance: 200000.0, balanceStr: 'Rp 200.000', color: '#00d97e'),
+  ];
+
+  static final DashboardData _guestDashboardData = DashboardData(
+    balance: 2450000.0,
+    balanceStr: 'Rp 2.450.000',
+    totalIncome: 5000000.0,
+    totalIncomeStr: 'Rp 5.000.000',
+    totalExpense: 2550000.0,
+    totalExpenseStr: 'Rp 2.550.000',
+    accounts: _guestAccounts,
+    recentTxns: [
+      TransactionModel(
+        id: 991,
+        type: 'expense',
+        amount: 35899.0,
+        amountStr: 'Rp 35.899',
+        category: 'Makanan & Minuman',
+        description: 'Kopi Kenangan & Roti',
+        accountId: 1,
+        accountName: 'Blu BCA',
+        date: '2026-09-03 08:30',
+      ),
+      TransactionModel(
+        id: 992,
+        type: 'expense',
+        amount: 480040.0,
+        amountStr: 'Rp 480.040',
+        category: 'Belanja',
+        description: 'QRIS Pembayaran Belanja',
+        accountId: 2,
+        accountName: 'Mandiri',
+        date: '2026-09-03 07:30',
+      ),
+      TransactionModel(
+        id: 993,
+        type: 'income',
+        amount: 5000000.0,
+        amountStr: 'Rp 5.000.000',
+        category: 'Gaji',
+        description: 'Gaji Bulanan & Bonus',
+        accountId: 1,
+        accountName: 'BCA',
+        date: '2026-09-01 09:00',
+      ),
+    ],
+  );
 
   AppProvider() {
     _loadPreferences();

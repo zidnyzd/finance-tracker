@@ -6,6 +6,8 @@ import '../models/models.dart';
 import '../services/platform_service.dart';
 import '../utils/date_util.dart';
 import '../widgets/bank_badge.dart';
+import '../widgets/empty_state_widget.dart';
+import '../widgets/guest_banner.dart';
 import '../widgets/quick_start_card.dart';
 import 'report_screen.dart';
 
@@ -13,12 +15,14 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToAdd;
   final VoidCallback onNavigateToHistory;
   final VoidCallback onNavigateToReport;
+  final VoidCallback onTriggerAuth;
 
   const HomeScreen({
     super.key,
     required this.onNavigateToAdd,
     required this.onNavigateToHistory,
     required this.onNavigateToReport,
+    required this.onTriggerAuth,
   });
 
   @override
@@ -265,80 +269,85 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // QUICK START ONBOARDING CHECKLIST (Khusus Akun Baru < 3 Transaksi)
-            QuickStartCard(
-              onNavigateToAdd: onNavigateToAdd,
-              onNavigateToReport: onNavigateToReport,
-            ),
-
-            // 2. Notification Sync Status Banner (Dynamic Realtime Permission State)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: isNotifGranted
-                    ? (isDark ? const Color(0xFF132238) : const Color(0xFFEBF3FE))
-                    : (isDark ? const Color(0xFF2D181B) : const Color(0xFFFEECEE)),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isNotifGranted
-                      ? (isDark ? const Color(0xFF1B3D6B) : const Color(0xFFCCE0FD))
-                      : (isDark ? const Color(0xFF5C2329) : const Color(0xFFFDCFD4)),
-                ),
+            // 1B. GUEST MODE BANNER OR AUTHENTICATED ONBOARDING BANNER
+            if (!provider.isLoggedIn)
+              GuestBanner(onLoginTap: onTriggerAuth)
+            else ...[
+              // QUICK START ONBOARDING CHECKLIST (Khusus Akun Baru < 3 Transaksi)
+              QuickStartCard(
+                onNavigateToAdd: onNavigateToAdd,
+                onNavigateToReport: onNavigateToReport,
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: isNotifGranted ? AppColors.success : AppColors.danger,
-                      shape: BoxShape.circle,
-                    ),
+
+              // 2. Notification Sync Status Banner (Dynamic Realtime Permission State)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isNotifGranted
+                      ? (isDark ? const Color(0xFF132238) : const Color(0xFFEBF3FE))
+                      : (isDark ? const Color(0xFF2D181B) : const Color(0xFFFEECEE)),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isNotifGranted
+                        ? (isDark ? const Color(0xFF1B3D6B) : const Color(0xFFCCE0FD))
+                        : (isDark ? const Color(0xFF5C2329) : const Color(0xFFFDCFD4)),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isNotifGranted ? 'Auto-Catat Notifikasi Aktif' : 'Auto-Catat Belum Diizinkan',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: isNotifGranted
-                                ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
-                                : AppColors.danger,
-                          ),
-                        ),
-                        Text(
-                          isNotifGranted
-                              ? 'BCA, Mandiri, BRI, GoPay, Dana, & m-banking lainnya'
-                              : 'Ketuk untuk izinkan akses notifikasi di pengaturan HP',
-                          style: TextStyle(fontSize: 10, color: textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      await PlatformService.requestPostNotificationPermission();
-                      await PlatformService.openNotificationSettings();
-                      Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
-                    },
-                    child: Text(
-                      isNotifGranted ? 'Kelola ➔' : 'Izinkan HP ➔',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: isNotifGranted
-                            ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
-                            : AppColors.danger,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: isNotifGranted ? AppColors.success : AppColors.danger,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isNotifGranted ? 'Auto-Catat Notifikasi Aktif' : 'Auto-Catat Belum Diizinkan',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: isNotifGranted
+                                  ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
+                                  : AppColors.danger,
+                            ),
+                          ),
+                          Text(
+                            isNotifGranted
+                                ? 'BCA, Mandiri, BRI, GoPay, Dana, & m-banking lainnya'
+                                : 'Ketuk untuk izinkan akses notifikasi di pengaturan HP',
+                            style: TextStyle(fontSize: 10, color: textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        await PlatformService.requestPostNotificationPermission();
+                        await PlatformService.openNotificationSettings();
+                        Future.delayed(const Duration(seconds: 1), () => provider.checkNotifPermission());
+                      },
+                      child: Text(
+                        isNotifGranted ? 'Kelola ➔' : 'Izinkan HP ➔',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isNotifGranted
+                              ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
+                              : AppColors.danger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: 20),
 
             // 3. Saldo per Akun Header & Carousel
@@ -475,23 +484,14 @@ class HomeScreen extends StatelessWidget {
 
             // Recent Transactions List
             if (data == null || data.recentTxns.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: borderCol),
-                ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.receipt_outlined, size: 36, color: textMuted),
-                      const SizedBox(height: 8),
-                      Text('Belum ada transaksi bulan ini.', style: TextStyle(color: textMuted, fontSize: 12)),
-                    ],
-                  ),
-                ),
+              EmptyStateWidget(
+                icon: Icons.receipt_long_rounded,
+                title: 'Belum Ada Mutasi Hari Ini',
+                description: 'Transaksi belanja, transfer, atau pembayaran QRIS Anda akan otomatis tercatat dan muncul rapi di sini.',
+                actionLabel: '+ Catat Manual / Scan Struk',
+                onAction: onNavigateToAdd,
+                secondaryActionLabel: 'Lihat Riwayat',
+                onSecondaryAction: onNavigateToHistory,
               )
             else
               Container(
