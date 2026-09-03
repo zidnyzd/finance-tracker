@@ -4,7 +4,18 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
-## [v2.0.2] - 2026-09-02
+## [v2.0.5] - 2026-09-03
+### 🚀 Added & Improved
+- **Interactive Quick-Start Onboarding Checklist (UX Step 1):** Menyematkan kartu interaktif di Beranda khusus untuk akun baru (< 3 transaksi) yang memandu 4 langkah awal dengan Live Progress Bar:
+  1. *Buat Akun & Masuk* (Status terverifikasi).
+  2. *Atur Dompet & Saldo Awal* (Modal cepat isi saldo tanpa ribet catat mutasi manual).
+  3. *Aktifkan Auto-Catat Notifikasi* (Aksi langsung ke perizinan HP).
+  4. *Catat Transaksi Pertama / Scan Struk AI* (Aksi langsung ke kamera AI Vision).
+- **Automated Unit Testing:** Menambahkan pengujian otomatis `Onboarding Checklist Logic Tests` dan lolos 100%.
+
+---
+
+## [v2.0.4] - 2026-09-02
 ### 🚀 Added & Improved
 - **Unified Google OAuth (Project `zira-507415`):** Menyelaraskan seluruh kredensial Google OAuth 2.0 Web & Mobile Client ke project terpusat Google Cloud Console `zira-507415` (Client ID: `460896282100-f2jk9h4s...`).
 - **Google Play App Signing & Local Keystore Support:** Mendukung otentikasi ganda baik untuk rilis Google Play Store maupun instalasi APK mandiri.
