@@ -32,7 +32,7 @@ class _QuickStartCardState extends State<QuickStartCard> {
     final accounts = provider.accounts;
     final isNotifGranted = provider.isNotifPermissionGranted;
 
-    final txnCount = data?.recentTransactions.length ?? 0;
+    final txnCount = data?.recentTxns.length ?? 0;
     // Only show quick start for accounts with fewer than 3 transactions
     if (txnCount >= 3) {
       return const SizedBox.shrink();
@@ -42,7 +42,7 @@ class _QuickStartCardState extends State<QuickStartCard> {
     const step1Done = true;
 
     // Step 2: Wallet has initial balance or customized (>0 or more accounts)
-    final totalBalance = data?.totalBalance ?? 0;
+    final totalBalance = data?.balance ?? 0;
     final step2Done = totalBalance > 0 || accounts.length > 2;
 
     // Step 3: Notification permission granted
