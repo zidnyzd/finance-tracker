@@ -1551,7 +1551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: primary.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(TablerIcons.message_check, size: 20, color: primary),
+                        child: Icon(Icons.check_circle_outline_rounded, size: 20, color: primary),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
