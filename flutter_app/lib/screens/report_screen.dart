@@ -135,7 +135,7 @@ class ReportScreenState extends State<ReportScreen> {
       onRefresh: () async {
         await provider.fetchDashboard();
         await provider.fetchAccounts();
-        await _loadReport(month: _currentMonth);
+        await loadReport(month: _currentMonth);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -174,7 +174,7 @@ class ReportScreenState extends State<ReportScreen> {
                     icon: const Icon(Icons.chevron_left),
                     color: textMain,
                     onPressed: _reportData != null && _reportData!.prevMonth.isNotEmpty
-                        ? () => _loadReport(month: _reportData!.prevMonth)
+                        ? () => loadReport(month: _reportData!.prevMonth)
                         : null,
                   ),
                   Row(
@@ -191,7 +191,7 @@ class ReportScreenState extends State<ReportScreen> {
                     icon: const Icon(Icons.chevron_right),
                     color: _reportData?.nextDisabled == true ? textMuted.withOpacity(0.3) : textMain,
                     onPressed: _reportData != null && !_reportData!.nextDisabled
-                        ? () => _loadReport(month: _reportData!.nextMonth)
+                        ? () => loadReport(month: _reportData!.nextMonth)
                         : null,
                   ),
                 ],
