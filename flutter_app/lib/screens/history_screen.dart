@@ -146,7 +146,6 @@ class HistoryScreenState extends State<HistoryScreen> {
     DateTime selectedDateTime = DateTime.tryParse(tx.date) ?? DateTime.now();
     String? modalErrorMsg;
 
-    final provider = Provider.of<AppProvider>(context, listen: false);
     final categories = editType == 'expense'
         ? provider.expenseCategories
         : provider.incomeCategories;
