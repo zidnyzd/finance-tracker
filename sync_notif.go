@@ -145,20 +145,20 @@ func matchAny(text string, keywords ...string) bool {
 func isIncomeNotification(text string) bool {
 	t := strings.ToLower(text)
 
-	// Explicit Income signals always win (Refund, Pengembalian, Received)
-	if matchAny(t, "pengembalian", "refund", "cashback", "received", "kamu menerima") {
+	// Explicit Income signals always win (Refund, Pengembalian, Cashback)
+	if matchAny(t, "pengembalian", "refund", "cashback", "kamu menerima") || (matchAny(t, "received") && !matchAny(t, "has been moved from", "moved from")) {
 		return true
 	}
 
-	// Explicit Expense signals (prevent false positives if both words exist)
-	if matchAny(t, "berhasil bayar", "pembayaran di ", "pembayaran qris", "pembayaran merchant", "pembayaran berhasil", "pembayaran payment", "debit card", "kamu telah membayar", "berhasil ditransfer ke", "transfer ke ", "kirim ke ", "sent to ", "temporary hold") {
+	// Explicit Expense signals (prevent false positives if words like 'from' exist in 'moved from')
+	if matchAny(t, "has been moved from", "moved from", "dipindahkan dari", "deducted from", "ditarik dari", "debit card", "virtual pocket", "berhasil bayar", "pembayaran di ", "pembayaran qris", "pembayaran merchant", "pembayaran berhasil", "pembayaran payment", "kamu telah membayar", "berhasil ditransfer ke", "transfer ke ", "kirim ke ", "sent to ", "temporary hold") {
 		return false
 	}
 
 	// General Income keywords (English & Indonesian)
 	return matchAny(t,
-		"received", "receive", "menerima", "terima", "uang masuk", "dana masuk", "masuk ke", "diterima",
-		"dapet uang", "top up", "isi saldo", "kredit", "cr ", "from ")
+		"receive", "menerima", "terima", "uang masuk", "dana masuk", "masuk ke", "diterima",
+		"dapet uang", "top up", "isi saldo", "kredit", "cr ")
 }
 
 // regexParseNotification melakukan ekstraksi cepat berdasarkan aturan bank / ewallet
@@ -175,6 +175,15 @@ func regexParseNotification(pkg, title, text string) *ParsedTransaction {
 
 	// Filter eksplisit notifikasi loyalti / bonus poin / reward (agar tidak terjadi double tracking dengan mutasi debit)
 	if matchAny(lowerText, "livin'poin", "livinpoin", "poin anda bertambah", "poin berhasil didapat", "mendapatkan poin", "tukar poin", "reward poin", "kamu dapat poin", "gopay coins", "koin shopee", "dana points", "ovo points") {
+		return nil
+	}
+
+	// Filter eksplisit pindah kantong / transfer internal antar dompet sendiri (Internal Pocket Movement)
+	// Mutasi ini bukan pengeluaran belanja dan bukan pendapatan baru
+	if (strings.Contains(lowerText, "moved from") || strings.Contains(lowerText, "has been moved")) && strings.Contains(lowerText, "pocket") {
+		return nil
+	}
+	if strings.Contains(lowerText, "dipindahkan dari") && strings.Contains(lowerText, "kantong") {
 		return nil
 	}
 

@@ -92,10 +92,42 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 73,
-		"version_name": "2.1.3",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.3.apk",
-		"changelog":    "Official Release v2.1.3 - Instant Realtime Push Notification via Google Firebase Cloud Messaging (FCM)",
+		"version_code": 74,
+		"version_name": "2.1.4",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.4.apk",
+		"changelog":    "Official Release v2.1.4 - Remote Dynamic Categories, User Custom Categories, and Remote Maintenance Kill Switch",
+	})
+}
+
+// GET /api/v1/app/config: Remote dynamic config, maintenance mode, force update, and metadata
+func handleApiAppConfig(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT key, value FROM app_config")
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Database error: "+err.Error())
+		return
+	}
+	defer rows.Close()
+
+	cfg := make(map[string]interface{})
+	for rows.Next() {
+		var k, v string
+		if err := rows.Scan(&k, &v); err == nil {
+			switch k {
+			case "is_maintenance", "force_update":
+				cfg[k] = (v == "true" || v == "1")
+			case "min_version_code":
+				vc, _ := strconv.Atoi(v)
+				cfg[k] = vc
+			default:
+				cfg[k] = v
+			}
+		}
+	}
+
+	w.Header().Set("Cache-Control", "public, max-age=60")
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"config":  cfg,
 	})
 }
 
@@ -1738,6 +1770,117 @@ func handleApiRegisterFCMToken(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "FCM device token berhasil didaftarkan",
+	})
+}
+
+// GET /api/v1/categories: List system & custom categories for user
+func handleApiCategories(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.Header.Get("X-User-Id")
+	uid, _ := strconv.Atoi(uidStr)
+
+	rows, err := db.Query(`SELECT name, type FROM transaction_categories 
+		WHERE is_active=1 AND (user_id=0 OR user_id=?) 
+		ORDER BY user_id ASC, id ASC`, uid)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Database error: "+err.Error())
+		return
+	}
+	defer rows.Close()
+
+	var expenses []string
+	var incomes []string
+	seenExp := make(map[string]bool)
+	seenInc := make(map[string]bool)
+
+	for rows.Next() {
+		var name, ctype string
+		if err := rows.Scan(&name, &ctype); err == nil {
+			name = strings.TrimSpace(name)
+			if ctype == "income" {
+				if !seenInc[name] {
+					seenInc[name] = true
+					incomes = append(incomes, name)
+				}
+			} else {
+				if !seenExp[name] {
+					seenExp[name] = true
+					expenses = append(expenses, name)
+				}
+			}
+		}
+	}
+
+	w.Header().Set("Cache-Control", "private, max-age=300")
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"expense": expenses,
+		"income":  incomes,
+	})
+}
+
+// POST /api/v1/categories: Add custom category for user
+func handleApiAddCategory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	uidStr := r.Header.Get("X-User-Id")
+	uid, _ := strconv.Atoi(uidStr)
+	if uid <= 0 {
+		jsonError(w, http.StatusUnauthorized, "Login diperlukan untuk menambah kategori kustom")
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+		Type string `json:"type"`
+		Icon string `json:"icon"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, http.StatusBadRequest, "Format JSON tidak valid")
+		return
+	}
+
+	name := strings.TrimSpace(req.Name)
+	catType := strings.ToLower(strings.TrimSpace(req.Type))
+	if catType != "income" {
+		catType = "expense"
+	}
+
+	if name == "" {
+		jsonError(w, http.StatusBadRequest, "Nama kategori tidak boleh kosong")
+		return
+	}
+
+	var existingID int
+	err := db.QueryRow(`SELECT id FROM transaction_categories WHERE (user_id=0 OR user_id=?) AND LOWER(name)=? AND type=?`,
+		uid, strings.ToLower(name), catType).Scan(&existingID)
+	if err == nil {
+		jsonError(w, http.StatusConflict, "Kategori dengan nama ini sudah ada")
+		return
+	}
+
+	icon := strings.TrimSpace(req.Icon)
+	if icon == "" {
+		icon = "tag"
+	}
+
+	_, err = db.Exec(`INSERT INTO transaction_categories (user_id, name, type, icon, is_active) VALUES (?, ?, ?, ?, 1)`,
+		uid, name, catType, icon)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Gagal menyimpan kategori: "+err.Error())
+		return
+	}
+
+	logAudit(uid, "CATEGORY_CREATE", clientIP(r), fmt.Sprintf("Added custom category: %s (%s)", name, catType))
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": fmt.Sprintf("Kategori %s berhasil ditambahkan!", name),
+		"name":    name,
+		"type":    catType,
 	})
 }
 

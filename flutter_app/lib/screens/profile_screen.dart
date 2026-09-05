@@ -1004,7 +1004,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Kirim teks mutasi atau foto struk kasir ke @zirafinancebot via Telegram, otomatis tercatat di akun Anda.',
+                    'Kirim teks mutasi atau foto struk kasir ke @${provider.telegramBotUsername} via Telegram, otomatis tercatat di akun Anda.',
                     style: TextStyle(fontSize: 12, color: textMuted, height: 1.4),
                   ),
                   const SizedBox(height: 16),
@@ -1092,7 +1092,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text('Kirim perintah di atas ke bot @zirafinancebot di Telegram', style: TextStyle(fontSize: 11, color: textMuted)),
+                            Text('Kirim perintah di atas ke bot @${provider.telegramBotUsername} di Telegram', style: TextStyle(fontSize: 11, color: textMuted)),
                           ],
                         ),
                       ),
@@ -1450,7 +1450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               Text('Bot Telegram AI', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: textMain)),
                               const SizedBox(height: 2),
-                              Text('Catat via chat & foto @zirafinancebot', style: TextStyle(fontSize: 11, color: textMuted)),
+                              Text('Catat via chat & foto @${provider.telegramBotUsername}', style: TextStyle(fontSize: 11, color: textMuted)),
                             ],
                           ),
                         ),

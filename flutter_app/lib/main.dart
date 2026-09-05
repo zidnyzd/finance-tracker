@@ -237,6 +237,62 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final provider = Provider.of<AppProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Remote Maintenance Mode Kill Switch
+    if (provider.isMaintenance) {
+      return Scaffold(
+        backgroundColor: isDark ? AppColors.bgDark : AppColors.bgLight,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.build_rounded, size: 54, color: Colors.orange),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Pemeliharaan Server',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  provider.maintenanceMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () => provider.fetchRemoteAppConfig(),
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Cek Lagi', style: TextStyle(fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final navBg = isDark ? AppColors.bottomnavDark : AppColors.bottomnavLight;
     final navBorder = isDark ? AppColors.borderDark : AppColors.borderLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;

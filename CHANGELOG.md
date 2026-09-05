@@ -4,6 +4,14 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.4] - 2026-09-05
+### 🚀 Added & Improved
+- **Kategori Transaksi Dinamis & Kustom Pengguna:** Chip kategori di form catat transaksi dan modal edit kini 100% dinamis dari server via API `GET /api/v1/categories`. Pengguna dapat menambah kategori baru sendiri (`[ + Kategori Baru ]`) yang tersimpan permanen di akun mereka.
+- **Remote App Config & Maintenance Kill Switch:** Proteksi server menyeluruh dengan sakelar pemeliharaan remote, force update, batas versi minimum, dan username bot Telegram dinamis.
+- **Anti-Double Notification & Jago Pocket Auto-Ignore:** Deduplikasi notifikasi FCM dan penyaringan otomatis mutasi pindah kantong internal Bank Jago.
+
+---
+
 ## [v2.1.3] - 2026-09-05
 ### 🚀 Added & Improved
 - **Integrasi Google Firebase Cloud Messaging (FCM Native):** Push notifikasi instan (0.3 detik) langsung berbunyi di status bar Android HP pengguna tanpa harus membuka atau me-refresh aplikasi.

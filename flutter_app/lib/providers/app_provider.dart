@@ -29,6 +29,26 @@ class AppProvider extends ChangeNotifier {
   List<InstalledBankApp> get installedApps => _installedApps;
   bool get isLoggedIn => _token != null && _token!.isNotEmpty;
   Map<String, bool> get appNotifSwitches => _appNotifSwitches;
+  List<String> get expenseCategories => _expenseCategories;
+  List<String> get incomeCategories => _incomeCategories;
+
+  // Remote Config State
+  Map<String, dynamic>? _remoteConfig;
+  Map<String, dynamic>? get remoteConfig => _remoteConfig;
+  bool get isMaintenance => _remoteConfig?['is_maintenance'] == true;
+  String get maintenanceMessage => _remoteConfig?['maintenance_message']?.toString() ?? 'Sistem sedang pemeliharaan.';
+  String get telegramBotUsername => _remoteConfig?['telegram_bot_username']?.toString() ?? 'zirafinancebot';
+  String get supportEmail => _remoteConfig?['support_email']?.toString() ?? 'zidzdev@gmail.com';
+
+  List<String> _expenseCategories = [
+    'Makan & Minum', 'Belanja', 'Transportasi', 'Tagihan',
+    'Hiburan', 'Kesehatan', 'Pendidikan', 'Keluarga', 'Zakat & Sedekah', 'Pajak & Biaya', 'Lainnya'
+  ];
+
+  List<String> _incomeCategories = [
+    'Gaji & Upah', 'Penjualan & Bisnis', 'Bonus & THR',
+    'Investasi & Bunga', 'Hadiah', 'Transfer Masuk', 'Lainnya'
+  ];
 
   static final List<AccountModel> _guestAccounts = [
     AccountModel(id: 1, name: 'BCA', type: 'bank', balance: 1450000.0, balanceStr: 'Rp 1.450.000', color: '#005baa'),
@@ -266,32 +286,41 @@ class AppProvider extends ChangeNotifier {
     }
     notifyListeners();
 
-    // Periksa apakah ada pengumuman / broadcast baru dari admin untuk ditampilkan di HP
-    checkNewAnnouncements();
+    // Fetch dynamic categories & remote app config
+    fetchCategories();
+    fetchRemoteAppConfig();
   }
 
-  Future<void> checkNewAnnouncements() async {
-    try {
-      final list = await ApiService.getAnnouncements(_token);
-      if (list.isEmpty) return;
+  Future<void> fetchRemoteAppConfig() async {
+    final cfg = await ApiService.getAppConfig();
+    if (cfg != null) {
+      _remoteConfig = cfg;
+      notifyListeners();
+    }
+  }
 
-      final prefs = await SharedPreferences.getInstance();
-      final lastShownId = prefs.getInt('last_shown_announcement_id') ?? 0;
-
-      for (final item in list) {
-        final id = item['id'] as int? ?? 0;
-        if (id > lastShownId) {
-          final title = item['title'] as String? ?? '📢 Pengumuman ZiRa Finance';
-          final message = item['message'] as String? ?? '';
-
-          // Munculkan notifikasi lokal resmi di status bar Android HP
-          await PlatformService.showAnnouncementNotification(title: title, message: message);
-
-          await prefs.setInt('last_shown_announcement_id', id);
-          break;
-        }
+  Future<void> fetchCategories() async {
+    if (_token == null) return;
+    final res = await ApiService.getCategories(_token!);
+    if (res.isNotEmpty) {
+      if (res['expense'] != null && res['expense']!.isNotEmpty) {
+        _expenseCategories = res['expense']!;
       }
-    } catch (_) {}
+      if (res['income'] != null && res['income']!.isNotEmpty) {
+        _incomeCategories = res['income']!;
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<bool> createCustomCategory(String name, String type) async {
+    if (_token == null) return false;
+    final success = await ApiService.addCategory(_token!, name, type);
+    if (success) {
+      await fetchCategories();
+      return true;
+    }
+    return false;
   }
 
   Future<void> fetchAccounts() async {

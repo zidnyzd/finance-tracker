@@ -82,7 +82,9 @@ class ZiRaFirebaseMessagingService : FirebaseMessagingService() {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
 
-        manager?.notify((System.currentTimeMillis() % 100000).toInt(), builder.build())
+        // Gunakan Notification ID yang konsisten berdasarkan hash isi pesan agar tidak duplikat di status bar
+        val notifId = (title.hashCode() xor message.hashCode()) and 0x7FFFFFFF
+        manager?.notify(notifId, builder.build())
     }
 
     companion object {

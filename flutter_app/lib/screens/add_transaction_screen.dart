@@ -417,6 +417,74 @@ class AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
+  void _showAddCustomCategoryDialog(AppProvider provider) {
+    final textController = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final textMain = isDark ? AppColors.textMainDark : AppColors.textMainLight;
+    final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.add_circle_outline, color: primary, size: 22),
+            const SizedBox(width: 8),
+            Text('Tambah Kategori Baru', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textMain)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Buat kategori baru untuk transaksi ${_txnType == 'income' ? 'Pemasukan' : 'Pengeluaran'}:',
+              style: TextStyle(fontSize: 12, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              style: TextStyle(fontSize: 14, color: textMain),
+              decoration: InputDecoration(
+                hintText: 'Contoh: Hobi, Zakat, KPR',
+                hintStyle: const TextStyle(fontSize: 13),
+                filled: true,
+                fillColor: isDark ? AppColors.inputBgDark : AppColors.inputBgLight,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              final val = textController.text.trim();
+              if (val.isEmpty) return;
+              Navigator.pop(ctx);
+              setState(() => _categoryController.text = val);
+              await provider.createCustomCategory(val, _txnType);
+            },
+            child: const Text('Simpan & Pakai'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -442,8 +510,8 @@ class AddTransactionScreenState extends State<AddTransactionScreen> {
     final inputBg = isDark ? AppColors.inputBgDark : AppColors.inputBgLight;
     final primary = isDark ? AppColors.primaryDark : AppColors.primaryLight;
 
-    final expenseCategories = ['Makan & Minum', 'Belanja', 'Transportasi', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Lainnya'];
-    final incomeCategories = ['Gaji', 'Bonus', 'Investasi', 'Hasil Usaha', 'Pemasukan Lain'];
+    final expenseCategories = provider.expenseCategories;
+    final incomeCategories = provider.incomeCategories;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -797,9 +865,36 @@ class AddTransactionScreenState extends State<AddTransactionScreen> {
 
                     // Category Quick Chips
                     Wrap(
-                      children: (_txnType == 'income' ? incomeCategories : expenseCategories)
-                          .map((cat) => _buildCategoryChip(cat))
-                          .toList(),
+                      children: [
+                        ...(_txnType == 'income' ? incomeCategories : expenseCategories)
+                            .map((cat) => _buildCategoryChip(cat)),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6, bottom: 6),
+                          child: InkWell(
+                            onTap: () => _showAddCustomCategoryDialog(provider),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: primary.withOpacity(0.4), width: 1),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add, size: 13, color: primary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Kategori Baru',
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                   ],

@@ -96,6 +96,85 @@
     </div>
 </div>
 
+<!-- SECTION 1B: REMOTE APP CONFIG & MAINTENANCE KILL SWITCH -->
+<div class="row mb-4" id="section-app-config">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-primary">
+                        <i class="ti ti-settings-cog me-2"></i>Remote App Config, Kill Switch & Sakelar Pemeliharaan
+                    </h6>
+                    <small class="text-muted">Kontrol sakelar pemeliharaan, versi minimum, kontak bantuan, dan metadata tanpa perlu rilis APK baru.</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span id="appConfigLiveNotice" class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-none">
+                        <i class="ti ti-check me-1"></i>Konfigurasi tersimpan instan
+                    </span>
+                    <span class="badge {{if eq (index .AppConfig "is_maintenance") "true"}}bg-danger text-white{{else}}bg-success-subtle text-success border border-success-subtle{{end}} py-1 px-2">
+                        {{if eq (index .AppConfig "is_maintenance") "true"}}🔴 Mode Pemeliharaan Aktif{{else}}🟢 Layanan Online Normal{{end}}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form id="formAppConfig" onsubmit="handleAppConfigSubmit(event)">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="row g-3">
+                        <!-- Baris 1: Sakelar & Versi -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Mode Pemeliharaan</label>
+                            <select name="is_maintenance" class="form-select form-select-sm">
+                                <option value="false" {{if ne (index .AppConfig "is_maintenance") "true"}}selected{{end}}>🟢 Layanan Online</option>
+                                <option value="true" {{if eq (index .AppConfig "is_maintenance") "true"}}selected{{end}}>🔴 Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Status Force Update</label>
+                            <select name="force_update" class="form-select form-select-sm">
+                                <option value="false" {{if ne (index .AppConfig "force_update") "true"}}selected{{end}}>⚪ Normal (Opsional)</option>
+                                <option value="true" {{if eq (index .AppConfig "force_update") "true"}}selected{{end}}>⚠️ Wajib Update</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Versi Minimum APK</label>
+                            <input type="text" name="min_version_name" class="form-control form-control-sm" value="{{index .AppConfig "min_version_name"}}" placeholder="Contoh: 2.1.0" required>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Username Bot Telegram</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">@</span>
+                                <input type="text" name="telegram_bot_username" class="form-control" value="{{index .AppConfig "telegram_bot_username"}}" required>
+                            </div>
+                        </div>
+
+                        <!-- Baris 2: Pesan & Dukungan -->
+                        <div class="col-12 col-md-7">
+                            <label class="form-label small fw-semibold">Pesan Pemeliharaan ke Pengguna</label>
+                            <input type="text" name="maintenance_message" class="form-control form-control-sm" value="{{index .AppConfig "maintenance_message"}}" required>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small fw-semibold">Email Dukungan Bantuan</label>
+                            <input type="email" name="support_email" class="form-control form-control-sm" value="{{index .AppConfig "support_email"}}" required>
+                        </div>
+
+                        <!-- Baris 3: URL Update -->
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">URL Download Pembaruan APK Resmi</label>
+                            <input type="url" name="update_url" class="form-control form-control-sm" value="{{index .AppConfig "update_url"}}" required>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-end">
+                        <button type="submit" id="btnSubmitAppConfig" class="btn btn-sm btn-primary px-4 fw-medium">
+                            <i class="ti ti-device-floppy me-1"></i> Simpan Konfigurasi Remote
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Data Tables (1 Tabel 1 Baris Penuh: Lapang, Rapi, & Tidak Sempit) -->
 
 <!-- SECTION 2: AUDIT KEAMANAN SISTEM -->
@@ -225,7 +304,7 @@
 </div>
 
 <!-- SECTION 4: LOG PEMBELAJARAN NOTIFIKASI REALTIME (SELF-LEARNING AI PIPELINE) -->
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4" id="section-learning-logs">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent border-bottom-0 py-3 d-flex justify-content-between align-items-center">
@@ -235,22 +314,28 @@
                     </h6>
                     <small class="text-muted">Rekaman kalimat mutasi nyata dari HP pengguna yang dianalisis oleh Fast Regex & Gemini AI untuk menyempurnakan pola auto-catat.</small>
                 </div>
-                <span class="badge bg-info-subtle text-info border border-info-subtle">Adaptive Self-Learning</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span id="learningLogLiveNotice" class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-none">
+                        <i class="ti ti-check me-1"></i>Koreksi tersimpan instan
+                    </span>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle">Adaptive Self-Learning</span>
+                </div>
             </div>
             <div class="card-body pt-0">
                 <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
                         <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                             <tr>
-                                <th class="ps-3 py-2" style="width: 170px;">Waktu (WIB)</th>
+                                <th class="ps-3 py-2" style="width: 160px;">Waktu (WIB)</th>
                                 <th class="py-2" style="width: 320px;">Teks Kalimat Mutasi Nyata</th>
-                                <th class="py-2" style="width: 220px;">Hasil Ekstraksi AI</th>
-                                <th class="text-center pe-3 py-2" style="width: 120px;">Parser</th>
+                                <th class="py-2" style="width: 200px;">Hasil Ekstraksi AI</th>
+                                <th class="text-center py-2" style="width: 100px;">Parser</th>
+                                <th class="text-end pe-4 py-2" style="width: 180px;">Aksi Koreksi AI</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{range .LearningLogs}}
-                            <tr>
+                            <tr id="learning-row-{{.ID}}">
                                 <td class="ps-3 py-2 text-nowrap">
                                     <span class="fw-semibold">{{.Time}}</span>
                                 </td>
@@ -258,27 +343,52 @@
                                     <div class="fw-bold">{{.Title}}</div>
                                     <div class="text-muted small mt-1">{{.RawText}}</div>
                                 </td>
-                                <td class="py-2">
+                                <td class="py-2" id="learning-status-cell-{{.ID}}">
                                     <div>
                                         {{if eq .Type "income"}}
                                         <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">Masuk</span>
-                                        {{else}}
+                                        {{else if eq .Type "expense"}}
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2">Keluar</span>
+                                        {{else}}
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1 px-2">Diabaikan</span>
                                         {{end}}
                                         <b class="ms-1">{{.AmountStr}}</b>
                                     </div>
                                     <div class="text-muted small mt-1">{{.Merchant}}</div>
                                 </td>
-                                <td class="text-center pe-3 py-2">
+                                <td class="text-center py-2">
                                     <span class="badge {{if eq .Parser "fast_regex"}}bg-primary-subtle text-primary border border-primary-subtle{{else}}bg-warning-subtle text-warning border border-warning-subtle{{end}} py-1 px-2">
                                         {{.Parser}}
                                     </span>
+                                </td>
+                                <td class="text-end text-nowrap pe-4 py-2" id="learning-action-cell-{{.ID}}">
+                                    {{if ne .Type "ignored"}}
+                                    <div class="btn-group btn-group-sm">
+                                        {{if eq .Type "income"}}
+                                        <button type="button" class="btn btn-outline-danger py-1 px-2" style="font-size: 0.72rem; border-radius: 6px 0 0 6px;" title="Ubah menjadi Pengeluaran"
+                                            onclick="instantCorrectLearningLog({{.ID}}, 'make_expense')">
+                                            <i class="ti ti-arrow-down me-1"></i>Keluar
+                                        </button>
+                                        {{else}}
+                                        <button type="button" class="btn btn-outline-success py-1 px-2" style="font-size: 0.72rem; border-radius: 6px 0 0 6px;" title="Ubah menjadi Pemasukan"
+                                            onclick="instantCorrectLearningLog({{.ID}}, 'make_income')">
+                                            <i class="ti ti-arrow-up me-1"></i>Masuk
+                                        </button>
+                                        {{end}}
+                                        <button type="button" class="btn btn-outline-secondary py-1 px-2" style="font-size: 0.72rem; border-radius: 0 6px 6px 0;" title="Abaikan / Jangan Dicatat (Pindah Saldo)"
+                                            onclick="instantCorrectLearningLog({{.ID}}, 'ignore')">
+                                            <i class="ti ti-ban me-1"></i>Abaikan
+                                        </button>
+                                    </div>
+                                    {{else}}
+                                    <span class="badge bg-secondary-subtle text-secondary py-1 px-2">🚫 Diabaikan</span>
+                                    {{end}}
                                 </td>
                             </tr>
                             {{end}}
                             {{if not .LearningLogs}}
                             <tr>
-                                <td colspan="4" class="text-center py-5">
+                                <td colspan="5" class="text-center py-5">
                                     <div class="text-muted mb-2"><i class="ti ti-radar fs-2 text-info opacity-75"></i></div>
                                     <div class="fw-semibold">Belum Ada Notifikasi Pembelajaran Baru</div>
                                     <div class="text-muted small mt-1">Notifikasi nyata dari HP pengguna akan otomatis terekam dan dianalisis AI di sini.</div>
@@ -670,6 +780,127 @@ async function handleAjaxAddBank(e) {
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Simpan ke Direktori Remote';
+    }
+}
+
+async function instantCorrectLearningLog(id, action) {
+    var notice = document.getElementById('learningLogLiveNotice');
+    var actionCell = document.getElementById('learning-action-cell-' + id);
+    var statusCell = document.getElementById('learning-status-cell-' + id);
+    if (!actionCell) return;
+
+    var origActionHtml = actionCell.innerHTML;
+    actionCell.innerHTML = '<span class="spinner-border spinner-border-sm text-primary" role="status"></span>';
+
+    try {
+        var params = new URLSearchParams();
+        params.append('id', id);
+        params.append('action', action);
+        params.append('csrf_token', '{{$.CSRFToken}}');
+        params.append('_csrf', '{{$.CSRFToken}}');
+
+        var res = await fetch('/admin/learning-logs/correct', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            if (notice) {
+                notice.innerHTML = '<i class="ti ti-check me-1"></i>' + data.message;
+                notice.classList.remove('d-none');
+                setTimeout(function() { notice.classList.add('d-none'); }, 4000);
+            }
+
+            if (data.new_type === 'ignored') {
+                actionCell.innerHTML = '<span class="badge bg-secondary-subtle text-secondary py-1 px-2">🚫 Diabaikan</span>';
+                if (statusCell) {
+                    var amtEl = statusCell.querySelector('b');
+                    var amtStr = amtEl ? amtEl.innerText : '';
+                    var merchEl = statusCell.querySelector('div.text-muted');
+                    var merchStr = merchEl ? merchEl.innerText : '';
+                    statusCell.innerHTML = '<div><span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1 px-2">Diabaikan</span><b class="ms-1">' + amtStr + '</b></div><div class="text-muted small mt-1">' + merchStr + '</div>';
+                }
+            } else if (data.new_type === 'expense') {
+                actionCell.innerHTML = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-success py-1 px-2" style="font-size: 0.72rem; border-radius: 6px 0 0 6px;" title="Ubah menjadi Pemasukan" onclick="instantCorrectLearningLog(${id}, 'make_income')"><i class="ti ti-arrow-up me-1"></i>Masuk</button>
+                        <button type="button" class="btn btn-outline-secondary py-1 px-2" style="font-size: 0.72rem; border-radius: 0 6px 6px 0;" title="Abaikan / Jangan Dicatat" onclick="instantCorrectLearningLog(${id}, 'ignore')"><i class="ti ti-ban me-1"></i>Abaikan</button>
+                    </div>`;
+                if (statusCell) {
+                    var amtEl = statusCell.querySelector('b');
+                    var amtStr = amtEl ? amtEl.innerText : '';
+                    var merchEl = statusCell.querySelector('div.text-muted');
+                    var merchStr = merchEl ? merchEl.innerText : '';
+                    statusCell.innerHTML = '<div><span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2">Keluar</span><b class="ms-1">' + amtStr + '</b></div><div class="text-muted small mt-1">' + merchStr + '</div>';
+                }
+            } else if (data.new_type === 'income') {
+                actionCell.innerHTML = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-danger py-1 px-2" style="font-size: 0.72rem; border-radius: 6px 0 0 6px;" title="Ubah menjadi Pengeluaran" onclick="instantCorrectLearningLog(${id}, 'make_expense')"><i class="ti ti-arrow-down me-1"></i>Keluar</button>
+                        <button type="button" class="btn btn-outline-secondary py-1 px-2" style="font-size: 0.72rem; border-radius: 0 6px 6px 0;" title="Abaikan / Jangan Dicatat" onclick="instantCorrectLearningLog(${id}, 'ignore')"><i class="ti ti-ban me-1"></i>Abaikan</button>
+                    </div>`;
+                if (statusCell) {
+                    var amtEl = statusCell.querySelector('b');
+                    var amtStr = amtEl ? amtEl.innerText : '';
+                    var merchEl = statusCell.querySelector('div.text-muted');
+                    var merchStr = merchEl ? merchEl.innerText : '';
+                    statusCell.innerHTML = '<div><span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">Masuk</span><b class="ms-1">' + amtStr + '</b></div><div class="text-muted small mt-1">' + merchStr + '</div>';
+                }
+            }
+        } else {
+            actionCell.innerHTML = origActionHtml;
+            alert('Gagal: ' + (data.error || 'Terjadi kesalahan'));
+        }
+    } catch (e) {
+        actionCell.innerHTML = origActionHtml;
+        alert('Koneksi gagal: ' + e.message);
+    }
+}
+
+async function handleAppConfigSubmit(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btnSubmitAppConfig');
+    var notice = document.getElementById('appConfigLiveNotice');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+
+    var form = document.getElementById('formAppConfig');
+    var formData = new FormData(form);
+    var params = new URLSearchParams();
+    for (var pair of formData.entries()) {
+        params.append(pair[0], pair[1]);
+    }
+
+    try {
+        var res = await fetch('/admin/app-config/update', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            if (notice) {
+                notice.innerHTML = '<i class="ti ti-check me-1"></i>' + data.message;
+                notice.classList.remove('d-none');
+                setTimeout(function() { notice.classList.add('d-none'); }, 4000);
+            }
+        } else {
+            alert('Gagal: ' + (data.error || 'Terjadi kesalahan'));
+        }
+    } catch (err) {
+        alert('Koneksi gagal: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-device-floppy me-1"></i> Simpan Konfigurasi Remote';
     }
 }
 

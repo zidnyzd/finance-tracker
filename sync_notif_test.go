@@ -52,6 +52,7 @@ func TestIsIncomeNotification(t *testing.T) {
 		"Pembayaran Payment BluXKlik di Klik Indomaret Rp 39.800 telah berhasil!",
 		"Rp123.210 telah dibayar ke Google dengan DANA BALANCE",
 		"Pembayaran QRIS sebesar Rp 35.000 ke RESTO BERHASIL",
+		"Rp1.200.000 has been moved from your Main Pocket Pocket to your Zd Debit Virtual Pocket.",
 	}
 
 	for _, text := range expenses {
@@ -122,6 +123,12 @@ func TestHoldAndMerchantNotificationsIgnored(t *testing.T) {
 	p2 := regexParseNotification("com.grabtaxi.passenger", "In the kitchen", "SeIndonesia is preparing your order.")
 	if p2 != nil {
 		t.Errorf("Kitchen order notification must be ignored, got: %+v", p2)
+	}
+
+	// Internal Pocket Movement (Bank Jago / Digital Bank) must be ignored
+	pJagoMove := regexParseNotification("com.jago.digitalBanking", "Jago", "Rp1.200.000 has been moved from your Main Pocket Pocket to your Zd Debit Virtual Pocket.")
+	if pJagoMove != nil {
+		t.Errorf("Internal pocket movement must be ignored, got: %+v", pJagoMove)
 	}
 
 	// Actual bank notification from Blu MUST be parsed

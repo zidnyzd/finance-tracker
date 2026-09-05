@@ -146,9 +146,10 @@ class HistoryScreenState extends State<HistoryScreen> {
     DateTime selectedDateTime = DateTime.tryParse(tx.date) ?? DateTime.now();
     String? modalErrorMsg;
 
+    final provider = Provider.of<AppProvider>(context, listen: false);
     final categories = editType == 'expense'
-        ? ['Makan & Minum', 'Belanja', 'Tagihan', 'Transportasi', 'Keluarga', 'Pendidikan', 'Hiburan', 'Lainnya']
-        : ['Gaji & Upah', 'Penjualan', 'Bonus', 'Investasi', 'Hadiah', 'Transfer Masuk', 'Lainnya'];
+        ? provider.expenseCategories
+        : provider.incomeCategories;
 
     showModalBottomSheet(
       context: context,

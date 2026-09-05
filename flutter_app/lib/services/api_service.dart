@@ -404,6 +404,66 @@ class ApiService {
     }
   }
 
+  // Categories: Fetch dynamic system & custom categories
+  static Future<Map<String, List<String>>> getCategories(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/categories'),
+        headers: _headers(token),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final exp = List<String>.from(data['expense'] ?? []);
+          final inc = List<String>.from(data['income'] ?? []);
+          return {'expense': exp, 'income': inc};
+        }
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  // Categories: Add custom category for user
+  static Future<bool> addCategory(String token, String name, String type) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/categories/add'),
+        headers: _headers(token),
+        body: jsonEncode({'name': name, 'type': type}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Remote App Config, Maintenance & Metadata
+  static Future<Map<String, dynamic>?> getAppConfig() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/app/config'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['config'] != null) {
+          return Map<String, dynamic>.from(data['config']);
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // Announcements & System Broadcasts
   static Future<List<Map<String, dynamic>>> getAnnouncements(String? token) async {
     try {

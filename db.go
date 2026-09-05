@@ -166,7 +166,7 @@ func initDB() {
 		confidence_score REAL DEFAULT 1.0,
 		suggested_pattern TEXT DEFAULT '',
 		status TEXT DEFAULT 'auto_learned',
-		created_at DATETIME DEFAULT (datetime('now', 'localtime'))
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	)`)
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_notif_learning_pkg ON notification_learning_logs(app_package)")
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_notif_learning_user ON notification_learning_logs(user_id)")
@@ -195,11 +195,33 @@ func initDB() {
 	)`)
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_user_device_tokens_uid ON user_device_tokens(user_id)")
 
+	// Tabel Master & Kustom Kategori Transaksi Dinamis
+	db.Exec(`CREATE TABLE IF NOT EXISTS transaction_categories (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL DEFAULT 0,
+		name TEXT NOT NULL,
+		type TEXT NOT NULL,
+		icon TEXT DEFAULT 'tag',
+		is_active INTEGER DEFAULT 1,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`)
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_txn_categories_user ON transaction_categories(user_id)")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_txn_categories_type ON transaction_categories(type)")
+
+	// Tabel Remote App Config, Maintenance & Metadata
+	db.Exec(`CREATE TABLE IF NOT EXISTS app_config (
+		key TEXT PRIMARY KEY,
+		value TEXT NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`)
+
 	// Inisialisasi Firebase Cloud Messaging Engine
 	initFCM()
 
-	// Seed data awal jika tabel supported_financial_apps masih kosong
+	// Seed data awal jika tabel supported_financial_apps, categories & config masih kosong
 	seedSupportedFinancialApps()
+	seedTransactionCategories()
+	seedAppConfig()
 
 	if os.Getenv("ADMIN_USERNAME") != "" {
 		seedAdmin(os.Getenv("ADMIN_USERNAME"), os.Getenv("ADMIN_PASSWORD"), os.Getenv("ADMIN_DISPLAY"))
@@ -341,6 +363,75 @@ func seedSupportedFinancialApps() {
 			VALUES (?, ?, ?, ?, ?, 1)`, a.ID, a.Name, a.Category, string(pkgsJSON), a.Icon)
 	}
 	fmt.Printf("Seeded %d supported financial apps\n", len(initialApps))
+}
+
+func seedTransactionCategories() {
+	var count int
+	db.QueryRow("SELECT COUNT(*) FROM transaction_categories WHERE user_id=0").Scan(&count)
+	if count > 0 {
+		return
+	}
+
+	initialCategories := []struct {
+		Name string
+		Type string
+		Icon string
+	}{
+		// Expense Categories
+		{"Makan & Minum", "expense", "coffee"},
+		{"Belanja", "expense", "shopping-bag"},
+		{"Transportasi", "expense", "car"},
+		{"Tagihan", "expense", "file-invoice"},
+		{"Hiburan", "expense", "device-gamepad"},
+		{"Kesehatan", "expense", "heartbeat"},
+		{"Pendidikan", "expense", "school"},
+		{"Keluarga", "expense", "users"},
+		{"Zakat & Sedekah", "expense", "heart"},
+		{"Pajak & Biaya", "expense", "receipt"},
+		{"Lainnya", "expense", "dots"},
+
+		// Income Categories
+		{"Gaji & Upah", "income", "cash"},
+		{"Penjualan & Bisnis", "income", "building-store"},
+		{"Bonus & THR", "income", "gift"},
+		{"Investasi & Bunga", "income", "trending-up"},
+		{"Hadiah", "income", "award"},
+		{"Transfer Masuk", "income", "arrow-down-left"},
+		{"Lainnya", "income", "dots"},
+	}
+
+	for _, c := range initialCategories {
+		db.Exec(`INSERT INTO transaction_categories (user_id, name, type, icon, is_active) VALUES (0, ?, ?, ?, 1)`,
+			c.Name, c.Type, c.Icon)
+	}
+	fmt.Println("Initial transaction categories seeded successfully")
+}
+
+func seedAppConfig() {
+	configs := map[string]string{
+		"is_maintenance":        "false",
+		"maintenance_message":   "Sistem sedang dalam pemeliharaan server rutin. Silakan coba kembali beberapa saat lagi.",
+		"min_version_code":      "70",
+		"min_version_name":      "2.1.0",
+		"latest_version_name":   "2.1.3",
+		"force_update":          "false",
+		"force_update_message":  "Versi aplikasi Anda sudah usang. Silakan unduh pembaruan terbaru untuk stabilitas transaksi.",
+		"update_url":            "https://zira.web.id/static/ZiRa-Finance-v2.1.3.apk",
+		"play_store_url":        "https://play.google.com/apps/testing/id.web.zira.app",
+		"telegram_bot_username": "zirafinancebot",
+		"support_email":         "zidzdev@gmail.com",
+		"announcement_banner":   "",
+		"banner_type":           "info",
+	}
+
+	for k, v := range configs {
+		var exists int
+		db.QueryRow("SELECT COUNT(*) FROM app_config WHERE key=?", k).Scan(&exists)
+		if exists == 0 {
+			db.Exec("INSERT INTO app_config (key, value) VALUES (?, ?)", k, v)
+		}
+	}
+	fmt.Println("Initial remote app config seeded successfully")
 }
 
 func formatMoney(n float64) string {
