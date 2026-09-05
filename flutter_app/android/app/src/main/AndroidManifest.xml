@@ -134,6 +134,15 @@
             </intent-filter>
         </service>
 
+        <!-- Firebase Cloud Messaging (FCM Native Background Push) -->
+        <service
+            android:name=".ZiRaFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <!-- File Provider for In-App APK Updater -->
         <provider
             android:name="androidx.core.content.FileProvider"

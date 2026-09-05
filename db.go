@@ -184,6 +184,20 @@ func initDB() {
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_announcements_active ON app_announcements(is_active)")
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_announcements_target ON app_announcements(target_user_id)")
 
+	// Tabel Registrasi Device Token FCM
+	db.Exec(`CREATE TABLE IF NOT EXISTS user_device_tokens (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL DEFAULT 0,
+		fcm_token TEXT NOT NULL UNIQUE,
+		device_model TEXT DEFAULT '',
+		os_version TEXT DEFAULT '',
+		updated_at DATETIME DEFAULT (datetime('now', 'localtime'))
+	)`)
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_user_device_tokens_uid ON user_device_tokens(user_id)")
+
+	// Inisialisasi Firebase Cloud Messaging Engine
+	initFCM()
+
 	// Seed data awal jika tabel supported_financial_apps masih kosong
 	seedSupportedFinancialApps()
 

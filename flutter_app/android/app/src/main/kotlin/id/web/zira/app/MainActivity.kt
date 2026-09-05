@@ -72,6 +72,19 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // Initialize Firebase Cloud Messaging (FCM) Token Sync
+        try {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance().token
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        if (token != null && token.isNotEmpty()) {
+                            ZiRaFirebaseMessagingService.sendRegistrationToServer(token)
+                        }
+                    }
+                }
+        } catch (_: Exception) {}
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "openNotificationSettings" -> {

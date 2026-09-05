@@ -4,6 +4,13 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.3] - 2026-09-05
+### 🚀 Added & Improved
+- **Integrasi Google Firebase Cloud Messaging (FCM Native):** Push notifikasi instan (0.3 detik) langsung berbunyi di status bar Android HP pengguna tanpa harus membuka atau me-refresh aplikasi.
+- **Backend FCM HTTP v1 Dispatcher:** Server Go backend mengirim pesan ke FCM API menggunakan kredensial Service Account Google Cloud `zira-507415`.
+
+---
+
 ## [v2.1.2] - 2026-09-03
 ### 🚀 Added & Improved
 - **Mobile In-App Announcement & Broadcast Engine:** Integrasi notifikasi pengumuman bebas dari admin dashboard web langsung ke status bar HP pengguna via Kotlin `showAnnouncementNotification`.

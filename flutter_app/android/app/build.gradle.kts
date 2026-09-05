@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -31,8 +32,8 @@ android {
         applicationId = "id.web.zira.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 72
-        versionName = "2.1.2"
+        versionCode = 73
+        versionName = "2.1.3"
         signingConfig = signingConfigs.getByName("release")
     }
 
@@ -56,4 +57,8 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Google Firebase Cloud Messaging (FCM Native)
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }

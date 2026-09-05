@@ -53,3 +53,4 @@ go.mod
 go.sum
 sync_notif.go
 
+firebase-adminsdk.json

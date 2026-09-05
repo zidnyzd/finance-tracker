@@ -92,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 72,
-		"version_name": "2.1.2",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.2.apk",
-		"changelog":    "Official Test Release v2.1.2 - Mobile In-App Announcement & Broadcast Engine, Remote Dynamic Bank Sync via MethodChannel",
+		"version_code": 73,
+		"version_name": "2.1.3",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.3.apk",
+		"changelog":    "Official Release v2.1.3 - Instant Realtime Push Notification via Google Firebase Cloud Messaging (FCM)",
 	})
 }
 
@@ -1697,6 +1697,47 @@ func handleApiAppAnnouncements(w http.ResponseWriter, r *http.Request) {
 		"success":       true,
 		"total":         len(list),
 		"announcements": list,
+	})
+}
+
+// POST /api/v1/app/fcm-token: Register or refresh mobile FCM device token
+func handleApiRegisterFCMToken(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		jsonError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	var req struct {
+		FCMToken    string `json:"fcm_token"`
+		DeviceModel string `json:"device_model"`
+		OSVersion   string `json:"os_version"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || strings.TrimSpace(req.FCMToken) == "" {
+		jsonError(w, http.StatusBadRequest, "FCM token tidak boleh kosong")
+		return
+	}
+
+	uidStr := r.Header.Get("X-User-Id")
+	uid, _ := strconv.Atoi(uidStr)
+
+	_, err := db.Exec(`INSERT INTO user_device_tokens (user_id, fcm_token, device_model, os_version, updated_at)
+		VALUES (?, ?, ?, ?, datetime('now', 'localtime'))
+		ON CONFLICT(fcm_token) DO UPDATE SET 
+			user_id=excluded.user_id,
+			device_model=excluded.device_model,
+			os_version=excluded.os_version,
+			updated_at=datetime('now', 'localtime')`,
+		uid, req.FCMToken, req.DeviceModel, req.OSVersion)
+
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Gagal registrasi token: "+err.Error())
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "FCM device token berhasil didaftarkan",
 	})
 }
 
