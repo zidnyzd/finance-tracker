@@ -385,6 +385,45 @@ class ApiService {
     }
   }
 
+  // Remote Dynamic Supported Financial Apps
+  static Future<List<Map<String, dynamic>>> getSupportedFinancialApps() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/supported-apps'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['apps'] != null) {
+          return List<Map<String, dynamic>>.from(data['apps']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // Announcements & System Broadcasts
+  static Future<List<Map<String, dynamic>>> getAnnouncements(String? token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/app/announcements'),
+        headers: token != null ? _headers(token) : {},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['announcements'] != null) {
+          return List<Map<String, dynamic>>.from(data['announcements']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
   // Notification Logs
   static Future<List<Map<String, dynamic>>> getNotificationLogs(String token) async {
     try {

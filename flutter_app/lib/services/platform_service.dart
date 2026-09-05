@@ -90,6 +90,27 @@ class PlatformService {
     }
   }
 
+  static Future<void> setDynamicSupportedApps(List<Map<String, dynamic>> apps) async {
+    try {
+      await _channel.invokeMethod('setDynamicSupportedApps', {'apps': apps});
+    } catch (_) {}
+  }
+
+  static Future<bool> showAnnouncementNotification({
+    required String title,
+    required String message,
+  }) async {
+    try {
+      final res = await _channel.invokeMethod<bool>('showAnnouncementNotification', {
+        'title': title,
+        'message': message,
+      });
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<List<InstalledBankApp>> getInstalledFinancialApps() async {
     try {
       final res = await _channel.invokeListMethod<Map<dynamic, dynamic>>('getInstalledFinancialApps');

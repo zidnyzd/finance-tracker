@@ -22,6 +22,7 @@ import java.io.File
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "id.web.zira.app/settings"
+    private var dynamicFinancialApps: List<Map<String, Any>>? = null
 
     private val KNOWN_FINANCIAL_APPS = listOf(
         // E-Wallet & Payment
@@ -202,13 +203,76 @@ class MainActivity: FlutterActivity() {
                         result.error("NOTIF_ERROR", e.message, null)
                     }
                 }
+                "showAnnouncementNotification" -> {
+                    try {
+                        val title = call.argument<String>("title") ?: "📢 Pengumuman ZiRa Finance"
+                        val message = call.argument<String>("message") ?: ""
+
+                        val channelId = "zira_announcements"
+                        val channelName = "Pengumuman & Update ZiRa"
+
+                        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val channel = android.app.NotificationChannel(
+                                channelId,
+                                channelName,
+                                android.app.NotificationManager.IMPORTANCE_HIGH
+                            ).apply {
+                                description = "Notifikasi pengumuman resmi dan pemeliharaan sistem dari pengembang"
+                                enableLights(true)
+                                lightColor = android.graphics.Color.BLUE
+                                enableVibration(true)
+                            }
+                            manager?.createNotificationChannel(channel)
+                        }
+
+                        val intent = Intent(this, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        }
+
+                        val pendingIntent = android.app.PendingIntent.getActivity(
+                            this,
+                            System.currentTimeMillis().toInt(),
+                            intent,
+                            android.app.PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.app.PendingIntent.FLAG_IMMUTABLE else 0)
+                        )
+
+                        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(message))
+                            .setColor(0xFF2C7BE5.toInt())
+                            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                            .setAutoCancel(true)
+                            .setContentIntent(pendingIntent)
+
+                        manager?.notify((System.currentTimeMillis() % 100000).toInt(), builder.build())
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("NOTIF_ERROR", e.message, null)
+                    }
+                }
+                "setDynamicSupportedApps" -> {
+                    try {
+                        val apps = call.argument<List<Map<String, Any>>>("apps")
+                        if (apps != null && apps.isNotEmpty()) {
+                            dynamicFinancialApps = apps
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
                 "getInstalledFinancialApps" -> {
                     try {
                         val pm = packageManager
                         val list = mutableListOf<Map<String, Any>>()
                         val foundPackages = mutableSetOf<String>()
 
-                        for (item in KNOWN_FINANCIAL_APPS) {
+                        val masterList = dynamicFinancialApps ?: KNOWN_FINANCIAL_APPS
+
+                        for (item in masterList) {
                             val pkgs = item["packages"] as? List<String> ?: emptyList()
                             var foundPkg: String? = null
                             var appLabel: String? = null

@@ -92,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 71,
-		"version_name": "2.1.1",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.1.apk",
-		"changelog":    "Official Release v2.1.1 - Active Countdown Timer for Telegram Pairing Modal and Live Button Refresh",
+		"version_code": 72,
+		"version_name": "2.1.2",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.2.apk",
+		"changelog":    "Official Test Release v2.1.2 - Mobile In-App Announcement & Broadcast Engine, Remote Dynamic Bank Sync via MethodChannel",
 	})
 }
 
@@ -1584,6 +1584,119 @@ func handleApiScanReceipt(w http.ResponseWriter, r *http.Request) {
 			"date":         parsed.Date,
 			"merchant":     parsed.Merchant,
 		},
+	})
+}
+
+// GET /api/v1/supported-apps
+func handleApiSupportedApps(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT id, name, category, package_names, icon_name FROM supported_financial_apps WHERE is_active=1 ORDER BY category ASC, name ASC")
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Database error: "+err.Error())
+		return
+	}
+	defer rows.Close()
+
+	type AppItem struct {
+		ID       string   `json:"id"`
+		Name     string   `json:"name"`
+		Category string   `json:"category"`
+		Packages []string `json:"packages"`
+		Icon     string   `json:"icon"`
+	}
+
+	var list []AppItem
+	for rows.Next() {
+		var item AppItem
+		var pkgsRaw string
+		if err := rows.Scan(&item.ID, &item.Name, &item.Category, &pkgsRaw, &item.Icon); err == nil {
+			json.Unmarshal([]byte(pkgsRaw), &item.Packages)
+			list = append(list, item)
+		}
+	}
+
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"total":   len(list),
+		"apps":    list,
+	})
+}
+
+// GET /api/v1/admin/notification-learning
+func handleApiAdminNotificationLearning(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query(`SELECT id, user_id, app_package, title, raw_text, parsed_type, parsed_amount, parsed_merchant, parser_used, confidence_score, status, created_at 
+		FROM notification_learning_logs ORDER BY id DESC LIMIT 50`)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Database error: "+err.Error())
+		return
+	}
+	defer rows.Close()
+
+	var list []map[string]interface{}
+	for rows.Next() {
+		var id, uid int
+		var pkg, title, raw, ptype, merchant, parser, status, createdAt string
+		var amount, conf float64
+		if err := rows.Scan(&id, &uid, &pkg, &title, &raw, &ptype, &amount, &merchant, &parser, &conf, &status, &createdAt); err == nil {
+			list = append(list, map[string]interface{}{
+				"id":              id,
+				"user_id":         uid,
+				"app_package":     pkg,
+				"title":           title,
+				"raw_text":        raw,
+				"parsed_type":     ptype,
+				"parsed_amount":   amount,
+				"parsed_merchant": merchant,
+				"parser_used":     parser,
+				"confidence":      conf,
+				"status":          status,
+				"created_at":      createdAt,
+			})
+		}
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"total":   len(list),
+		"logs":    list,
+	})
+}
+
+// GET /api/v1/app/announcements: Get active system broadcasts & maintenance notices
+func handleApiAppAnnouncements(w http.ResponseWriter, r *http.Request) {
+	uidStr := r.Header.Get("X-User-Id")
+	uid, _ := strconv.Atoi(uidStr)
+
+	rows, err := db.Query(`SELECT id, title, message, type, created_at 
+		FROM app_announcements 
+		WHERE is_active=1 AND (target_user_id=0 OR target_user_id=?) 
+		ORDER BY id DESC LIMIT 5`, uid)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Database error: "+err.Error())
+		return
+	}
+	defer rows.Close()
+
+	type AnnounceItem struct {
+		ID        int    `json:"id"`
+		Title     string `json:"title"`
+		Message   string `json:"message"`
+		Type      string `json:"type"`
+		CreatedAt string `json:"created_at"`
+	}
+
+	var list []AnnounceItem
+	for rows.Next() {
+		var item AnnounceItem
+		if err := rows.Scan(&item.ID, &item.Title, &item.Message, &item.Type, &item.CreatedAt); err == nil {
+			list = append(list, item)
+		}
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success":       true,
+		"total":         len(list),
+		"announcements": list,
 	})
 }
 

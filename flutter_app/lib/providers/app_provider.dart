@@ -92,6 +92,13 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> loadInstalledFinancialApps() async {
     try {
+      // 1. Fetch remote dynamic supported apps from server (cached/fallback locally)
+      final remoteApps = await ApiService.getSupportedFinancialApps();
+      if (remoteApps.isNotEmpty) {
+        await PlatformService.setDynamicSupportedApps(remoteApps);
+      }
+
+      // 2. Scan installed apps on device using the dynamic directory
       final apps = await PlatformService.getInstalledFinancialApps();
       _installedApps = apps;
       
@@ -258,6 +265,33 @@ class AppProvider extends ChangeNotifier {
       _accounts = data.accounts;
     }
     notifyListeners();
+
+    // Periksa apakah ada pengumuman / broadcast baru dari admin untuk ditampilkan di HP
+    checkNewAnnouncements();
+  }
+
+  Future<void> checkNewAnnouncements() async {
+    try {
+      final list = await ApiService.getAnnouncements(_token);
+      if (list.isEmpty) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final lastShownId = prefs.getInt('last_shown_announcement_id') ?? 0;
+
+      for (final item in list) {
+        final id = item['id'] as int? ?? 0;
+        if (id > lastShownId) {
+          final title = item['title'] as String? ?? '📢 Pengumuman ZiRa Finance';
+          final message = item['message'] as String? ?? '';
+
+          // Munculkan notifikasi lokal resmi di status bar Android HP
+          await PlatformService.showAnnouncementNotification(title: title, message: message);
+
+          await prefs.setInt('last_shown_announcement_id', id);
+          break;
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> fetchAccounts() async {

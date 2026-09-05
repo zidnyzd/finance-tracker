@@ -592,8 +592,10 @@ func handleSyncNotification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 4. Parsing Notifikasi: Fast Regex -> Fallback Gemini AI
+	parserUsed := "fast_regex"
 	parsed := regexParseNotification(req.PackageName, req.Title, req.Text)
 	if parsed == nil {
+		parserUsed = "gemini_ai"
 		parsed = fallbackGeminiParseNotification(req.PackageName, req.Title, req.Text)
 	}
 
@@ -610,6 +612,12 @@ func handleSyncNotification(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	// Simpan ke notification_learning_logs untuk pembelajaran pola mandiri (Self-Learning AI Pipeline)
+	db.Exec(`INSERT INTO notification_learning_logs 
+		(user_id, app_package, title, raw_text, parsed_type, parsed_amount, parsed_merchant, parser_used, confidence_score, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'auto_learned')`,
+		userID, req.PackageName, req.Title, req.Text, parsed.Type, parsed.Amount, parsed.AccountName, parserUsed, 0.95)
 
 	// 5. Cocokkan Akun Dompet Pengguna
 	var accountID int

@@ -4,6 +4,13 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.2] - 2026-09-03
+### 🚀 Added & Improved
+- **Mobile In-App Announcement & Broadcast Engine:** Integrasi notifikasi pengumuman bebas dari admin dashboard web langsung ke status bar HP pengguna via Kotlin `showAnnouncementNotification`.
+- **Remote Dynamic Bank Sync di Android Native:** Sinkronisasi m-banking dan e-wallet dinamis dari API `GET /api/v1/supported-apps` ke native MethodChannel scanner.
+
+---
+
 ## [v2.1.1] - 2026-09-03
 ### 🚀 Added & Improved
 - **Timer Hitung Mundur Aktif Modal Bot Telegram:** Memperbaiki timer cooldown anti-spam pairing bot Telegram yang sebelumnya membeku di angka `20s`. Menggunakan `Timer.periodic(Duration(seconds: 1))` di dalam `StatefulBuilder` sehingga tombol menghitung mundur detik demi detik (`20s -> 19s -> ... -> 0s`) dan otomatis aktif kembali menjadi biru.

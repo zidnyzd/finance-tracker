@@ -39,62 +39,55 @@
     </div>
 </div>
 
-<!-- Notification Sync Simulator Card -->
+<!-- Broadcast Announcement to Mobile APK Card -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent border-bottom-0 py-3 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 fw-semibold text-primary">
-                    <i class="ti ti-bell-ringing me-2"></i>Simulator Uji Notifikasi Mutasi Bank & E-Wallet
+                    <i class="ti ti-speakerphone me-2"></i>Pusat Pengumuman & Broadcast Notifikasi ke APK HP
                 </h6>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Dev Tools</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Mobile Broadcast Engine</span>
             </div>
             <div class="card-body pt-0">
                 <p class="text-muted small mb-3">
-                    Uji coba parsing regex mutasi, auto-catat transaksi ke database, dan pengiriman notifikasi instan ke HP / Telegram target.
+                    Kirim pesan bebas atau informasi resmi (pemeliharaan sistem, update fitur, pengumuman darurat). Notifikasi ini <b>murni berupa pesan di status bar HP pengguna</b> tanpa mencatat transaksi keuangan dan tanpa mengubah saldo dompet.
                 </p>
-                <form action="/admin/test-notification" method="POST" id="formSimulasiNotif" onsubmit="handleSimulasiSubmit(event)">
+                <form id="formBroadcastNotif" onsubmit="handleBroadcastSubmit(event)">
                     <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <div class="row g-3">
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Target Pengguna</label>
-                            <select name="user_id" id="notifUserId" class="form-select form-select-sm" required>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Target Penerima</label>
+                            <select name="target_user_id" id="broadcastTargetUser" class="form-select form-select-sm">
+                                <option value="0">📢 Semua Pengguna Aplikasi (Broadcast)</option>
                                 {{range .Users}}
-                                <option value="{{.ID}}">#{{.ID}} - {{.Username}} ({{.Role}})</option>
+                                <option value="{{.ID}}">Khusus User #{{.ID}} - {{.Username}}</option>
                                 {{end}}
                             </select>
                         </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Preset Bank / E-Wallet</label>
-                            <select id="presetSelect" class="form-select form-select-sm" onchange="applyPreset()">
-                                <option value="">-- Pilih Contoh Transaksi --</option>
-                                <option value="seabank_in">SeaBank - Transfer Masuk Rp 500.000</option>
-                                <option value="blu_out">Blu BCA - Pembayaran Debit Grab Rp 35.899</option>
-                                <option value="mandiri_out">Livin' Mandiri - QRIS Pembayaran Rp 45.000</option>
-                                <option value="brimo_in">BRImo - Dana Masuk Rp 250.000</option>
-                                <option value="jago_in">Bank Jago - Received Rp 200.000</option>
-                                <option value="dana_out">DANA - Pembayaran QRIS Rp 15.000</option>
-                                <option value="gopay_out">GoPay - Transaksi Berhasil Rp 85.000</option>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold">Tipe Informasi</label>
+                            <select name="type" id="broadcastType" class="form-select form-select-sm">
+                                <option value="maintenance">🔧 Pemeliharaan Sistem (Maintenance)</option>
+                                <option value="info" selected>📢 Pengumuman Umum (Info)</option>
+                                <option value="update">🚀 Pembaruan Fitur Baru (Update)</option>
+                                <option value="warning">⚠️ Peringatan Penting (Warning)</option>
                             </select>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Package Name Android</label>
-                            <input type="text" name="package_name" id="notifPackage" class="form-control form-control-sm" placeholder="id.co.bankbkemobile.digitalbank" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Judul Notifikasi (*Title*)</label>
-                            <input type="text" name="title" id="notifTitle" class="form-control form-control-sm" placeholder="SeaBank" required>
+                            <input type="text" name="title" id="broadcastTitle" class="form-control form-control-sm" placeholder="Contoh: Pemeliharaan Server Malam Ini" required>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label small fw-semibold">Teks / Pesan Notifikasi (*Body*)</label>
-                            <input type="text" name="text" id="notifText" class="form-control form-control-sm" placeholder="Transfer Rp 500.000 diterima dari rekening lain" required>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Isi Pesan Notifikasi Bebas (*Message Body*)</label>
+                            <textarea name="message" id="broadcastMessage" rows="2" class="form-control form-control-sm" placeholder="Ketik pesan bebas apa saja, contoh: Aplikasi akan mengalami maintenance pada pukul 23:00 - 01:00 WIB. Mohon selesaikan pencatatan sebelum waktu tersebut." required></textarea>
                         </div>
                     </div>
                     <div class="mt-3 d-flex justify-content-between align-items-center">
-                        <span id="simulasiStatus" class="small text-muted"></span>
-                        <button type="submit" id="btnSubmitSimulasi" class="btn btn-sm btn-primary px-4 fw-medium">
-                            <i class="ti ti-send me-1"></i> Uji Coba Kirim Notifikasi
+                        <span id="broadcastStatus" class="small text-muted"></span>
+                        <button type="submit" id="btnSubmitBroadcast" class="btn btn-sm btn-primary px-4 fw-medium">
+                            <i class="ti ti-send me-1"></i> Kirim Notifikasi ke APK HP 🚀
                         </button>
                     </div>
                 </form>
@@ -103,64 +96,55 @@
     </div>
 </div>
 
-<!-- Data Tables -->
-<div class="row g-3">
-    <!-- Users Table -->
-    <div class="col-12 col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header border-bottom-0 py-3">
-                <h6 class="mb-0 fw-semibold"><i class="ti ti-users me-2 text-primary"></i>Pengguna Terdaftar</h6>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
-                    <thead class="table-light">
-                        <tr><th>ID</th><th>Username</th><th>Role</th><th>TG ID</th></tr>
-                    </thead>
-                    <tbody>
-                        {{range .Users}}
-                        <tr>
-                            <td class="text-muted">#{{.ID}}</td>
-                            <td class="fw-medium">{{.Username}}</td>
-                            <td>
-                                {{if eq .Role "admin"}}<span class="badge bg-danger">Admin</span>{{else}}<span class="badge bg-secondary">User</span>{{end}}
-                            </td>
-                            <td>{{if gt .TelegramID 0}}<i class="ti ti-check text-success"></i>{{else}}-{{end}}</td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<!-- Data Tables (1 Tabel 1 Baris Penuh: Lapang, Rapi, & Tidak Sempit) -->
 
-    <!-- Audit Logs Table -->
-    <div class="col-12 col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header border-bottom-0 py-3">
-                <h6 class="mb-0 fw-semibold"><i class="ti ti-history me-2 text-warning"></i>Audit Keamanan (50 Terakhir)</h6>
+<!-- SECTION 2: AUDIT KEAMANAN SISTEM -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold"><i class="ti ti-history me-2 text-warning"></i>Audit Keamanan Sistem (50 Terakhir)</h6>
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Realtime Feed</span>
             </div>
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.75rem;">
+            <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
                     <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
-                        <tr><th>Waktu</th><th>UID</th><th>Event</th><th>IP Address</th><th>Detail</th></tr>
+                        <tr>
+                            <th class="ps-3 py-2" style="width: 170px;">Waktu (WIB)</th>
+                            <th class="text-center py-2" style="width: 70px;">UID</th>
+                            <th class="py-2" style="width: 160px;">Aktivitas Event</th>
+                            <th class="py-2" style="width: 180px;">IP Client</th>
+                            <th class="pe-3 py-2">Detail Aksi</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {{range .Logs}}
                         <tr>
-                            <td class="text-muted text-nowrap">{{.Time}}</td>
-                            <td class="text-center">{{if eq .UID "0"}}<span class="text-muted">-</span>{{else}}<b>{{.UID}}</b>{{end}}</td>
-                            <td>
-                                {{if eq .Event "LOGIN"}}<span class="badge bg-success">LOGIN</span>
-                                {{else if eq .Event "LOGIN_FAILED"}}<span class="badge bg-danger">LOGIN_FAIL</span>
-                                {{else if eq .Event "REGISTER"}}<span class="badge bg-primary">REGISTER</span>
-                                {{else}}<span class="badge bg-info">{{.Event}}</span>{{end}}
+                            <td class="ps-3 py-2 text-nowrap">
+                                <span class="fw-semibold">{{.Time}}</span>
                             </td>
-                            <td class="text-nowrap" style="font-family: monospace;">{{.IP}}</td>
-                            <td>{{.Details}}</td>
+                            <td class="text-center py-2">{{if eq .UID "0"}}<span class="text-muted">-</span>{{else}}<b>#{{.UID}}</b>{{end}}</td>
+                            <td class="py-2">
+                                {{if or (eq .Event "LOGIN") (eq .Event "API_LOGIN_GOOGLE") (eq .Event "OAUTH_LOGIN")}}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">{{.Event}}</span>
+                                {{else if eq .Event "LOGIN_FAILED"}}
+                                <span class="badge bg-danger py-1 px-2">{{.Event}}</span>
+                                {{else if or (eq .Event "REGISTER") (eq .Event "API_REGISTER_GOOGLE") (eq .Event "OAUTH_REGISTER")}}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2">{{.Event}}</span>
+                                {{else if or (eq .Event "TXN_CREATE") (eq .Event "TXN_UPDATE") (eq .Event "TXN_DELETE")}}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2">{{.Event}}</span>
+                                {{else}}
+                                <span class="badge bg-secondary-subtle text-secondary py-1 px-2">{{.Event}}</span>
+                                {{end}}
+                            </td>
+                            <td class="py-2 text-nowrap" style="font-family: monospace; font-size: 0.76rem;">
+                                <code>{{.IP}}</code>
+                            </td>
+                            <td class="pe-3 py-2">{{.Details}}</td>
                         </tr>
                         {{end}}
                         {{if not .Logs}}
-                        <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada log.</td></tr>
+                        <tr><td colspan="5" class="text-center py-4 text-muted">Belum ada log aktivitas.</td></tr>
                         {{end}}
                     </tbody>
                 </table>
@@ -168,68 +152,272 @@
         </div>
     </div>
 </div>
+
+<!-- SECTION 3: DIREKTORI BANK & E-WALLET DINAMIS (REMOTE APP DIRECTORY) -->
+<div class="row g-3 mb-4" id="section-bank-apps">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-primary">
+                        <i class="ti ti-building-bank me-2"></i>Direktori Bank & E-Wallet Dinamis
+                    </h6>
+                    <small class="text-muted">Daftar m-banking & e-wallet yang otomatis disinkronkan ke seluruh aplikasi mobile tanpa perlu update APK.</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span id="bankAppLiveNotice" class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-none">
+                        <i class="ti ti-check me-1"></i>Tersimpan instan
+                    </span>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddBankApp">
+                        <i class="ti ti-plus me-1"></i>Tambah Bank Baru
+                    </button>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" id="tableBankApps" style="font-size: 0.82rem;">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th class="ps-3 py-2" style="width: 220px;">Nama Bank / E-Wallet</th>
+                                <th class="py-2" style="width: 140px;">Kategori</th>
+                                <th class="py-2">Package IDs Android</th>
+                                <th class="text-center py-2" style="width: 110px;">Status</th>
+                                <th class="text-end pe-4 py-2" style="width: 140px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .BankApps}}
+                            <tr id="bank-row-{{.ID}}">
+                                <td class="fw-bold ps-3 py-2 bank-name-cell">{{.Name}}</td>
+                                <td class="py-2 bank-category-cell">
+                                    <span class="badge {{if eq .Category "bank"}}bg-primary-subtle text-primary border border-primary-subtle{{else}}bg-info-subtle text-info border border-info-subtle{{end}} py-1 px-2">
+                                        {{.Category}}
+                                    </span>
+                                </td>
+                                <td class="py-2 bank-packages-cell">
+                                    <code class="text-muted small d-inline-block" style="font-size: 0.75rem;">{{.Packages}}</code>
+                                </td>
+                                <td class="text-center py-2">
+                                    <button type="button" class="btn btn-sm {{if .IsActive}}btn-success{{else}}btn-outline-secondary{{end}} py-1 px-2 border-0" 
+                                        id="btn-status-{{.ID}}" style="font-size: 0.72rem; border-radius: 6px;"
+                                        onclick="instantToggleBankStatus('{{.ID}}')">
+                                        {{if .IsActive}}🟢 Aktif{{else}}⚪ Nonaktif{{end}}
+                                    </button>
+                                </td>
+                                <td class="text-end text-nowrap pe-4 py-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 me-1" style="font-size: 0.72rem; border-radius: 6px;"
+                                        onclick="openEditBankModal('{{.ID}}', '{{.Name}}', '{{.Category}}', '{{.Packages}}')">
+                                        <i class="ti ti-edit me-1"></i>Edit
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 0.72rem; border-radius: 6px;" title="Hapus"
+                                        onclick="instantDeleteBank('{{.ID}}', '{{.Name}}')">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 4: LOG PEMBELAJARAN NOTIFIKASI REALTIME (SELF-LEARNING AI PIPELINE) -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-info">
+                        <i class="ti ti-brain me-2"></i>Log Pembelajaran AI Notifikasi Mutasi
+                    </h6>
+                    <small class="text-muted">Rekaman kalimat mutasi nyata dari HP pengguna yang dianalisis oleh Fast Regex & Gemini AI untuk menyempurnakan pola auto-catat.</small>
+                </div>
+                <span class="badge bg-info-subtle text-info border border-info-subtle">Adaptive Self-Learning</span>
+            </div>
+            <div class="card-body pt-0">
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th class="ps-3 py-2" style="width: 170px;">Waktu (WIB)</th>
+                                <th class="py-2" style="width: 320px;">Teks Kalimat Mutasi Nyata</th>
+                                <th class="py-2" style="width: 220px;">Hasil Ekstraksi AI</th>
+                                <th class="text-center pe-3 py-2" style="width: 120px;">Parser</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .LearningLogs}}
+                            <tr>
+                                <td class="ps-3 py-2 text-nowrap">
+                                    <span class="fw-semibold">{{.Time}}</span>
+                                </td>
+                                <td class="py-2">
+                                    <div class="fw-bold">{{.Title}}</div>
+                                    <div class="text-muted small mt-1">{{.RawText}}</div>
+                                </td>
+                                <td class="py-2">
+                                    <div>
+                                        {{if eq .Type "income"}}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">Masuk</span>
+                                        {{else}}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2">Keluar</span>
+                                        {{end}}
+                                        <b class="ms-1">{{.AmountStr}}</b>
+                                    </div>
+                                    <div class="text-muted small mt-1">{{.Merchant}}</div>
+                                </td>
+                                <td class="text-center pe-3 py-2">
+                                    <span class="badge {{if eq .Parser "fast_regex"}}bg-primary-subtle text-primary border border-primary-subtle{{else}}bg-warning-subtle text-warning border border-warning-subtle{{end}} py-1 px-2">
+                                        {{.Parser}}
+                                    </span>
+                                </td>
+                            </tr>
+                            {{end}}
+                            {{if not .LearningLogs}}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="text-muted mb-2"><i class="ti ti-radar fs-2 text-info opacity-75"></i></div>
+                                    <div class="fw-semibold">Belum Ada Notifikasi Pembelajaran Baru</div>
+                                    <div class="text-muted small mt-1">Notifikasi nyata dari HP pengguna akan otomatis terekam dan dianalisis AI di sini.</div>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 5: PENGGUNA TERDAFTAR -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold"><i class="ti ti-users me-2 text-primary"></i>Pengguna Terdaftar</h6>
+                <span class="badge bg-primary-subtle text-primary">{{len .Users}} Akun Terdaftar</span>
+            </div>
+            <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                        <tr>
+                            <th class="ps-3 py-2" style="width: 100px;">User ID</th>
+                            <th class="py-2">Nama Pengguna (Username)</th>
+                            <th class="py-2" style="width: 140px;">Role Akses</th>
+                            <th class="text-center pe-3 py-2" style="width: 140px;">Bot Telegram</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td class="text-muted ps-3 py-2">#{{.ID}}</td>
+                            <td class="fw-bold py-2">{{.Username}}</td>
+                            <td class="py-2">
+                                {{if eq .Role "admin"}}<span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2">Admin</span>{{else}}<span class="badge bg-secondary-subtle text-secondary py-1 px-2">User</span>{{end}}
+                            </td>
+                            <td class="text-center pe-3 py-2">{{if gt .TelegramID 0}}<span class="text-success fw-bold">Terhubung ✓</span>{{else}}<span class="text-muted">-</span>{{end}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Bank Dinamis -->
+<div class="modal fade" id="modalAddBankApp" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="ti ti-plus me-1 text-primary"></i>Tambah Bank / E-Wallet Dinamis</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formAddBankApp" onsubmit="handleAjaxAddBank(event)">
+                <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
+                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nama Bank / E-Wallet</label>
+                        <input type="text" name="name" id="addBankName" class="form-control form-control-sm" placeholder="Contoh: Bank BJB Digi" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Kategori</label>
+                        <select name="category" id="addBankCategory" class="form-select form-select-sm">
+                            <option value="bank">Bank Konvensional / Daerah</option>
+                            <option value="digital_bank">Bank Digital</option>
+                            <option value="ewallet">E-Wallet & Fintech</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Android Package ID (Bisa banyak, pisahkan koma)</label>
+                        <textarea name="packages" id="addBankPackages" rows="2" class="form-control form-control-sm" placeholder="id.co.bankbjb.digi" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" id="btnAddBankSubmit" class="btn btn-sm btn-primary">Simpan ke Direktori Remote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Bank Dinamis -->
+<div class="modal fade" id="modalEditBankApp" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="ti ti-edit me-1 text-primary"></i>Edit Bank / E-Wallet Dinamis</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditBankApp" onsubmit="handleAjaxEditBank(event)">
+                <input type="hidden" name="_csrf" value="{{$.CSRFToken}}">
+                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                <input type="hidden" name="id" id="editBankId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nama Bank / E-Wallet</label>
+                        <input type="text" name="name" id="editBankName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Kategori</label>
+                        <select name="category" id="editBankCategory" class="form-select form-select-sm">
+                            <option value="bank">Bank Konvensional / Daerah</option>
+                            <option value="digital_bank">Bank Digital</option>
+                            <option value="ewallet">E-Wallet & Fintech</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Android Package ID (Bisa banyak, pisahkan koma)</label>
+                        <textarea name="packages" id="editBankPackages" rows="3" class="form-control form-control-sm" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" id="btnEditBankSubmit" class="btn btn-sm btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {{end}}
 
 {{define "pagescripts"}}
-var presets = {
-    seabank_in: {
-        pkg: "id.co.bankbkemobile.digitalbank",
-        title: "SeaBank",
-        text: "Transfer Rp 500.000 diterima dari rekening lain"
-    },
-    blu_out: {
-        pkg: "com.bcadigital.blu",
-        title: "Hore, Pembayaran Kamu Berhasil!",
-        text: "Pembayaran di Grab Rp 35.899,00 dengan bluDebit Card telah berhasil."
-    },
-    mandiri_out: {
-        pkg: "id.bmri.livin",
-        title: "Livin' by Mandiri",
-        text: "Pembayaran QRIS sebesar Rp 45.000 ke KOPI KENANGAN berhasil"
-    },
-    brimo_in: {
-        pkg: "id.co.bri.brimo",
-        title: "BRImo",
-        text: "Transaksi masuk sebesar Rp 250.000 dari REKENING 123456"
-    },
-    jago_in: {
-        pkg: "com.jago.digitalBanking",
-        title: "Bank Jago",
-        text: "You've received Rp200.000 from MIRANDA AMBAR SARI"
-    },
-    dana_out: {
-        pkg: "id.dana",
-        title: "DANA",
-        text: "Pembayaran Rp15.000 ke INDOMARET berhasil dilakukan"
-    },
-    gopay_out: {
-        pkg: "com.gojek.gopay",
-        title: "GoPay",
-        text: "Kamu berhasil melakukan pembayaran sebesar Rp 85.000 ke Tokopedia"
-    }
-};
-
-function applyPreset() {
-    var selectEl = document.getElementById('presetSelect');
-    if (!selectEl) return;
-    var val = selectEl.value;
-    if (presets[val]) {
-        document.getElementById('notifPackage').value = presets[val].pkg;
-        document.getElementById('notifTitle').value = presets[val].title;
-        document.getElementById('notifText').value = presets[val].text;
-    }
-}
-
-async function handleSimulasiSubmit(e) {
+async function handleBroadcastSubmit(e) {
     e.preventDefault();
-    var form = document.getElementById('formSimulasiNotif');
-    var btn = document.getElementById('btnSubmitSimulasi');
-    var status = document.getElementById('simulasiStatus');
+    var form = document.getElementById('formBroadcastNotif');
+    var btn = document.getElementById('btnSubmitBroadcast');
+    var status = document.getElementById('broadcastStatus');
     var container = document.getElementById('adminAlertContainer');
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Memproses...';
-    status.innerText = "Mengirim simulasi...";
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Mengirim ke APK...';
+    status.innerText = "Mengirim broadcast...";
 
     try {
         var formData = new FormData(form);
@@ -238,7 +426,7 @@ async function handleSimulasiSubmit(e) {
             params.append(pair[0], pair[1]);
         }
 
-        var response = await fetch('/admin/test-notification', {
+        var response = await fetch('/admin/broadcast-announcement', {
             method: 'POST',
             body: params,
             headers: {
@@ -253,21 +441,23 @@ async function handleSimulasiSubmit(e) {
             container.innerHTML = `
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3" role="alert">
                     <i class="ti ti-circle-check me-2 fs-5 align-middle"></i> 
-                    <strong>Berhasil!</strong> ${res.message}
-                    <div class="small mt-1 text-muted">Tercatat di Akun <b>${res.data.account_name}</b> | Kategori: <b>${res.data.category}</b> | Telegram Alert: <b>${res.data.telegram_sent ? 'Terkirim ✓' : 'Tidak aktif'}</b></div>
+                    <strong>Berhasil Terkirim!</strong> ${res.message}
+                    <div class="small mt-1 text-muted">Pesan pengumuman ini otomatis muncul sebagai notifikasi di HP pengguna saat aplikasi terbuka/sinkronisasi.</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            status.innerText = "Tercatat sukses!";
+            status.innerText = "Terkirim ke APK!";
+            document.getElementById('broadcastTitle').value = "";
+            document.getElementById('broadcastMessage').value = "";
         } else {
             container.innerHTML = `
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3" role="alert">
                     <i class="ti ti-alert-triangle me-2 fs-5 align-middle"></i> 
-                    <strong>Gagal:</strong> ${res.error || 'Terjadi kesalahan saat memproses notifikasi'}
+                    <strong>Gagal:</strong> ${res.error || 'Terjadi kesalahan'}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            status.innerText = "Gagal memproses.";
+            status.innerText = "Gagal mengirim.";
         }
     } catch (err) {
         container.innerHTML = `
@@ -280,7 +470,206 @@ async function handleSimulasiSubmit(e) {
         status.innerText = "Koneksi gagal.";
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-send me-1"></i> Uji Coba Kirim Notifikasi';
+        btn.innerHTML = '<i class="ti ti-send me-1"></i> Kirim Notifikasi ke APK HP 🚀';
+    }
+}
+
+function openEditBankModal(id, name, category, packages) {
+    document.getElementById('editBankId').value = id;
+    document.getElementById('editBankName').value = name;
+    document.getElementById('editBankCategory').value = category;
+    
+    // Parse json package list to comma separated string if valid JSON
+    var pkgsStr = packages;
+    try {
+        var parsed = JSON.parse(packages);
+        if (Array.isArray(parsed)) {
+            pkgsStr = parsed.join(', ');
+        }
+    } catch (_) {}
+    document.getElementById('editBankPackages').value = pkgsStr;
+
+    var modal = new bootstrap.Modal(document.getElementById('modalEditBankApp'));
+    modal.show();
+}
+
+function showLiveBankNotice(msg, isError) {
+    var badge = document.getElementById('bankAppLiveNotice');
+    if (!badge) return;
+    badge.className = 'badge ' + (isError ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-success-subtle text-success border border-success-subtle') + ' py-1 px-2';
+    badge.innerHTML = (isError ? '<i class="ti ti-alert-circle me-1"></i>' : '<i class="ti ti-check me-1"></i>') + msg;
+    badge.classList.remove('d-none');
+    setTimeout(function() {
+        badge.classList.add('d-none');
+    }, 4000);
+}
+
+async function instantToggleBankStatus(id) {
+    var btn = document.getElementById('btn-status-' + id);
+    if (!btn) return;
+    var origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '...';
+
+    try {
+        var params = new URLSearchParams();
+        params.append('id', id);
+        params.append('csrf_token', '{{$.CSRFToken}}');
+        params.append('_csrf', '{{$.CSRFToken}}');
+
+        var res = await fetch('/admin/bank-apps/toggle', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            if (data.is_active) {
+                btn.className = 'btn btn-sm btn-success py-1 px-2 border-0';
+                btn.innerHTML = '🟢 Aktif';
+            } else {
+                btn.className = 'btn btn-sm btn-outline-secondary py-1 px-2 border-0';
+                btn.innerHTML = '⚪ Nonaktif';
+            }
+            showLiveBankNotice(data.message || 'Status berhasil diubah', false);
+        } else {
+            btn.innerHTML = origText;
+            showLiveBankNotice(data.error || 'Gagal mengubah status', true);
+        }
+    } catch (e) {
+        btn.innerHTML = origText;
+        showLiveBankNotice('Koneksi gagal: ' + e.message, true);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function instantDeleteBank(id, name) {
+    if (!confirm('Hapus bank ' + name + ' dari direktori remote?')) return;
+    var row = document.getElementById('bank-row-' + id);
+    if (row) row.style.opacity = '0.5';
+
+    try {
+        var params = new URLSearchParams();
+        params.append('id', id);
+        params.append('csrf_token', '{{$.CSRFToken}}');
+        params.append('_csrf', '{{$.CSRFToken}}');
+
+        var res = await fetch('/admin/bank-apps/delete', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            if (row) row.remove();
+            showLiveBankNotice('Bank ' + name + ' berhasil dihapus', false);
+        } else {
+            if (row) row.style.opacity = '1';
+            showLiveBankNotice(data.error || 'Gagal menghapus bank', true);
+        }
+    } catch (e) {
+        if (row) row.style.opacity = '1';
+        showLiveBankNotice('Koneksi gagal: ' + e.message, true);
+    }
+}
+
+async function handleAjaxEditBank(e) {
+    e.preventDefault();
+    var submitBtn = document.getElementById('btnEditBankSubmit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Menyimpan...';
+
+    var form = document.getElementById('formEditBankApp');
+    var formData = new FormData(form);
+    var params = new URLSearchParams();
+    for (var pair of formData.entries()) {
+        params.append(pair[0], pair[1]);
+    }
+
+    try {
+        var res = await fetch('/admin/bank-apps/edit', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            var row = document.getElementById('bank-row-' + data.id);
+            if (row) {
+                var nameCell = row.querySelector('.bank-name-cell');
+                var catCell = row.querySelector('.bank-category-cell');
+                var pkgCell = row.querySelector('.bank-packages-cell');
+                if (nameCell) nameCell.innerText = data.name;
+                if (catCell) {
+                    var badgeCls = data.category === 'bank' ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-info-subtle text-info border border-info-subtle';
+                    catCell.innerHTML = '<span class="badge ' + badgeCls + ' py-1 px-2">' + data.category + '</span>';
+                }
+                if (pkgCell) {
+                    pkgCell.innerHTML = '<code class="text-muted small d-inline-block" style="font-size: 0.75rem;">' + data.packages + '</code>';
+                }
+            }
+            var modalEl = document.getElementById('modalEditBankApp');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            showLiveBankNotice(data.message || 'Perubahan berhasil disimpan', false);
+        } else {
+            alert('Gagal: ' + (data.error || 'Terjadi kesalahan'));
+        }
+    } catch (err) {
+        alert('Koneksi error: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Simpan Perubahan';
+    }
+}
+
+async function handleAjaxAddBank(e) {
+    e.preventDefault();
+    var submitBtn = document.getElementById('btnAddBankSubmit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Menyimpan...';
+
+    var form = document.getElementById('formAddBankApp');
+    var formData = new FormData(form);
+    var params = new URLSearchParams();
+    for (var pair of formData.entries()) {
+        params.append(pair[0], pair[1]);
+    }
+
+    try {
+        var res = await fetch('/admin/bank-apps/add', {
+            method: 'POST',
+            body: params,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        var data = await res.json();
+        if (res.ok && data.success) {
+            window.location.reload();
+        } else {
+            alert('Gagal: ' + (data.error || 'Terjadi kesalahan'));
+        }
+    } catch (err) {
+        alert('Koneksi error: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Simpan ke Direktori Remote';
     }
 }
 
