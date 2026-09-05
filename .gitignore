@@ -54,3 +54,4 @@ go.sum
 sync_notif.go
 
 firebase-adminsdk.json
+google-services.json

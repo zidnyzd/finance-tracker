@@ -34,6 +34,13 @@ jobs:
         working-directory: flutter_app
         run: flutter pub get
 
+      - name: Restore google-services.json from Secret
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > flutter_app/android/app/google-services.json
+            echo "Restored google-services.json successfully"
+          fi
+
       - name: Run Flutter Unit Tests
         working-directory: flutter_app
         run: flutter test --no-pub
