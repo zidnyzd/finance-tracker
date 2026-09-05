@@ -92,10 +92,10 @@ func apiAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // GET /api/v1/app/version
 func handleApiAppVersion(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"version_code": 74,
-		"version_name": "2.1.4",
-		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.4.apk",
-		"changelog":    "Official Release v2.1.4 - Remote Dynamic Categories, User Custom Categories, and Remote Maintenance Kill Switch",
+		"version_code": 75,
+		"version_name": "2.1.5",
+		"apk_url":      "https://zira.web.id/static/ZiRa-Finance-v2.1.5.apk",
+		"changelog":    "Official Release v2.1.5 - High-Contrast UI, Dynamic Custom Categories, Google FCM Native, and Remote Kill Switch",
 	})
 }
 
@@ -541,10 +541,18 @@ func handleApiDashboard(w http.ResponseWriter, r *http.Request) {
 	uid := r.Header.Get("X-User-Id")
 
 	// 1. Total Income, Expense & Balance
-	var ti, te float64
-	db.QueryRow("SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=? AND type='income'", uid).Scan(&ti)
-	db.QueryRow("SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=? AND type='expense'", uid).Scan(&te)
-	balance := ti - te
+	// Saldo Bersih: Akumulasi total riil seluruh waktu (all-time balance)
+	var allTi, allTe float64
+	db.QueryRow("SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=? AND type='income'", uid).Scan(&allTi)
+	db.QueryRow("SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=? AND type='expense'", uid).Scan(&allTe)
+	balance := allTi - allTe
+
+	// Arus Kas Masuk & Keluar: Khusus Bulan Berjalan (Current Month Cash Flow)
+	var mTi, mTe float64
+	db.QueryRow(`SELECT COALESCE(SUM(amount),0) FROM transactions 
+		WHERE user_id=? AND type='income' AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now', 'localtime')`, uid).Scan(&mTi)
+	db.QueryRow(`SELECT COALESCE(SUM(amount),0) FROM transactions 
+		WHERE user_id=? AND type='expense' AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now', 'localtime')`, uid).Scan(&mTe)
 
 	// 2. Accounts List
 	rows, err := db.Query(`SELECT a.id, a.name, a.type,
@@ -604,13 +612,15 @@ func handleApiDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse(w, http.StatusOK, map[string]interface{}{
-		"success":           true,
-		"balance":           balance,
-		"balance_str":       formatMoney(balance),
-		"total_income":      ti,
-		"total_income_str":  formatMoney(ti),
-		"total_expense":     te,
-		"total_expense_str": formatMoney(te),
+		"success":             true,
+		"balance":             balance,
+		"balance_str":         formatMoney(balance),
+		"total_income":        mTi,
+		"total_income_str":    formatMoney(mTi),
+		"total_expense":       mTe,
+		"total_expense_str":   formatMoney(mTe),
+		"all_time_income":     allTi,
+		"all_time_expense":    allTe,
 		"accounts":            accounts,
 		"recent_txns":         recentTxns,
 		"recent_transactions": recentTxns,

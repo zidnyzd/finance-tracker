@@ -4,6 +4,15 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
+## [v2.1.5] - 2026-09-05
+### 🚀 Added & Improved
+- **Arus Kas Masuk & Keluar Bulan Berjalan (Current Month Cash Flow):** Mengubah metrik 'Masuk' & 'Keluar' pada Beranda (Web & Mobile) menjadi murni arus kas bulan berjalan (misal September 2026), mencegah membengkaknya angka ratusan juta/miliar seiring berjalannya waktu, sementara Saldo Bersih Utama tetap membawa akumulasi seluruh saldo riil rekening pengguna.
+- **High-Contrast Maintenance UI:** Memperbaiki warna ikon panah refresh tombol 'Cek Lagi' menjadi putih bersih solid (`Colors.white`) dengan elevasi tajam di seluruh mode tema (Light & Dark).
+- **Hardening Keamanan Secret Scanning:** Berkas `google-services.json` diisolasi sepenuhnya melalui GitHub Encrypted Secret `GOOGLE_SERVICES_JSON` dan diinjeksikan secara otomatis saat proses build.
+- **Rilis Terpadu APK & Google Play AAB:** Menyediakan artefak lengkap `ZiRa-Finance-v2.1.5-release.aab`, `ZiRa-Finance-v2.1.5-arm64.apk`, dan native symbols.
+
+---
+
 ## [v2.1.4] - 2026-09-05
 ### 🚀 Added & Improved
 - **Kategori Transaksi Dinamis & Kustom Pengguna:** Chip kategori di form catat transaksi dan modal edit kini 100% dinamis dari server via API `GET /api/v1/categories`. Pengguna dapat menambah kategori baru sendiri (`[ + Kategori Baru ]`) yang tersimpan permanen di akun mereka.

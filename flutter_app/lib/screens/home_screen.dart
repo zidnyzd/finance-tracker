@@ -198,7 +198,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Masuk',
+                                    'Masuk (Bln Ini)',
                                     style: TextStyle(fontSize: 10, color: textMuted),
                                   ),
                                   Text(
@@ -243,7 +243,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Keluar',
+                                    'Keluar (Bln Ini)',
                                     style: TextStyle(fontSize: 10, color: textMuted),
                                   ),
                                   Text(
