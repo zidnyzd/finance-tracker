@@ -4,12 +4,14 @@ Semua perubahan besar, rilis versi, dan riwayat pembaruan sistem ZiRa Finance (W
 
 ---
 
-## [v2.1.5] - 2026-09-05
+## [v2.1.5] - 2026-09-06
 ### 🚀 Added & Improved
-- **Arus Kas Masuk & Keluar Bulan Berjalan (Current Month Cash Flow):** Mengubah metrik 'Masuk' & 'Keluar' pada Beranda (Web & Mobile) menjadi murni arus kas bulan berjalan (misal September 2026), mencegah membengkaknya angka ratusan juta/miliar seiring berjalannya waktu, sementara Saldo Bersih Utama tetap membawa akumulasi seluruh saldo riil rekening pengguna.
-- **High-Contrast Maintenance UI:** Memperbaiki warna ikon panah refresh tombol 'Cek Lagi' menjadi putih bersih solid (`Colors.white`) dengan elevasi tajam di seluruh mode tema (Light & Dark).
-- **Hardening Keamanan Secret Scanning:** Berkas `google-services.json` diisolasi sepenuhnya melalui GitHub Encrypted Secret `GOOGLE_SERVICES_JSON` dan diinjeksikan secara otomatis saat proses build.
-- **Rilis Terpadu APK & Google Play AAB:** Menyediakan artefak lengkap `ZiRa-Finance-v2.1.5-release.aab`, `ZiRa-Finance-v2.1.5-arm64.apk`, dan native symbols.
+- **Penyelarasan Saldo Akumulasi Riil vs Arus Kas Bulan Berjalan:** Menyelaraskan metrik Saldo di seluruh Web & Mobile agar murni menampilkan saldo akumulasi riil seluruh rekening pengguna (`Rp 34,5 Juta`), sementara 'Masuk' & 'Keluar' murni menghitung perputaran kas bulan berjalan, mencegah angka saldo menjadi minus semu akibat selisih kas bulan ini.
+- **Kategori Transaksi Dinamis & Kustom Pengguna:** Fitur `[ + Kategori Baru ]` aktif di mobile dan backend REST API.
+- **Penyaringan Pindah Kantong Internal Bank Jago:** Otomatis diabaikan agar saldo tidak bertambah/berkurang semu.
+- **Koreksi Stempel Waktu Log AI:** Normalisasi UTC/WIB di SQLite dan tampilan web admin.
+- **High-Contrast Maintenance UI:** Ikon panah tombol 'Cek Lagi' putih solid solid (`Colors.white`).
+- **Hardening Keamanan Secret Scanning:** Berkas `google-services.json` diisolasi sepenuhnya via GitHub Secret.
 
 ---
 
